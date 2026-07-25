@@ -16,7 +16,6 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
-import { uploadProfileMusic } from '@/actions/upload-music';
 import { toast } from 'sonner';
 
 /**
@@ -167,7 +166,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // 100% Bulletproof Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Dedicated API Route Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -203,7 +202,13 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await uploadProfileMusic(formData);
+      // Call dedicated /api/upload-music endpoint (bypasses Server Action payload limits completely!)
+      const response = await fetch('/api/upload-music', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const res = await response.json();
 
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
@@ -212,6 +217,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
         setMusicUrl(res.music_url);
         setMusicTitle(res.music_title || file.name.replace(/\.[^/.]+$/, ''));
         toast.success('Background music uploaded & active on public profile!');
+        router.refresh();
       } else {
         toast.error(res.message || 'Failed to upload audio file.');
         setFileSizeError(res.message);
