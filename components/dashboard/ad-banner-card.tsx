@@ -44,23 +44,23 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
   const topActiveEvent = activeEventBadges[0];
 
   return (
-    <Card className="bg-[#3B82F6] text-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-6 md:p-8 space-y-6 h-full flex flex-col justify-between relative overflow-hidden">
+    <Card className="bg-[#3B82F6] text-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-5 md:p-8 space-y-6 h-full flex flex-col justify-between relative overflow-hidden">
       <div className="space-y-6 relative z-10">
         {/* Top Banner Header Tag */}
         <div className="flex items-center justify-between">
           <Badge variant="default" className="text-xs font-black text-[#111111] gap-1.5">
             <Megaphone className="w-3.5 h-3.5" />
-            <span>KYVO EVENTS & PROMOS ({activeEventBadges.length})</span>
+            <span>KYVO EVENTS</span>
           </Badge>
         </div>
 
         {/* Dynamic Admin-Customized Promo Section Header (Only visible when active events exist) */}
         {hasActiveEvents && (
           <div className="space-y-2 animate-in fade-in duration-200">
-            <h3 className="text-2xl md:text-3xl font-black leading-tight">
+            <h3 className="text-2xl md:text-3xl font-black leading-tight break-words">
               {topActiveEvent?.name || 'Claim Creator Event Badges! 🚀'}
             </h3>
-            <p className="text-sm font-bold text-white/90 leading-relaxed">
+            <p className="text-xs sm:text-sm font-bold text-white/90 leading-relaxed break-words">
               {topActiveEvent?.description || 'Exclusive Creator Events created by Admin. Claim free badges to equip on your public profile!'}
             </p>
           </div>
@@ -100,19 +100,19 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                   className="rounded-2xl border-[3px] border-[#111111] bg-white text-[#111111] p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       {/* Admin Custom Vector Icon */}
                       <div
-                        className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] flex-shrink-0"
+                        className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0"
                         style={{ backgroundColor: event.bg_color || '#FFD43B', color: event.color || '#111111' }}
                       >
                         <BadgeIconComp className="w-6 h-6 stroke-[2.5]" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="text-base font-black leading-tight">{event.name}</h4>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <h4 className="text-base font-black leading-tight break-words">{event.name}</h4>
                         </div>
-                        <p className="text-xs font-bold text-[#111111]/70 leading-normal pt-0.5">
+                        <p className="text-xs font-bold text-[#111111]/70 leading-normal pt-0.5 break-words">
                           {event.description || 'Special event badge for creators'}
                         </p>
                       </div>
@@ -120,7 +120,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
 
                     <Badge
                       variant="green"
-                      className="text-[10px] font-black uppercase flex-shrink-0"
+                      className="text-[10px] font-black uppercase shrink-0"
                     >
                       Active
                     </Badge>

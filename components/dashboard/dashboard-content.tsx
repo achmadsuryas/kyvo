@@ -456,7 +456,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   onClick={() => setDeleteAccountOpen(true)}
                   variant="secondary"
                   size="sm"
-                  className="font-black text-xs gap-1.5 bg-[#FF4D6D] text-white shadow-[2px_2px_0px_0px_#111111] shrink-0"
+                  className="font-black text-xs gap-1.5 bg-[#FF4D6D] text-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Account</span>
@@ -465,13 +465,13 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             </CardContent>
           </Card>
 
-          {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR BELOW ACCOUNT OVERVIEW */}
-          <div className="flex flex-wrap items-center gap-3 border-b-4 border-[#111111] pb-3">
+          {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR BELOW ACCOUNT OVERVIEW (Fixed padding and removed scale-105 so buttons never clip on the left!) */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 border-b-4 border-[#111111] pb-3 pt-1 px-1">
             <button
               onClick={() => setActiveTab('links')}
-              className={`flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
                 activeTab === 'links'
-                  ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111] -translate-y-0.5 scale-105'
+                  ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
               }`}
             >
@@ -481,9 +481,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
                 activeTab === 'analytics'
-                  ? 'bg-[#3B82F6] text-white shadow-[4px_4px_0px_0px_#111111] -translate-y-0.5 scale-105'
+                  ? 'bg-[#3B82F6] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
               }`}
             >
