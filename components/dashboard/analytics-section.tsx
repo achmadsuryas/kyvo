@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Eye, MousePointerClick, BarChart3, ExternalLink, Award, Sparkles, Globe } from 'lucide-react';
+import { Eye, MousePointerClick, BarChart3, ExternalLink, Sparkles, Globe } from 'lucide-react';
 import { Profile, LinkItem } from '@/types';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -180,10 +180,9 @@ export function AnalyticsSection({ profile, links = [] }: AnalyticsSectionProps)
               </div>
             ) : (
               <div className="divide-y-2 divide-[#111111]/15">
-                {sortedLinks.map((link, index) => {
+                {sortedLinks.map((link) => {
                   const IconComp = getIconComponent(link.icon || 'Globe');
                   const clicks = link.clicks_count || 0;
-                  const isTopLink = index === 0 && clicks > 0;
 
                   return (
                     <div
@@ -195,15 +194,7 @@ export function AnalyticsSection({ profile, links = [] }: AnalyticsSectionProps)
                           <IconComp className="w-5 h-5 stroke-[2.5]" />
                         </div>
                         <div className="space-y-0.5 overflow-hidden">
-                          <div className="flex items-center gap-2">
-                            <span className="font-black text-base text-[#111111] truncate">{link.title}</span>
-                            {isTopLink && (
-                              <Badge variant="green" className="text-[9px] font-black gap-1 flex-shrink-0">
-                                <Award className="w-3 h-3 text-[#111111]" />
-                                <span>#1 TOP PERFORMER</span>
-                              </Badge>
-                            )}
-                          </div>
+                          <span className="font-black text-base text-[#111111] truncate block">{link.title}</span>
                           <a
                             href={link.url}
                             target="_blank"
