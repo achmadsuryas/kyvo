@@ -4,18 +4,14 @@ import * as React from 'react';
 import Link from 'next/link';
 import { 
   CheckCircle2, 
-  Sparkles, 
   Play, 
-  Pause, 
   Volume2, 
   VolumeX, 
   Disc, 
-  Music,
-  ExternalLink
+  Music
 } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem } from '@/types';
 import { getBadgeIconComponent } from '@/components/shared/badge-icons';
-import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ProfileShareButton } from '@/components/profile/profile-share-button';
 import { PublicProfileTracker, TrackedLinkItem } from '@/components/profile/public-profile-tracker';
@@ -71,19 +67,6 @@ export function PublicProfileContainer({
     }
   };
 
-  // Toggle Play / Pause Audio
-  const togglePlayPause = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      });
-    }
-  };
-
   // Toggle Mute Audio
   const toggleMute = () => {
     if (!audioRef.current) return;
@@ -97,15 +80,15 @@ export function PublicProfileContainer({
       {!hasTriggered && hasMusic && (
         <div className="w-full max-w-sm sm:max-w-md my-auto animate-in zoom-in-95 duration-300">
           <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#111111] text-center space-y-6">
-            {/* Spinning Preview Record */}
-            <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+            {/* Perfectly Round 100% Circle Spinning Vinyl Preview Record */}
+            <div className="relative w-28 h-28 mx-auto flex items-center justify-center shrink-0">
               {/* Outer Black Vinyl Disk with Concentric Grooves */}
-              <div className="w-28 h-28 rounded-full border-[3px] border-[#111111] bg-[#111111] flex items-center justify-center shadow-[4px_4px_0px_0px_#111111] animate-[spin_6s_linear_infinite]">
+              <div className="w-28 h-28 rounded-full border-[3.5px] border-[#111111] bg-[#111111] flex items-center justify-center shadow-[4px_4px_0px_0px_#111111] animate-[spin_6s_linear_infinite] shrink-0 aspect-square">
                 {/* Vinyl Ring Grooves */}
-                <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B]">
+                <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center shrink-0 aspect-square">
+                  <div className="w-13 h-13 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B] shrink-0 aspect-square">
                     {/* Kyvo Favicon Center Label */}
-                    <img src="/favicon.svg" alt="Kyvo Logo" className="w-8 h-8 rounded-full" />
+                    <img src="/favicon.svg" alt="Kyvo Logo" className="w-7 h-7 rounded-full shrink-0 aspect-square" />
                   </div>
                 </div>
               </div>
@@ -117,14 +100,11 @@ export function PublicProfileContainer({
             </div>
 
             <div className="space-y-2">
-              <span className="inline-block px-3 py-1 rounded-full border-2 border-[#111111] bg-white text-[11px] font-black uppercase text-[#111111] shadow-[2px_2px_0px_0px_#111111]">
-                BACKGROUND MUSIC READY 🎵
-              </span>
               <h2 className="text-2xl sm:text-3xl font-black text-[#111111] leading-tight">
                 {profile.display_name || profile.username}
               </h2>
               <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs mx-auto">
-                {profile.music_title ? `Track: "${profile.music_title}"` : 'Click below to enter profile with audio!'}
+                {profile.music_title ? `Track: "${profile.music_title}"` : 'Click below to enter profile & enjoy music!'}
               </p>
             </div>
 
@@ -207,17 +187,17 @@ export function PublicProfileContainer({
               )}
             </div>
 
-            {/* ANIMATED SPINNING VINYL RECORD DISK & MUSIC CONTROLLER (Only visible when user has music) */}
+            {/* ANIMATED SPINNING PERFECT VINYL RECORD DISK & MUTE CONTROLLER (Only visible when user has music) */}
             {hasMusic && (
               <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#FFD43B]/30 p-3 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between gap-3">
-                {/* Left: Spinning Vinyl Disk with Kyvo Favicon Center */}
+                {/* Left: Perfectly Round Vinyl Disk with Kyvo Favicon Center */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="relative w-11 h-11 shrink-0">
-                    <div className={`w-11 h-11 rounded-full border-2 border-[#111111] bg-[#111111] flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] ${
+                  <div className="relative w-11 h-11 shrink-0 aspect-square">
+                    <div className={`w-11 h-11 rounded-full border-2 border-[#111111] bg-[#111111] flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] shrink-0 aspect-square ${
                       isPlaying ? 'animate-[spin_4s_linear_infinite]' : ''
                     }`}>
-                      <div className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B]">
-                        <img src="/favicon.svg" alt="Kyvo Logo" className="w-4 h-4 rounded-full" />
+                      <div className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B] shrink-0 aspect-square">
+                        <img src="/favicon.svg" alt="Kyvo Logo" className="w-4 h-4 rounded-full shrink-0 aspect-square" />
                       </div>
                     </div>
                   </div>
@@ -232,29 +212,22 @@ export function PublicProfileContainer({
                   </div>
                 </div>
 
-                {/* Right: Play/Pause & Mute Toggle Controls */}
+                {/* Right: Mute / Unmute Control Button Only */}
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={toggleMute}
-                    className="p-1.5 rounded-lg border-2 border-[#111111] bg-white text-[#111111] shadow-[1.5px_1.5px_0px_0px_#111111] hover:bg-gray-100 transition-colors"
-                    title={isMuted ? 'Unmute' : 'Mute'}
+                    className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] font-black text-xs shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors flex items-center gap-1.5 cursor-pointer"
+                    title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
                   >
-                    {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                  </button>
-
-                  <button
-                    onClick={togglePlayPause}
-                    className="px-2.5 py-1.5 rounded-lg border-2 border-[#111111] bg-[#FF4D6D] text-white font-black text-xs shadow-[1.5px_1.5px_0px_0px_#111111] flex items-center gap-1 hover:bg-[#FF3355] transition-colors"
-                  >
-                    {isPlaying ? (
+                    {isMuted ? (
                       <>
-                        <Pause className="w-3.5 h-3.5 fill-white" />
-                        <span>Pause</span>
+                        <VolumeX className="w-4 h-4 text-[#FF4D6D]" />
+                        <span>Unmute</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                        <span>Play</span>
+                        <Volume2 className="w-4 h-4 text-[#3B82F6]" />
+                        <span>Mute</span>
                       </>
                     )}
                   </button>

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Volume2, Play } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -93,6 +93,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
   const [isDeletingMusic, setIsDeletingMusic] = React.useState(false);
+  const [isSavingTitle, setIsSavingTitle] = React.useState(false);
 
   // Verified checkmark appears ONLY if user has been granted Verified Creator badge by admin and it is equipped
   const isVerified = userBadgeItems.some(
@@ -107,8 +108,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [editName, setEditName] = React.useState(displayName);
   const [editBio, setEditBio] = React.useState(bio);
   const [editAvatarUrl, setEditAvatarUrl] = React.useState<string | null>(avatarUrl);
-  const [editMusicUrl, setEditMusicUrl] = React.useState<string | null>(musicUrl);
-  const [editMusicTitle, setEditMusicTitle] = React.useState<string>(musicTitle);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
   const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
@@ -188,31 +187,23 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           const audioData = event.target.result as string;
           const trackTitle = file.name.replace(/\.[^/.]+$/, '');
 
-          setEditMusicUrl(audioData);
-          setEditMusicTitle(trackTitle);
-          setIsAudioProcessing(false);
-          toast.dismiss('audio-toast');
-          
-          if (!isEditingDetails) {
-            // Auto save if uploaded directly from outside card widget
-            updateUserProfileDetails({
-              display_name: displayName,
-              bio: bio,
-              avatar_url: avatarUrl,
-              music_url: audioData,
-              music_title: trackTitle,
-            }).then((res) => {
-              if (res.success) {
-                setMusicUrl(audioData);
-                setMusicTitle(trackTitle);
-                toast.success('Background music uploaded & active on public profile!');
-              } else {
-                toast.error(res.message);
-              }
-            });
-          } else {
-            toast.success('Background music selected! Click "Save Profile Changes" to apply.');
-          }
+          updateUserProfileDetails({
+            display_name: displayName,
+            bio: bio,
+            avatar_url: avatarUrl,
+            music_url: audioData,
+            music_title: trackTitle,
+          }).then((res) => {
+            setIsAudioProcessing(false);
+            toast.dismiss('audio-toast');
+            if (res.success) {
+              setMusicUrl(audioData);
+              setMusicTitle(trackTitle);
+              toast.success('Background music uploaded & active on public profile!');
+            } else {
+              toast.error(res.message);
+            }
+          });
         }
       };
       reader.readAsDataURL(file);
@@ -220,6 +211,27 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
       toast.error('Failed to process audio file.');
+    }
+  };
+
+  // Save Song Title Change
+  const handleSaveSongTitle = async () => {
+    if (!musicUrl) return;
+    setIsSavingTitle(true);
+
+    const res = await updateUserProfileDetails({
+      display_name: displayName,
+      bio: bio,
+      avatar_url: avatarUrl,
+      music_url: musicUrl,
+      music_title: musicTitle,
+    });
+    setIsSavingTitle(false);
+
+    if (res.success) {
+      toast.success('Song title saved!');
+    } else {
+      toast.error(res.message);
     }
   };
 
@@ -233,8 +245,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       toast.success(res.message);
       setMusicUrl(null);
       setMusicTitle('');
-      setEditMusicUrl(null);
-      setEditMusicTitle('');
     } else {
       toast.error(res.message);
     }
@@ -283,8 +293,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       display_name: editName,
       bio: editBio,
       avatar_url: editAvatarUrl,
-      music_url: editMusicUrl,
-      music_title: editMusicTitle,
     });
     setIsSaving(false);
 
@@ -293,8 +301,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       setDisplayName(editName);
       setBio(editBio);
       setAvatarUrl(editAvatarUrl);
-      setMusicUrl(editMusicUrl);
-      setMusicTitle(editMusicTitle);
       setIsEditingDetails(false);
     } else {
       toast.error(res.message);
@@ -388,8 +394,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       setEditName(displayName);
                       setEditBio(bio);
                       setEditAvatarUrl(avatarUrl);
-                      setEditMusicUrl(musicUrl);
-                      setEditMusicTitle(musicTitle);
                       setIsEditingDetails(true);
                     }}
                     variant="yellow"
@@ -482,67 +486,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     </div>
                   </div>
 
-                  {/* BACKGROUND MUSIC UPLOADER SECTION (.MP3, .WAV, Max 10 MB) */}
-                  <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
-                    <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
-                      <Music className="w-4 h-4 text-[#A855F7]" />
-                      <span>Profile Background Music (.MP3, .WAV - Max 10 MB)</span>
-                    </label>
-
-                    <div className="space-y-3 pt-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#A855F7] hover:text-white transition-colors ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-                          {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#A855F7]" />}
-                          <span>{isAudioProcessing ? 'Processing Song...' : 'Upload Music Track (.MP3 / .WAV)'}</span>
-                          <input
-                            type="file"
-                            accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
-                            onChange={handleAudioFileChange}
-                            disabled={isAudioProcessing}
-                            className="hidden"
-                          />
-                        </label>
-
-                        {editMusicUrl && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditMusicUrl(null);
-                              setEditMusicTitle('');
-                            }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Remove Song & Clean Storage</span>
-                          </button>
-                        )}
-                      </div>
-
-                      {editMusicUrl && (
-                        <div className="space-y-2 rounded-xl border-2 border-[#111111] bg-white p-3 shadow-[2px_2px_0px_0px_#111111]">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black uppercase text-[#111111]/70">
-                              Song Title (Appears on Record Disk)
-                            </label>
-                            <input
-                              type="text"
-                              value={editMusicTitle}
-                              onChange={(e) => setEditMusicTitle(e.target.value)}
-                              placeholder="e.g. My Favorite Chill Beat"
-                              className="w-full rounded-lg border-2 border-[#111111] bg-[#F8F9FA] px-2.5 py-1.5 font-bold text-xs outline-none"
-                            />
-                          </div>
-
-                          <audio controls src={editMusicUrl} className="w-full h-8 pt-1" />
-                        </div>
-                      )}
-
-                      <p className="text-[10px] font-extrabold text-[#111111]/70 break-words">
-                        {editMusicUrl ? `Music active: "${editMusicTitle || 'Custom Track'}".` : 'No background music uploaded. Visitors see public profile directly.'}
-                      </p>
-                    </div>
-                  </div>
-
                   <div className="space-y-1">
                     <label className="text-xs font-black uppercase text-[#111111]">
                       Display Name
@@ -583,7 +526,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       type="submit"
                       variant="green"
                       size="sm"
-                      disabled={isSaving || isCompressing || isAudioProcessing}
+                      disabled={isSaving || isCompressing}
                       className="gap-1 font-black"
                     >
                       {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
@@ -673,7 +616,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                 </div>
               )}
 
-              {/* DEDICATED PUBLIC BACKGROUND MUSIC SHOWCASE & PREVIEW CARD (Visible directly on card outside edit mode!) */}
+              {/* CLEAN DEDICATED PROFILE BACKGROUND MUSIC WIDGET */}
               {!isEditingDetails && (
                 <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#A855F7]/15 p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -684,12 +627,14 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <h4 className="text-sm font-black text-[#111111]">Profile Background Music</h4>
-                          <Badge variant={musicUrl ? "purple" : "outline"} className="text-[9px] font-black uppercase">
-                            {musicUrl ? 'ACTIVE' : 'OPTIONAL'}
-                          </Badge>
+                          {musicUrl && (
+                            <Badge variant="purple" className="text-[9px] font-black uppercase">
+                              ACTIVE
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs font-bold text-[#111111]/70 truncate">
-                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music added yet.'}
+                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded.'}
                         </p>
                       </div>
                     </div>
@@ -720,15 +665,27 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     </div>
                   </div>
 
-                  {musicUrl ? (
-                    <div className="pt-1 border-t border-black/15 space-y-1">
-                      <p className="text-[10px] font-black uppercase text-[#111111]/70">Live Player Preview:</p>
-                      <audio controls src={musicUrl} className="w-full h-8" />
+                  {musicUrl && (
+                    <div className="pt-2 border-t border-black/15 space-y-2">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        <input
+                          type="text"
+                          value={musicTitle}
+                          onChange={(e) => setMusicTitle(e.target.value)}
+                          placeholder="Type Song Title (e.g. My Favorite Beat)"
+                          className="flex-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-1.5 font-black text-xs text-[#111111] outline-none shadow-[1.5px_1.5px_0px_0px_#111111]"
+                        />
+                        <button
+                          onClick={handleSaveSongTitle}
+                          disabled={isSavingTitle}
+                          className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] font-black text-xs shadow-[1.5px_1.5px_0px_0px_#111111] flex items-center justify-center gap-1 shrink-0"
+                        >
+                          {isSavingTitle ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          <span>Save Title</span>
+                        </button>
+                      </div>
+                      <audio controls src={musicUrl} className="w-full h-8 pt-0.5" />
                     </div>
-                  ) : (
-                    <p className="text-[11px] font-extrabold text-[#111111]/70 leading-relaxed pt-0.5">
-                      💡 <span className="font-black">Pro Tip:</span> Uploading a background music track will trigger a spinning vinyl record and song player when visitors open your public page at <span className="underline font-black">kyvo.fun/{currentUsername}</span>!
-                    </p>
                   )}
                 </div>
               )}
