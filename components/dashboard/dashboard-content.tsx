@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Volume2, Play } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -92,6 +92,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [qrOpen, setQrOpen] = React.useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = React.useState(false);
+  const [isDeletingMusic, setIsDeletingMusic] = React.useState(false);
 
   // Verified checkmark appears ONLY if user has been granted Verified Creator badge by admin and it is equipped
   const isVerified = userBadgeItems.some(
@@ -184,11 +185,34 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setEditMusicUrl(event.target.result as string);
-          setEditMusicTitle(file.name.replace(/\.[^/.]+$/, ''));
+          const audioData = event.target.result as string;
+          const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+
+          setEditMusicUrl(audioData);
+          setEditMusicTitle(trackTitle);
           setIsAudioProcessing(false);
           toast.dismiss('audio-toast');
-          toast.success('Background music selected! Click "Save Profile Changes" to apply.');
+          
+          if (!isEditingDetails) {
+            // Auto save if uploaded directly from outside card widget
+            updateUserProfileDetails({
+              display_name: displayName,
+              bio: bio,
+              avatar_url: avatarUrl,
+              music_url: audioData,
+              music_title: trackTitle,
+            }).then((res) => {
+              if (res.success) {
+                setMusicUrl(audioData);
+                setMusicTitle(trackTitle);
+                toast.success('Background music uploaded & active on public profile!');
+              } else {
+                toast.error(res.message);
+              }
+            });
+          } else {
+            toast.success('Background music selected! Click "Save Profile Changes" to apply.');
+          }
         }
       };
       reader.readAsDataURL(file);
@@ -196,6 +220,23 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
       toast.error('Failed to process audio file.');
+    }
+  };
+
+  // Direct Quick Remove Music Handler
+  const handleRemoveMusicDirect = async () => {
+    setIsDeletingMusic(true);
+    const res = await deleteProfileMusic();
+    setIsDeletingMusic(false);
+
+    if (res.success) {
+      toast.success(res.message);
+      setMusicUrl(null);
+      setMusicTitle('');
+      setEditMusicUrl(null);
+      setEditMusicTitle('');
+    } else {
+      toast.error(res.message);
     }
   };
 
@@ -629,6 +670,66 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <span>Profile Bio</span>
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text break-words">{bio}</p>
+                </div>
+              )}
+
+              {/* DEDICATED PUBLIC BACKGROUND MUSIC SHOWCASE & PREVIEW CARD (Visible directly on card outside edit mode!) */}
+              {!isEditingDetails && (
+                <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#A855F7]/15 p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl border-2 border-[#111111] bg-[#A855F7] text-white flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] shrink-0">
+                        {musicUrl ? <Disc className="w-5 h-5 animate-spin" /> : <Music className="w-5 h-5 stroke-[2.5]" />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="text-sm font-black text-[#111111]">Profile Background Music</h4>
+                          <Badge variant={musicUrl ? "purple" : "outline"} className="text-[9px] font-black uppercase">
+                            {musicUrl ? 'ACTIVE' : 'OPTIONAL'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs font-bold text-[#111111]/70 truncate">
+                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music added yet.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                      <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#A855F7] hover:text-white transition-colors ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#A855F7]" />}
+                        <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV)'}</span>
+                        <input
+                          type="file"
+                          accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
+                          onChange={handleAudioFileChange}
+                          disabled={isAudioProcessing}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {musicUrl && (
+                        <button
+                          onClick={handleRemoveMusicDirect}
+                          disabled={isDeletingMusic}
+                          className="p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform"
+                          title="Remove Song & Clean Storage"
+                        >
+                          {isDeletingMusic ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {musicUrl ? (
+                    <div className="pt-1 border-t border-black/15 space-y-1">
+                      <p className="text-[10px] font-black uppercase text-[#111111]/70">Live Player Preview:</p>
+                      <audio controls src={musicUrl} className="w-full h-8" />
+                    </div>
+                  ) : (
+                    <p className="text-[11px] font-extrabold text-[#111111]/70 leading-relaxed pt-0.5">
+                      💡 <span className="font-black">Pro Tip:</span> Uploading a background music track will trigger a spinning vinyl record and song player when visitors open your public page at <span className="underline font-black">kyvo.fun/{currentUsername}</span>!
+                    </p>
+                  )}
                 </div>
               )}
 
