@@ -23,11 +23,12 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { toast } from 'sonner';
 
 interface BadgeManagerProps {
-  initialBadges: BadgeItem[];
+  initialBadges?: BadgeItem[];
+  badges?: BadgeItem[];
 }
 
-export function BadgeManager({ initialBadges }: BadgeManagerProps) {
-  const [badges, setBadges] = React.useState<BadgeItem[]>(initialBadges);
+export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerProps) {
+  const [badges, setBadges] = React.useState<BadgeItem[]>(initialBadges || rawBadges || []);
   const [isOpen, setIsOpen] = React.useState(false);
 
   // Form states

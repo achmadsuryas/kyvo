@@ -121,10 +121,33 @@ export async function toggleBadgeDisplayStatus(userBadgeId: string, currentIsDis
   }
 }
 
+export async function toggleBadgeActive(badgeId: string, newActiveStatus: boolean): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, message: 'Unauthorized' };
+
+    const { error } = await (supabase.from('badges') as any)
+      .update({ is_active: newActiveStatus })
+      .eq('id', badgeId);
+
+    if (error) return { success: false, message: error.message };
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/admin');
+    revalidatePath('/[username]');
+    return { success: true, message: newActiveStatus ? 'Event Badge activated!' : 'Event Badge deactivated.' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to toggle active status.';
+    return { success: false, message: msg };
+  }
+}
+
 /**
  * ADMIN ONLY: Create or edit a Badge item (supports single object or (id, data) signature)
  */
-export async function adminSaveBadge(badgeDataOrId: any, maybeData?: any): Promise<{ success: boolean; message: string }> {
+export async function adminSaveBadge(badgeDataOrId: any, maybeData?: any): Promise<{ success: boolean; message: string; badge?: BadgeItem }> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -159,11 +182,11 @@ export async function adminSaveBadge(badgeDataOrId: any, maybeData?: any): Promi
       color,
       bg_color,
       is_event,
-      event_end_time: badgeData?.event_end_time || null,
-      event_custom_title: badgeData?.event_custom_title?.trim() || null,
-      event_custom_description: badgeData?.event_custom_description?.trim() || null,
+      is_active: badgeData?.is_active !== false,
       created_at: new Date().toISOString(),
     };
+
+    let createdBadge: BadgeItem | undefined = undefined;
 
     if (targetId) {
       // Update existing badge
@@ -174,16 +197,23 @@ export async function adminSaveBadge(badgeDataOrId: any, maybeData?: any): Promi
       if (error) return { success: false, message: error.message };
     } else {
       // Insert new badge
-      const { error } = await (supabase.from('badges') as any)
-        .insert(payload);
+      const { data: newBadge, error } = await (supabase.from('badges') as any)
+        .insert(payload)
+        .select()
+        .single();
 
       if (error) return { success: false, message: error.message };
+      createdBadge = newBadge as BadgeItem;
     }
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');
     revalidatePath('/[username]');
-    return { success: true, message: targetId ? 'Badge updated successfully!' : 'New Badge created successfully!' };
+    return { 
+      success: true, 
+      message: targetId ? 'Badge updated successfully!' : 'New Badge created successfully!',
+      badge: createdBadge,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to save badge.';
     return { success: false, message: msg };
@@ -304,8 +334,11 @@ export async function adminRevokeUserBadge(userBadgeId: string): Promise<{ succe
   }
 }
 
-// Backward Compatibility Aliases for Admin Badge Management Component
+// Backward Compatibility Aliases for Badge Management Component
+export const createBadge = adminSaveBadge;
+export const updateBadge = adminSaveBadge;
+export const deleteBadge = adminDeleteBadge;
 export const createAdminBadge = adminSaveBadge;
 export const updateAdminBadge = adminSaveBadge;
 export const deleteAdminBadge = adminDeleteBadge;
-export const toggleBadgeActiveStatus = toggleBadgeDisplayStatus;
+export const toggleBadgeActiveStatus = toggleBadgeActive;
