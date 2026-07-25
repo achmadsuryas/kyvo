@@ -533,7 +533,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         <div className="flex flex-wrap items-center gap-2">
                           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors ${isCompressing ? 'opacity-50 pointer-events-none' : ''}`}>
                             {isCompressing ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
-                            <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF - Max 4.5MB)'}</span>
+                            <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF)'}</span>
                             <input
                               type="file"
                               accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
@@ -710,9 +710,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                      <label className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#A855F7] hover:text-white transition-colors w-full sm:w-auto ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-                        {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#A855F7]" />}
-                        <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV - Max 4.5 MB)'}</span>
+                      <label className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] hover:text-[#111111] transition-colors w-full sm:w-auto ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                        <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV)'}</span>
                         <input
                           type="file"
                           accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
