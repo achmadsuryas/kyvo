@@ -58,12 +58,12 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [editAvatarUrl, setEditAvatarUrl] = React.useState<string | null>(avatarUrl);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  // File Upload Handler with Max Size Check (Max 2 MB)
+  // File Upload Handler with Max Size Check (Max 10 MB)
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const MAX_SIZE_MB = 2;
+    const MAX_SIZE_MB = 10;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
     if (file.size > MAX_BYTES) {
@@ -273,7 +273,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
                     <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
                       <Camera className="w-4 h-4 text-[#3B82F6]" />
-                      <span>Custom Profile Picture (Max 2 MB)</span>
+                      <span>Custom Profile Picture (Max 10 MB)</span>
                     </label>
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
@@ -283,7 +283,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         <div className="flex flex-wrap items-center gap-2">
                           <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors">
                             <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />
-                            <span>Upload Photo (Max 2MB)</span>
+                            <span>Upload Photo (Max 10MB)</span>
                             <input
                               type="file"
                               accept="image/png, image/jpeg, image/webp, image/gif"
@@ -465,7 +465,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             </CardContent>
           </Card>
 
-          {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR BELOW ACCOUNT OVERVIEW (Fixed padding and removed scale-105 so buttons never clip on the left!) */}
+          {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR BELOW ACCOUNT OVERVIEW */}
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 border-b-4 border-[#111111] pb-3 pt-1 px-1">
             <button
               onClick={() => setActiveTab('links')}
