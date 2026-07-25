@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 
 /**
  * Client-Side Instant Image Compressor (Resizes 10MB photos to ultra-lightweight ~100KB WebP)
+ * (Skipped for animated .gif files so animations are 100% preserved!)
  */
 const compressImage = (file: File, maxWidth = 512, maxHeight = 512, quality = 0.82): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -106,7 +107,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
 
-  // File Upload Handler with Auto Compression (Compresses 10MB down to ultra-light 100KB in ~0.1 sec)
+  // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -121,14 +122,29 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     try {
       setIsCompressing(true);
-      toast.loading('Optimizing image for super-fast speed...', { id: 'compressing-toast' });
-      
-      const compressedDataUrl = await compressImage(file, 512, 512, 0.82);
-      
-      setEditAvatarUrl(compressedDataUrl);
-      setIsCompressing(false);
-      toast.dismiss('compressing-toast');
-      toast.success('Photo optimized & compressed! Click "Save Profile Changes" to apply.');
+
+      const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+
+      if (isGif) {
+        toast.loading('Processing animated GIF photo...', { id: 'compressing-toast' });
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setEditAvatarUrl(event.target.result as string);
+            setIsCompressing(false);
+            toast.dismiss('compressing-toast');
+            toast.success('Animated GIF photo ready! Click "Save Profile Changes" to apply.');
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        toast.loading('Optimizing image for super-fast speed...', { id: 'compressing-toast' });
+        const compressedDataUrl = await compressImage(file, 512, 512, 0.82);
+        setEditAvatarUrl(compressedDataUrl);
+        setIsCompressing(false);
+        toast.dismiss('compressing-toast');
+        toast.success('Photo optimized & compressed! Click "Save Profile Changes" to apply.');
+      }
     } catch (err) {
       setIsCompressing(false);
       toast.dismiss('compressing-toast');
@@ -211,8 +227,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   return (
     <div className="space-y-8 w-full overflow-hidden">
       {/* Full-width Top Banner Header */}
-      <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-5 sm:p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
-        <div className="space-y-2 min-w-0 w-full md:w-auto flex-1">
+      <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-5 sm:p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 w-full">
+        <div className="space-y-2 min-w-0 w-full lg:w-auto flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="text-xs font-black">
               {role === 'admin' ? 'SYSTEM ADMIN' : 'CREATOR DASHBOARD'}
@@ -232,11 +248,11 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           </p>
         </div>
 
-        {/* Top Header Buttons: Landing Page, Share QR Code & Public Profile */}
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-          <Link href="/" className="flex-1 sm:flex-none">
-            <Button variant="outline" size="lg" className="w-full justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]">
-              <Home className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+        {/* Top Header Buttons: Landing Page, Share QR Code & Public Profile (Fully Responsive & Auto-Wraps on PC & Mobile!) */}
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          <Link href="/" className="flex-1 sm:flex-initial">
+            <Button variant="outline" size="lg" className="w-full justify-center gap-2 text-xs sm:text-sm font-black shadow-[3px_3px_0px_0px_#111111]">
+              <Home className="w-4 h-4 stroke-[2.5]" />
               <span>Landing Page</span>
             </Button>
           </Link>
@@ -245,16 +261,16 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             onClick={() => setQrOpen(true)}
             variant="purple"
             size="lg"
-            className="flex-1 sm:flex-none justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]"
+            className="flex-1 sm:flex-initial justify-center gap-2 text-xs sm:text-sm font-black shadow-[3px_3px_0px_0px_#111111]"
           >
-            <QrCode className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+            <QrCode className="w-4 h-4 stroke-[2.5]" />
             <span>Share & QR Code</span>
           </Button>
 
-          <Link href={`/${currentUsername}`} target="_blank" className="w-full sm:w-auto">
-            <Button variant="default" size="lg" className="w-full justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]">
+          <Link href={`/${currentUsername}`} target="_blank" className="flex-1 sm:flex-initial">
+            <Button variant="default" size="lg" className="w-full justify-center gap-2 text-xs sm:text-sm font-black shadow-[3px_3px_0px_0px_#111111]">
               <span>View Public Page</span>
-              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3]" />
+              <ExternalLink className="w-4 h-4 stroke-[3]" />
             </Button>
           </Link>
         </div>
@@ -328,7 +344,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
                     <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
                       <Camera className="w-4 h-4 text-[#3B82F6]" />
-                      <span>Custom Profile Picture (Auto-Compressed, Max 10 MB)</span>
+                      <span>Custom Profile Picture (Supports PNG, JPG, JPEG, GIF - Max 10 MB)</span>
                     </label>
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
@@ -338,10 +354,10 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         <div className="flex flex-wrap items-center gap-2">
                           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors ${isCompressing ? 'opacity-50 pointer-events-none' : ''}`}>
                             {isCompressing ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
-                            <span>{isCompressing ? 'Optimizing Image...' : 'Upload Photo (Max 10MB)'}</span>
+                            <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF - Max 10MB)'}</span>
                             <input
                               type="file"
-                              accept="image/png, image/jpeg, image/webp, image/gif"
+                              accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
                               onChange={handleImageFileChange}
                               disabled={isCompressing}
                               className="hidden"
@@ -360,7 +376,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                           )}
                         </div>
                         <p className="text-[10px] font-extrabold text-[#111111]/70 break-words">
-                          {editAvatarUrl ? 'Photo active (Compressed for super-fast saving).' : 'No photo uploaded. Using 2-letter username initial fallback.'}
+                          {editAvatarUrl ? 'Photo active (Supports animated GIFs & static images).' : 'No photo uploaded. Using 2-letter username initial fallback.'}
                         </p>
                       </div>
                     </div>
