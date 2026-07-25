@@ -16,6 +16,7 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 /**
@@ -166,7 +167,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Dedicated API Route Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Safe Production Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -197,36 +198,80 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     try {
       setIsAudioProcessing(true);
-      toast.loading('Uploading background audio...', { id: 'audio-toast' });
+      toast.loading('Uploading background audio track...', { id: 'audio-toast' });
 
-      const formData = new FormData();
-      formData.append('file', file);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      // Call dedicated /api/upload-music endpoint (bypasses Server Action payload limits completely!)
-      const response = await fetch('/api/upload-music', {
-        method: 'POST',
-        body: formData,
+      const fileExt = ext || 'mp3';
+      const fileName = `music-${user?.id || 'user'}-${Date.now()}.${fileExt}`;
+      
+      let finalMusicUrl = '';
+
+      // STEP 1: Direct Browser to Supabase Cloud Storage Upload (Bypasses Vercel Serverless Body Payload Limit!)
+      if (user) {
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+        if (!uploadErr && uploadData) {
+          const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
+          finalMusicUrl = publicUrlData.publicUrl;
+        }
+      }
+
+      // STEP 2: Fallback to /api/upload-music API Route
+      if (!finalMusicUrl) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload-music', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson.success && resJson.music_url) {
+            finalMusicUrl = resJson.music_url;
+          }
+        } else {
+          const errorText = await response.text();
+          if (response.status === 413 || errorText.includes('Request Entity') || errorText.includes('Too Large')) {
+            throw new Error(`File "${file.name}" (${fileSizeMb} MB) is too large for the web server limit (Max 4.5 MB on Vercel). Please pick a song file under 4.5 MB.`);
+          } else {
+            throw new Error('Storage upload failed.');
+          }
+        }
+      }
+
+      const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+
+      const res = await updateUserProfileDetails({
+        display_name: displayName,
+        bio: bio,
+        avatar_url: avatarUrl,
+        music_url: finalMusicUrl,
+        music_title: trackTitle,
       });
-
-      const res = await response.json();
 
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
 
-      if (res.success && res.music_url) {
-        setMusicUrl(res.music_url);
-        setMusicTitle(res.music_title || file.name.replace(/\.[^/.]+$/, ''));
+      if (res.success) {
+        setMusicUrl(finalMusicUrl);
+        setMusicTitle(trackTitle);
         toast.success('Background music uploaded & active on public profile!');
         router.refresh();
       } else {
-        toast.error(res.message || 'Failed to upload audio file.');
+        toast.error(res.message);
         setFileSizeError(res.message);
       }
     } catch (err: any) {
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
       const errMsg = err?.message || 'Failed to process audio file.';
-      toast.error(errMsg);
+      toast.error(errMsg, { duration: 6000 });
       setFileSizeError(errMsg);
     }
   };
