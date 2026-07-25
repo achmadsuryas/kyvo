@@ -7,7 +7,6 @@ import {
   Play, 
   Volume2, 
   VolumeX, 
-  Disc, 
   Music
 } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem } from '@/types';
@@ -16,6 +15,42 @@ import { Button } from '@/components/ui/button';
 import { ProfileShareButton } from '@/components/profile/profile-share-button';
 import { PublicProfileTracker, TrackedLinkItem } from '@/components/profile/public-profile-tracker';
 import { InteractiveAvatar } from '@/components/profile/interactive-avatar';
+
+/**
+ * Pure Vector SVG Vinyl Record Disk (Mathematically 100% Perfect Circle!)
+ */
+function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg'; isSpinning?: boolean }) {
+  const outerSize = size === 'lg' ? 'w-28 h-28' : 'w-11 h-11';
+
+  return (
+    <div className={`relative ${outerSize} shrink-0 aspect-square flex items-center justify-center`}>
+      <svg
+        viewBox="0 0 200 200"
+        className={`w-full h-full aspect-square shrink-0 ${isSpinning ? 'animate-[spin_6s_linear_infinite]' : ''}`}
+      >
+        {/* Outer Vinyl Disk Circle */}
+        <circle cx="100" cy="100" r="96" fill="#111111" stroke="#111111" strokeWidth="4" />
+        
+        {/* Concentric Grooves */}
+        <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" />
+        <circle cx="100" cy="100" r="68" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" />
+        <circle cx="100" cy="100" r="54" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
+        
+        {/* Center Yellow Label Circle */}
+        <circle cx="100" cy="100" r="40" fill="#FFD43B" stroke="#111111" strokeWidth="3.5" />
+        
+        {/* Center K Logo Text */}
+        <text x="96" y="113" fontFamily="Arial Black, Impact, sans-serif" fontSize="42" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
+        
+        {/* Pink Dot */}
+        <circle cx="123" cy="112" r="5.5" fill="#FF4D6D" stroke="#111111" strokeWidth="1.5" />
+        
+        {/* Center Spindle Hole */}
+        <circle cx="100" cy="100" r="6" fill="#111111" />
+      </svg>
+    </div>
+  );
+}
 
 interface PublicProfileContainerProps {
   profile: Profile & {
@@ -80,18 +115,9 @@ export function PublicProfileContainer({
       {!hasTriggered && hasMusic && (
         <div className="w-full max-w-sm sm:max-w-md my-auto animate-in zoom-in-95 duration-300">
           <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#111111] text-center space-y-6">
-            {/* Perfectly Round 100% Circle Spinning Vinyl Preview Record */}
+            {/* Perfectly Round Pure Vector Spinning Vinyl Preview Record */}
             <div className="relative w-28 h-28 mx-auto flex items-center justify-center shrink-0">
-              {/* Outer Black Vinyl Disk with Concentric Grooves */}
-              <div className="w-28 h-28 rounded-full border-[3.5px] border-[#111111] bg-[#111111] flex items-center justify-center shadow-[4px_4px_0px_0px_#111111] animate-[spin_6s_linear_infinite] shrink-0 aspect-square">
-                {/* Vinyl Ring Grooves */}
-                <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center shrink-0 aspect-square">
-                  <div className="w-13 h-13 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B] shrink-0 aspect-square">
-                    {/* Kyvo Favicon Center Label */}
-                    <img src="/favicon.svg" alt="Kyvo Logo" className="w-7 h-7 rounded-full shrink-0 aspect-square" />
-                  </div>
-                </div>
-              </div>
+              <VinylRecordDisk size="lg" isSpinning={true} />
 
               {/* Floating Music Notes */}
               <div className="absolute -top-2 -right-2 p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white font-black shadow-[2px_2px_0px_0px_#111111] animate-bounce">
@@ -187,20 +213,12 @@ export function PublicProfileContainer({
               )}
             </div>
 
-            {/* ANIMATED SPINNING PERFECT VINYL RECORD DISK & MUTE CONTROLLER (Only visible when user has music) */}
+            {/* ANIMATED SPINNING PERFECT VINYL RECORD DISK & MUTE CONTROLLER */}
             {hasMusic && (
               <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#FFD43B]/30 p-3 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between gap-3">
-                {/* Left: Perfectly Round Vinyl Disk with Kyvo Favicon Center */}
+                {/* Left: Perfectly Round Pure Vector Vinyl Disk */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="relative w-11 h-11 shrink-0 aspect-square">
-                    <div className={`w-11 h-11 rounded-full border-2 border-[#111111] bg-[#111111] flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] shrink-0 aspect-square ${
-                      isPlaying ? 'animate-[spin_4s_linear_infinite]' : ''
-                    }`}>
-                      <div className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center bg-[#FFD43B] shrink-0 aspect-square">
-                        <img src="/favicon.svg" alt="Kyvo Logo" className="w-4 h-4 rounded-full shrink-0 aspect-square" />
-                      </div>
-                    </div>
-                  </div>
+                  <VinylRecordDisk size="sm" isSpinning={isPlaying} />
 
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-black uppercase text-[#111111]/60 tracking-wider">

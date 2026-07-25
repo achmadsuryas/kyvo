@@ -95,6 +95,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [isDeletingMusic, setIsDeletingMusic] = React.useState(false);
   const [isSavingTitle, setIsSavingTitle] = React.useState(false);
 
+  // File size error alert message state
+  const [fileSizeError, setFileSizeError] = React.useState<string | null>(null);
+
   // Verified checkmark appears ONLY if user has been granted Verified Creator badge by admin and it is equipped
   const isVerified = userBadgeItems.some(
     (ub) => ub.badge?.name.toLowerCase().includes('verified') && ub.is_displayed !== false
@@ -119,11 +122,17 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     const MAX_SIZE_MB = 10;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
 
     if (file.size > MAX_BYTES) {
-      toast.error(`File size exceeds ${MAX_SIZE_MB} MB limit! Please choose a smaller image.`);
+      const errorMsg = `⚠️ File size exceeds limit! Selected image (${fileSizeMb} MB) is larger than the 10 MB limit. Please upload a file smaller than 10 MB.`;
+      toast.error(errorMsg, { duration: 6000 });
+      setFileSizeError(`Image "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 10 MB.`);
+      e.target.value = '';
       return;
     }
+
+    setFileSizeError(null);
 
     try {
       setIsCompressing(true);
@@ -164,18 +173,27 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     const MAX_SIZE_MB = 10;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
 
     if (file.size > MAX_BYTES) {
-      toast.error(`Audio file size exceeds ${MAX_SIZE_MB} MB limit! Please choose a smaller audio file.`);
+      const errorMsg = `⚠️ File size exceeds limit! Selected audio track (${fileSizeMb} MB) is larger than the 10 MB limit. Please upload an audio file smaller than 10 MB.`;
+      toast.error(errorMsg, { duration: 6000 });
+      setFileSizeError(`Audio track "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 10 MB.`);
+      e.target.value = '';
       return;
     }
 
     const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav'];
     const ext = file.name.toLowerCase().split('.').pop();
     if (!validTypes.includes(file.type) && ext !== 'mp3' && ext !== 'wav') {
-      toast.error('Invalid audio format! Only .MP3 and .WAV audio files are supported.');
+      const typeError = 'Invalid audio format! Only .MP3 and .WAV audio files are supported.';
+      toast.error(typeError);
+      setFileSizeError(typeError);
+      e.target.value = '';
       return;
     }
+
+    setFileSizeError(null);
 
     try {
       setIsAudioProcessing(true);
@@ -202,6 +220,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
               toast.success('Background music uploaded & active on public profile!');
             } else {
               toast.error(res.message);
+              setFileSizeError(res.message);
             }
           });
         }
@@ -373,6 +392,22 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           </Link>
         </div>
       </div>
+
+      {/* FILE SIZE OVERFLOW WARNING ALERT BANNER */}
+      {fileSizeError && (
+        <div className="rounded-2xl border-[3px] border-[#111111] bg-[#FF4D6D] text-white p-4 shadow-[5px_5px_0px_0px_#111111] flex items-center justify-between gap-3 animate-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertTriangle className="w-5 h-5 shrink-0 stroke-[2.5]" />
+            <p className="text-xs sm:text-sm font-black break-words">{fileSizeError}</p>
+          </div>
+          <button
+            onClick={() => setFileSizeError(null)}
+            className="p-1 rounded-lg border-2 border-white bg-black/20 hover:bg-black/40 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4 stroke-[3]" />
+          </button>
+        </div>
+      )}
 
       {/* Main 2-Column Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
@@ -634,7 +669,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                           )}
                         </div>
                         <p className="text-xs font-bold text-[#111111]/70 truncate">
-                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded.'}
+                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded (Max 10 MB).'}
                         </p>
                       </div>
                     </div>
