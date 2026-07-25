@@ -84,16 +84,20 @@ export function Navbar({ user: initialUser }: NavbarProps) {
 
   return (
     <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-6xl transition-all duration-300">
-      {/* Centered Floating Neobrutalism Navbar Container (overflow-visible so dropdown menu floats outside cleanly!) */}
+      {/* Centered Floating Neobrutalism Navbar Container */}
       <div className="rounded-2xl border-[3.5px] border-[#111111] bg-white/95 backdrop-blur-md shadow-[6px_6px_0px_0px_#111111] relative z-50 overflow-visible transition-all">
         {/* Navbar Top Bar */}
         <nav className="px-4 py-2.5 sm:px-5 sm:py-3 flex items-center justify-between">
-          {/* Kyvo Typography Logo */}
+          {/* Kyvo Favicon Logo & Text */}
           <Link href="/" className="flex items-center gap-2 group">
+            <img
+              src="/favicon.svg"
+              alt="Kyvo Logo"
+              className="w-7 h-7 sm:w-8 sm:h-8 group-hover:scale-105 transition-transform duration-200 drop-shadow-[2px_2px_0px_#111111]"
+            />
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform duration-200">
               {APP_CONFIG.name}
             </span>
-            <span className="inline-block w-3 h-3 rounded-full bg-[#FF4D6D] border-2 border-[#111111] animate-bounce" />
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -113,7 +117,7 @@ export function Navbar({ user: initialUser }: NavbarProps) {
           {/* Desktop User Menu (Authenticated vs Guest) */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
-              /* Logged In User Dropdown Menu (Floats OUTSIDE Navbar without getting cut off!) */
+              /* Logged In User Dropdown Menu */
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
@@ -124,7 +128,7 @@ export function Navbar({ user: initialUser }: NavbarProps) {
                   <ChevronDown className="w-3.5 h-3.5 stroke-[3]" />
                 </button>
 
-                {/* Dropdown Menu Popup (Fully Visible Outside Navbar) */}
+                {/* Dropdown Menu Popup */}
                 {userDropdownOpen && (
                   <div className="absolute right-0 top-12 z-50 w-56 rounded-2xl border-[3px] border-[#111111] bg-white p-3 shadow-[6px_6px_0px_0px_#111111] space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
                     <div className="px-3 py-1.5 border-b-2 border-dashed border-[#111111]/20">

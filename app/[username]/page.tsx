@@ -63,15 +63,22 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-between items-center p-3 sm:p-6 font-sans selection:bg-[#FFD43B]">
-      {/* Top Header Bar */}
+      {/* Top Header Bar with Custom Favicon Logo */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-1.5">
-        <Link href="/" className="flex items-center gap-1.5 font-black text-xl sm:text-2xl text-[#111111] hover:scale-105 transition-transform">
-          <span>{APP_CONFIG.name}</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
+        <Link href="/" className="flex items-center gap-2 group hover:scale-105 transition-transform">
+          <img
+            src="/favicon.svg"
+            alt="Kyvo Logo"
+            className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow-[2px_2px_0px_#111111]"
+          />
+          <span className="text-xl sm:text-2xl font-black tracking-tight text-[#111111]">
+            {APP_CONFIG.name}
+          </span>
         </Link>
+
         <Link href="/login">
           <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]">
-            <Sparkles className="w-3 h-3" />
+            <Sparkles className="w-3 h-3 text-[#FF4D6D]" />
             <span>Create Your Own</span>
           </Button>
         </Link>
@@ -217,10 +224,14 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </main>
       )}
 
-      {/* Footer Branding */}
-      <footer className="w-full max-w-sm sm:max-w-md text-center py-2 space-y-0.5">
-        <p className="text-[11px] font-black text-[#111111]/60">
-          Powered by <Link href="/" className="underline font-black text-[#111111]">Kyvo</Link>
+      {/* Footer Branding with Custom Favicon Logo */}
+      <footer className="w-full max-w-sm sm:max-w-md text-center py-2">
+        <p className="text-[11px] font-black text-[#111111]/60 flex items-center justify-center gap-1.5">
+          <span>Powered by</span>
+          <Link href="/" className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity">
+            <img src="/favicon.svg" alt="Kyvo Logo" className="w-4 h-4" />
+            <span className="underline font-black text-[#111111]">Kyvo</span>
+          </Link>
         </p>
       </footer>
     </div>
