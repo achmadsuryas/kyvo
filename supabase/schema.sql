@@ -13,8 +13,9 @@ ALTER TABLE public.profiles ALTER COLUMN is_onboarded SET DEFAULT FALSE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS music_url TEXT DEFAULT NULL;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS music_title TEXT DEFAULT NULL;
 
--- 4. Ensure clicks_count column exists on links table
+-- 4. Ensure clicks_count and bg_color columns exist on links table
 ALTER TABLE public.links ADD COLUMN IF NOT EXISTS clicks_count INTEGER DEFAULT 0;
+ALTER TABLE public.links ADD COLUMN IF NOT EXISTS bg_color TEXT DEFAULT '#FFD43B';
 
 -- 5. Create SECURITY DEFINER RPC function to increment profile views (bypasses RLS safely for visitors)
 CREATE OR REPLACE FUNCTION public.increment_profile_views(target_profile_id UUID)

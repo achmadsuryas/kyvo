@@ -33,6 +33,7 @@ export interface LinkItem {
   title: string;
   url: string;
   icon: string | null;
+  bg_color?: string | null;
   is_active: boolean;
   clicks_count?: number;
   position: number;

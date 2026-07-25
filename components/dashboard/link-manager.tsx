@@ -23,6 +23,87 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
+const PRESET_LINK_COLORS = [
+  { name: 'Kuning (Default)', value: '#FFD43B' },
+  { name: 'Pink Merah', value: '#FF4D6D' },
+  { name: 'Biru', value: '#3B82F6' },
+  { name: 'Hijau', value: '#51CF66' },
+  { name: 'Ungu', value: '#CC5DE8' },
+  { name: 'Oranye', value: '#FF922B' },
+  { name: 'Hitam', value: '#111111' },
+  { name: 'Putih', value: '#FFFFFF' },
+];
+
+function getContrastColor(hexColor?: string | null): string {
+  if (!hexColor || !hexColor.startsWith('#')) return '#111111';
+  const hex = hexColor.replace('#', '');
+  if (hex.length !== 6) return '#111111';
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#111111' : '#ffffff';
+}
+
+function LinkColorPicker({
+  selectedColor,
+  onChangeColor,
+}: {
+  selectedColor: string;
+  onChangeColor: (color: string) => void;
+}) {
+  const currentColor = selectedColor || '#FFD43B';
+  const textColor = getContrastColor(currentColor);
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-black uppercase text-[#111111]/70">
+          Button Link Color
+        </label>
+        <span
+          className="text-[10px] font-black uppercase px-2 py-0.5 rounded border border-[#111111] shadow-[1px_1px_0px_0px_#111111]"
+          style={{ backgroundColor: currentColor, color: textColor }}
+        >
+          {currentColor.toUpperCase()}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl border-2 border-[#111111] bg-white">
+        {PRESET_LINK_COLORS.map((c) => {
+          const isSelected = currentColor.toLowerCase() === c.value.toLowerCase();
+          return (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => onChangeColor(c.value)}
+              className={`w-7 h-7 rounded-lg border-2 border-[#111111] transition-all cursor-pointer flex items-center justify-center ${
+                isSelected ? 'scale-110 shadow-[2px_2px_0px_0px_#111111] ring-2 ring-offset-1 ring-[#111111]' : 'hover:scale-105'
+              }`}
+              style={{ backgroundColor: c.value }}
+              title={c.name}
+            >
+              {isSelected && (
+                <Check className={`w-3.5 h-3.5 stroke-[3] ${getContrastColor(c.value) === '#ffffff' ? 'text-white' : 'text-[#111111]'}`} />
+              )}
+            </button>
+          );
+        })}
+
+        <div className="flex items-center gap-2 pl-2 border-l-2 border-dashed border-[#111111]/20">
+          <input
+            type="color"
+            value={currentColor}
+            onChange={(e) => onChangeColor(e.target.value)}
+            className="w-7 h-7 rounded-lg border-2 border-[#111111] cursor-pointer p-0 bg-transparent overflow-hidden shadow-[1.5px_1.5px_0px_0px_#111111]"
+            title="Custom Color Picker"
+          />
+          <span className="text-[10px] font-black uppercase text-[#111111]/70">Custom</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface LinkManagerProps {
   initialLinks: LinkItem[];
 }
@@ -39,12 +120,14 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
   const [newTitle, setNewTitle] = React.useState('');
   const [newUrl, setNewUrl] = React.useState('');
   const [newIcon, setNewIcon] = React.useState('Globe');
+  const [newBgColor, setNewBgColor] = React.useState('#FFD43B');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Edit Link Form state
   const [editTitle, setEditTitle] = React.useState('');
   const [editUrl, setEditUrl] = React.useState('');
   const [editIcon, setEditIcon] = React.useState('Globe');
+  const [editBgColor, setEditBgColor] = React.useState('#FFD43B');
   const [editActive, setEditActive] = React.useState(true);
 
   React.useEffect(() => {
@@ -64,6 +147,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
       title: newTitle,
       url: newUrl,
       icon: newIcon,
+      bg_color: newBgColor,
     });
     setIsSubmitting(false);
 
@@ -73,6 +157,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
       setNewTitle('');
       setNewUrl('');
       setNewIcon('Globe');
+      setNewBgColor('#FFD43B');
       setIsAddOpen(false);
     } else {
       toast.error(res.message);
@@ -85,6 +170,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
     setEditTitle(link.title);
     setEditUrl(link.url);
     setEditIcon(link.icon || 'Globe');
+    setEditBgColor(link.bg_color || '#FFD43B');
     setEditActive(link.is_active);
   };
 
@@ -101,6 +187,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
       url: editUrl,
       icon: editIcon,
       is_active: editActive,
+      bg_color: editBgColor,
     });
     setIsSubmitting(false);
 
@@ -109,7 +196,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
       setLinks((prev) =>
         prev.map((l) =>
           l.id === id
-            ? { ...l, title: editTitle, url: editUrl, icon: editIcon, is_active: editActive }
+            ? { ...l, title: editTitle, url: editUrl, icon: editIcon, is_active: editActive, bg_color: editBgColor }
             : l
         )
       );
@@ -224,6 +311,12 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
               </div>
             </div>
 
+            {/* Link Color Picker */}
+            <LinkColorPicker
+              selectedColor={newBgColor}
+              onChangeColor={(color) => setNewBgColor(color)}
+            />
+
             {/* Graphical Icon Picker */}
             <IconPicker
               selectedIcon={newIcon}
@@ -267,6 +360,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
             {links.map((link) => {
               const IconComp = getIconComponent(link.icon || 'Globe');
               const isEditing = editingId === link.id;
+              const linkBgColor = link.bg_color || '#FFD43B';
 
               return (
                 <div
@@ -310,6 +404,12 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
                         </div>
                       </div>
 
+                      {/* Link Color Picker */}
+                      <LinkColorPicker
+                        selectedColor={editBgColor}
+                        onChangeColor={(color) => setEditBgColor(color)}
+                      />
+
                       <IconPicker
                         selectedIcon={editIcon}
                         onSelectIcon={(iconName) => setEditIcon(iconName)}
@@ -342,7 +442,13 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-3.5 overflow-hidden">
                         {/* Graphical SVG Icon Badge */}
-                        <div className="p-3 rounded-xl border-2 border-[#111111] bg-[#FFD43B] text-[#111111] flex-shrink-0 shadow-[2px_2px_0px_0px_#111111]">
+                        <div
+                          className="p-3 rounded-xl border-2 border-[#111111] flex-shrink-0 shadow-[2px_2px_0px_0px_#111111]"
+                          style={{
+                            backgroundColor: linkBgColor,
+                            color: getContrastColor(linkBgColor),
+                          }}
+                        >
                           <IconComp className="w-6 h-6" />
                         </div>
                         <div className="overflow-hidden">

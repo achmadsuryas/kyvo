@@ -24,8 +24,8 @@ export async function getUserLinks(): Promise<LinkItem[]> {
   }
 }
 
-export async function createLink(formData: { title: string; url: string; icon: string }): Promise<{ success: boolean; message: string; link?: LinkItem }> {
-  const { title, url, icon } = formData;
+export async function createLink(formData: { title: string; url: string; icon: string; bg_color?: string }): Promise<{ success: boolean; message: string; link?: LinkItem }> {
+  const { title, url, icon, bg_color } = formData;
 
   if (!title.trim()) {
     return { success: false, message: 'Link title is required.' };
@@ -58,6 +58,7 @@ export async function createLink(formData: { title: string; url: string; icon: s
         title: title.trim(),
         url: formattedUrl,
         icon: icon || 'Globe',
+        bg_color: bg_color || '#FFD43B',
         sort_order,
         is_active: true,
       })
@@ -77,8 +78,8 @@ export async function createLink(formData: { title: string; url: string; icon: s
   }
 }
 
-export async function updateLink(id: string, formData: { title: string; url: string; icon: string; is_active: boolean }): Promise<{ success: boolean; message: string }> {
-  const { title, url, icon, is_active } = formData;
+export async function updateLink(id: string, formData: { title: string; url: string; icon: string; is_active: boolean; bg_color?: string }): Promise<{ success: boolean; message: string }> {
+  const { title, url, icon, is_active, bg_color } = formData;
 
   if (!title.trim()) {
     return { success: false, message: 'Link title is required.' };
@@ -102,6 +103,7 @@ export async function updateLink(id: string, formData: { title: string; url: str
         title: title.trim(),
         url: formattedUrl,
         icon: icon || 'Globe',
+        bg_color: bg_color || '#FFD43B',
         is_active,
       })
       .eq('id', id)
