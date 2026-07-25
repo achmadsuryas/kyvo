@@ -149,20 +149,80 @@ export function SpotifyIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+export function DiscordIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M18 6h0a14 14 0 0 0-4-1.5 10 10 0 0 0-.5 1 12 12 0 0 0-3 0A10 10 0 0 0 10 4.5 14 14 0 0 0 6 6c-3 4.5-3 9-3 13a14 14 0 0 0 4 2 10 10 0 0 0 1-1.5 9 9 0 0 1-2.5-1.5c.2.2.4.3.6.5a10 10 0 0 0 8 0c.2-.2.4-.3.6-.5a9 9 0 0 1-2.5 1.5 10 10 0 0 0 1 1.5 14 14 0 0 0 4-2c0-4 0-8.5-3-13z" />
+      <circle cx="9" cy="12" r="1" fill="currentColor" />
+      <circle cx="15" cy="12" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function WhatsappIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+      <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+    </svg>
+  );
+}
+
+export function FacebookIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
 export const PRESET_ICONS = [
   { name: 'Globe', label: 'Website / Globe', component: Globe },
-  { name: 'Github', label: 'GitHub', component: GithubIcon },
-  { name: 'Twitter', label: 'Twitter / X', component: TwitterIcon },
-  { name: 'Youtube', label: 'YouTube', component: YoutubeIcon },
-  { name: 'Linkedin', label: 'LinkedIn', component: LinkedinIcon },
+  { name: 'Discord', label: 'Discord Server / Profile', component: DiscordIcon },
+  { name: 'Whatsapp', label: 'WhatsApp', component: WhatsappIcon },
+  { name: 'Facebook', label: 'Facebook', component: FacebookIcon },
   { name: 'Instagram', label: 'Instagram', component: InstagramIcon },
   { name: 'Tiktok', label: 'TikTok', component: TiktokIcon },
+  { name: 'Youtube', label: 'YouTube', component: YoutubeIcon },
+  { name: 'Twitter', label: 'Twitter / X', component: TwitterIcon },
   { name: 'Spotify', label: 'Spotify', component: SpotifyIcon },
+  { name: 'Github', label: 'GitHub', component: GithubIcon },
+  { name: 'Linkedin', label: 'LinkedIn', component: LinkedinIcon },
   { name: 'Store', label: 'Online Store', component: Store },
   { name: 'ShoppingBag', label: 'Shop / Product', component: ShoppingBag },
   { name: 'Mail', label: 'Email Contact', component: Mail },
   { name: 'Video', label: 'Video / Stream', component: Video },
-  { name: 'Phone', label: 'WhatsApp / Phone', component: Phone },
+  { name: 'Phone', label: 'Phone Call', component: Phone },
   { name: 'Send', label: 'Telegram / Channel', component: Send },
 ];
 

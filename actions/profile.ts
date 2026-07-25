@@ -77,6 +77,8 @@ export async function updateUserProfileDetails(details: {
   display_name: string;
   bio: string;
   avatar_url?: string | null;
+  music_url?: string | null;
+  music_title?: string | null;
 }): Promise<{ success: boolean; message: string }> {
   try {
     const supabase = await createClient();
@@ -92,25 +94,41 @@ export async function updateUserProfileDetails(details: {
       updated_at: new Date().toISOString(),
     };
 
-    // Clean up old avatar from Supabase Storage if changing or removing photo
+    // Fetch current profile to check for old avatar/music files in storage
     const { data: currentProfile } = await supabase
       .from('profiles')
-      .select('avatar_url')
+      .select('avatar_url, music_url')
       .eq('id', user.id)
       .maybeSingle();
 
     const oldAvatarUrl = (currentProfile as any)?.avatar_url;
+    const oldMusicUrl = (currentProfile as any)?.music_url;
 
+    // Handle avatar URL change/deletion & storage cleanup
     if (details.avatar_url !== undefined && details.avatar_url !== oldAvatarUrl) {
       updatePayload.avatar_url = details.avatar_url;
 
-      // If old avatar was stored in Supabase storage bucket 'avatars', delete old object file
       if (oldAvatarUrl && typeof oldAvatarUrl === 'string' && oldAvatarUrl.includes('/storage/v1/object/public/avatars/')) {
         const parts = oldAvatarUrl.split('/storage/v1/object/public/avatars/');
         if (parts[1]) {
           await supabase.storage.from('avatars').remove([parts[1]]);
         }
       }
+    }
+
+    // Handle music URL change/deletion & storage cleanup
+    if (details.music_url !== undefined && details.music_url !== oldMusicUrl) {
+      updatePayload.music_url = details.music_url;
+      updatePayload.music_title = details.music_title || null;
+
+      if (oldMusicUrl && typeof oldMusicUrl === 'string' && oldMusicUrl.includes('/storage/v1/object/public/music/')) {
+        const parts = oldMusicUrl.split('/storage/v1/object/public/music/');
+        if (parts[1]) {
+          await supabase.storage.from('music').remove([parts[1]]);
+        }
+      }
+    } else if (details.music_title !== undefined) {
+      updatePayload.music_title = details.music_title;
     }
 
     const { error } = await (supabase.from('profiles') as any)
@@ -125,12 +143,58 @@ export async function updateUserProfileDetails(details: {
     revalidatePath('/[username]');
     return { 
       success: true, 
-      message: details.avatar_url === null 
-        ? 'Profile updated & old photo removed from database!' 
-        : 'Profile details updated successfully!' 
+      message: 'Profile details updated successfully!' 
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update profile details.';
+    return { success: false, message: msg };
+  }
+}
+
+/**
+ * Delete Profile Background Music & Clean Storage
+ */
+export async function deleteProfileMusic(): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: 'You must be logged in.' };
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('music_url')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const oldMusicUrl = (profile as any)?.music_url;
+
+    if (oldMusicUrl && typeof oldMusicUrl === 'string' && oldMusicUrl.includes('/storage/v1/object/public/music/')) {
+      const parts = oldMusicUrl.split('/storage/v1/object/public/music/');
+      if (parts[1]) {
+        await supabase.storage.from('music').remove([parts[1]]);
+      }
+    }
+
+    const { error } = await (supabase.from('profiles') as any)
+      .update({
+        music_url: null,
+        music_title: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/[username]');
+    return { success: true, message: 'Profile background music removed from database and storage!' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to delete profile music.';
     return { success: false, message: msg };
   }
 }

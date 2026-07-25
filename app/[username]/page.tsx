@@ -9,14 +9,11 @@ import {
   ShieldAlert,
   Home,
 } from 'lucide-react';
-import { getBadgeIconComponent } from '@/components/shared/badge-icons';
 import { getProfileByUsername } from '@/services/profile';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ProfileShareButton } from '@/components/profile/profile-share-button';
-import { PublicProfileTracker, TrackedLinkItem } from '@/components/profile/public-profile-tracker';
-import { InteractiveAvatar } from '@/components/profile/interactive-avatar';
+import { PublicProfileContainer } from '@/components/profile/public-profile-container';
 import { APP_CONFIG } from '@/constants';
 
 export const dynamic = 'force-dynamic';
@@ -57,8 +54,10 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
   const isWarned = profile.status === 'warned';
 
   // Verified checkmark appears ONLY if user has been granted Verified Creator badge by admin
-  const isVerifiedByAdmin = profile.badges?.some(
-    (b) => b.name.toLowerCase().includes('verified') || b.icon === 'CheckCircle2'
+  const isVerifiedByAdmin = Boolean(
+    profile.badges?.some(
+      (b) => b.name.toLowerCase().includes('verified') || b.icon === 'CheckCircle2'
+    )
   );
 
   return (
@@ -142,86 +141,12 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
           </div>
         </main>
       ) : (
-        /* SLEEK & COMPACT PUBLIC PROFILE CARD */
-        <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6">
-          <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 sm:p-6 shadow-[6px_6px_0px_0px_#111111] relative overflow-hidden space-y-5">
-            {/* Header Decorative Banner */}
-            <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between">
-              <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
-              
-              <div className="flex gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FFD43B]" />
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#51CF66]" />
-              </div>
-            </div>
-
-            {/* User Info Section */}
-            <div className="flex flex-col items-center text-center -mt-12 sm:-mt-14 relative z-10 space-y-2">
-              <InteractiveAvatar
-                src={profile.avatar_url}
-                fallback={profile.display_name || profile.username}
-                displayName={profile.display_name || profile.username}
-              />
-              
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-center gap-1.5">
-                  <h1 className="text-xl sm:text-2xl font-black text-[#111111]">
-                    {profile.display_name || profile.username}
-                  </h1>
-                  {isVerifiedByAdmin && (
-                    <span title="Verified Creator">
-                      <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">
-                  @{profile.username}
-                </p>
-
-                {/* Granted Badges Pills */}
-                {profile.badges && profile.badges.length > 0 && (
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
-                    {profile.badges.map((b) => {
-                      const BadgeIcon = getBadgeIconComponent(b.icon);
-
-                      return (
-                        <span
-                          key={b.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#111111] font-black text-[10px] uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
-                          style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
-                        >
-                          <BadgeIcon className="w-3 h-3 stroke-[2.5]" />
-                          <span>{b.name}</span>
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {profile.bio && (
-                <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs leading-relaxed pt-0.5">
-                  {profile.bio}
-                </p>
-              )}
-            </div>
-
-            {/* Links List with Click Tracking */}
-            <div className="space-y-2.5 pt-1">
-              {profile.links.map((link, idx) => (
-                <TrackedLinkItem
-                  key={link.id}
-                  link={link}
-                  bgClass={bgColors[idx % bgColors.length]}
-                />
-              ))}
-            </div>
-
-            {/* Share Profile & QR Code Action */}
-            <ProfileShareButton username={profile.username} displayName={profile.display_name || profile.username} />
-          </div>
-        </main>
+        /* SLEEK PUBLIC PROFILE CONTAINER (Supports Music Trigger, Spinning Vinyl Disk & Play/Pause Controls!) */
+        <PublicProfileContainer
+          profile={profile}
+          isVerifiedByAdmin={isVerifiedByAdmin}
+          bgColors={bgColors}
+        />
       )}
 
       {/* Footer Branding with Custom Favicon Logo */}

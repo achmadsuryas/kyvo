@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { AdBannerCard } from '@/components/dashboard/ad-banner-card';
 import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
-import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount } from '@/actions/profile';
+import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
 import { toast } from 'sonner';
 
 /**
@@ -79,6 +79,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [displayName, setDisplayName] = React.useState(profile?.display_name || 'Kyvo User');
   const [bio, setBio] = React.useState(profile?.bio || 'Welcome to my Kyvo page!');
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(profile?.avatar_url || null);
+  const [musicUrl, setMusicUrl] = React.useState<string | null>(profile?.music_url || null);
+  const [musicTitle, setMusicTitle] = React.useState<string>(profile?.music_title || '');
   const email = profile?.email || 'user@kyvo.fun';
   const currentUsername = profile?.username || 'user';
   const role = profile?.role || 'user';
@@ -104,8 +106,11 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [editName, setEditName] = React.useState(displayName);
   const [editBio, setEditBio] = React.useState(bio);
   const [editAvatarUrl, setEditAvatarUrl] = React.useState<string | null>(avatarUrl);
+  const [editMusicUrl, setEditMusicUrl] = React.useState<string | null>(musicUrl);
+  const [editMusicTitle, setEditMusicTitle] = React.useState<string>(musicTitle);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
+  const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
 
   // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,6 +157,48 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
+  // Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const MAX_SIZE_MB = 10;
+    const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
+
+    if (file.size > MAX_BYTES) {
+      toast.error(`Audio file size exceeds ${MAX_SIZE_MB} MB limit! Please choose a smaller audio file.`);
+      return;
+    }
+
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav'];
+    const ext = file.name.toLowerCase().split('.').pop();
+    if (!validTypes.includes(file.type) && ext !== 'mp3' && ext !== 'wav') {
+      toast.error('Invalid audio format! Only .MP3 and .WAV audio files are supported.');
+      return;
+    }
+
+    try {
+      setIsAudioProcessing(true);
+      toast.loading('Loading background audio file...', { id: 'audio-toast' });
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setEditMusicUrl(event.target.result as string);
+          setEditMusicTitle(file.name.replace(/\.[^/.]+$/, ''));
+          setIsAudioProcessing(false);
+          toast.dismiss('audio-toast');
+          toast.success('Background music selected! Click "Save Profile Changes" to apply.');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setIsAudioProcessing(false);
+      toast.dismiss('audio-toast');
+      toast.error('Failed to process audio file.');
+    }
+  };
+
   // Update Username Handler
   const handleUpdateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +242,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       display_name: editName,
       bio: editBio,
       avatar_url: editAvatarUrl,
+      music_url: editMusicUrl,
+      music_title: editMusicTitle,
     });
     setIsSaving(false);
 
@@ -203,6 +252,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       setDisplayName(editName);
       setBio(editBio);
       setAvatarUrl(editAvatarUrl);
+      setMusicUrl(editMusicUrl);
+      setMusicTitle(editMusicTitle);
       setIsEditingDetails(false);
     } else {
       toast.error(res.message);
@@ -248,7 +299,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           </p>
         </div>
 
-        {/* Top Header Buttons: Landing Page, Share QR Code & Public Profile (Fully Responsive & Auto-Wraps on PC & Mobile!) */}
+        {/* Top Header Buttons: Landing Page, Share QR Code & Public Profile */}
         <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
           <Link href="/" className="flex-1 sm:flex-initial">
             <Button variant="outline" size="lg" className="w-full justify-center gap-2 text-xs sm:text-sm font-black shadow-[3px_3px_0px_0px_#111111]">
@@ -287,7 +338,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                 <div className="min-w-0 flex-1">
                   <CardTitle className="text-xl sm:text-2xl font-black break-words">Account Information</CardTitle>
                   <CardDescription className="text-xs sm:text-sm font-bold break-words">
-                    Customize your display photo, name, username, and bio
+                    Customize your display photo, name, username, bio, and background music
                   </CardDescription>
                 </div>
                 {!isEditingDetails ? (
@@ -296,6 +347,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       setEditName(displayName);
                       setEditBio(bio);
                       setEditAvatarUrl(avatarUrl);
+                      setEditMusicUrl(musicUrl);
+                      setEditMusicTitle(musicTitle);
                       setIsEditingDetails(true);
                     }}
                     variant="yellow"
@@ -314,7 +367,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             </CardHeader>
 
             <CardContent className="px-0 pt-5 space-y-5">
-              {/* Avatar & Display Name Header (Auto wraps downward naturally on small screens!) */}
+              {/* Avatar & Display Name Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-5 min-w-0">
                 <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="sm:w-16 sm:h-16 shrink-0" />
                 <div className="space-y-1 min-w-0 flex-1 w-full">
@@ -333,6 +386,12 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <Badge variant="default" className="text-[10px] font-black shrink-0">
                       Google Authenticated
                     </Badge>
+                    {musicUrl && (
+                      <Badge variant="purple" className="text-[10px] font-black shrink-0 gap-1">
+                        <Disc className="w-3 h-3 animate-spin" />
+                        <span>Background Music Active</span>
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -344,7 +403,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
                     <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
                       <Camera className="w-4 h-4 text-[#3B82F6]" />
-                      <span>Custom Profile Picture (Supports PNG, JPG, JPEG, GIF - Max 10 MB)</span>
+                      <span>Custom Profile Picture (PNG, JPG, JPEG, GIF - Max 10 MB)</span>
                     </label>
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
@@ -379,6 +438,67 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                           {editAvatarUrl ? 'Photo active (Supports animated GIFs & static images).' : 'No photo uploaded. Using 2-letter username initial fallback.'}
                         </p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* BACKGROUND MUSIC UPLOADER SECTION (.MP3, .WAV, Max 10 MB) */}
+                  <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
+                    <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                      <Music className="w-4 h-4 text-[#A855F7]" />
+                      <span>Profile Background Music (.MP3, .WAV - Max 10 MB)</span>
+                    </label>
+
+                    <div className="space-y-3 pt-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#A855F7] hover:text-white transition-colors ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                          {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#A855F7]" />}
+                          <span>{isAudioProcessing ? 'Processing Song...' : 'Upload Music Track (.MP3 / .WAV)'}</span>
+                          <input
+                            type="file"
+                            accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
+                            onChange={handleAudioFileChange}
+                            disabled={isAudioProcessing}
+                            className="hidden"
+                          />
+                        </label>
+
+                        {editMusicUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditMusicUrl(null);
+                              setEditMusicTitle('');
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Remove Song & Clean Storage</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {editMusicUrl && (
+                        <div className="space-y-2 rounded-xl border-2 border-[#111111] bg-white p-3 shadow-[2px_2px_0px_0px_#111111]">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase text-[#111111]/70">
+                              Song Title (Appears on Record Disk)
+                            </label>
+                            <input
+                              type="text"
+                              value={editMusicTitle}
+                              onChange={(e) => setEditMusicTitle(e.target.value)}
+                              placeholder="e.g. My Favorite Chill Beat"
+                              className="w-full rounded-lg border-2 border-[#111111] bg-[#F8F9FA] px-2.5 py-1.5 font-bold text-xs outline-none"
+                            />
+                          </div>
+
+                          <audio controls src={editMusicUrl} className="w-full h-8 pt-1" />
+                        </div>
+                      )}
+
+                      <p className="text-[10px] font-extrabold text-[#111111]/70 break-words">
+                        {editMusicUrl ? `Music active: "${editMusicTitle || 'Custom Track'}".` : 'No background music uploaded. Visitors see public profile directly.'}
+                      </p>
                     </div>
                   </div>
 
@@ -422,7 +542,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       type="submit"
                       variant="green"
                       size="sm"
-                      disabled={isSaving || isCompressing}
+                      disabled={isSaving || isCompressing || isAudioProcessing}
                       className="gap-1 font-black"
                     >
                       {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
