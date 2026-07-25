@@ -167,7 +167,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Ultra-Fast Direct Storage Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Bulletproof Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -198,38 +198,44 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     try {
       setIsAudioProcessing(true);
-      toast.loading('Uploading audio to cloud storage...', { id: 'audio-toast' });
+      toast.loading('Uploading & processing audio file...', { id: 'audio-toast' });
 
-      const supabase = createClient();
-      const fileExt = ext || 'mp3';
-      const fileName = `${profile?.id || 'user'}-${Date.now()}.${fileExt}`;
-      
       let finalMusicUrl = '';
 
-      // Direct upload to Supabase Storage bucket 'music' for super-fast speed
-      let uploadBucket = 'music';
-      let { data: uploadData, error: uploadError } = await supabase.storage
-        .from(uploadBucket)
-        .upload(fileName, file, { cacheControl: '3600', upsert: true });
-
-      if (uploadError && uploadError.message.includes('not found')) {
-        // Fallback to 'avatars' bucket if 'music' bucket hasn't been created yet
-        uploadBucket = 'avatars';
-        const res = await supabase.storage
+      // Try uploading directly to Supabase Storage if available
+      try {
+        const supabase = createClient();
+        const fileExt = ext || 'mp3';
+        const fileName = `${profile?.id || 'user'}-${Date.now()}.${fileExt}`;
+        
+        let uploadBucket = 'music';
+        let { data: uploadData, error: uploadError } = await supabase.storage
           .from(uploadBucket)
-          .upload(`music-${fileName}`, file, { cacheControl: '3600', upsert: true });
-        uploadData = res.data;
-        uploadError = res.error;
+          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+        if (uploadError) {
+          uploadBucket = 'avatars';
+          const res = await supabase.storage
+            .from(uploadBucket)
+            .upload(`music-${fileName}`, file, { cacheControl: '3600', upsert: true });
+          uploadData = res.data;
+          uploadError = res.error;
+        }
+
+        if (!uploadError && uploadData) {
+          const { data: publicUrlData } = supabase.storage.from(uploadBucket).getPublicUrl(uploadData.path);
+          finalMusicUrl = publicUrlData.publicUrl;
+        }
+      } catch (storageErr) {
+        console.warn('Storage bucket upload fallback:', storageErr);
       }
 
-      if (!uploadError && uploadData) {
-        const { data: publicUrlData } = supabase.storage.from(uploadBucket).getPublicUrl(uploadData.path);
-        finalMusicUrl = publicUrlData.publicUrl;
-      } else {
-        // Fallback to Data URL if storage bucket RLS restricts anon uploads
+      // If Supabase Storage is not public or missing on production, fallback to Data URL
+      if (!finalMusicUrl) {
         const reader = new FileReader();
-        finalMusicUrl = await new Promise((resolve) => {
+        finalMusicUrl = await new Promise((resolve, reject) => {
           reader.onload = (ev) => resolve(ev.target?.result as string);
+          reader.onerror = (err) => reject(err);
           reader.readAsDataURL(file);
         });
       }
@@ -258,7 +264,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     } catch (err) {
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
-      toast.error('Failed to process audio file.');
+      toast.error('Failed to process audio file. Please try a different audio track.');
     }
   };
 

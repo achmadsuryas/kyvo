@@ -192,7 +192,7 @@ export async function deleteProfileMusic(): Promise<{ success: boolean; message:
 
     revalidatePath('/dashboard');
     revalidatePath('/[username]');
-    return { success: true, message: 'Profile background music removed from database and storage!' };
+    return { success: true, message: 'Profile background music removed!' };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to delete profile music.';
     return { success: false, message: msg };
@@ -242,7 +242,7 @@ export async function deleteProfilePicture(): Promise<{ success: boolean; messag
 
     revalidatePath('/dashboard');
     revalidatePath('/[username]');
-    return { success: true, message: 'Profile picture removed from database and storage!' };
+    return { success: true, message: 'Profile picture removed!' };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to delete profile picture.';
     return { success: false, message: msg };
