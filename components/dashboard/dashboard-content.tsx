@@ -154,11 +154,11 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   };
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-8 w-full overflow-hidden">
       {/* Full-width Top Banner Header */}
-      <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
-        <div className="space-y-2 min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+      <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-5 sm:p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
+        <div className="space-y-2 min-w-0 w-full md:w-auto flex-1">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="text-xs font-black">
               {role === 'admin' ? 'SYSTEM ADMIN' : 'CREATOR DASHBOARD'}
             </Badge>
@@ -169,18 +169,18 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
               </Badge>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#111111] truncate">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#111111] break-words">
             Welcome back, {displayName}!
           </h1>
-          <p className="text-sm sm:text-base font-extrabold text-[#111111]/80 truncate">
+          <p className="text-sm sm:text-base font-extrabold text-[#111111]/80 break-all sm:break-words">
             Your Kyvo page is live at <span className="underline font-black text-[#111111]">kyvo.fun/{currentUsername}</span>
           </p>
         </div>
 
         {/* Top Header Buttons: Landing Page, Share QR Code & Public Profile */}
-        <div className="flex flex-wrap items-center gap-3">
-          <Link href="/">
-            <Button variant="outline" size="lg" className="gap-2 text-sm sm:text-base font-black shadow-[4px_4px_0px_0px_#111111]">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <Link href="/" className="flex-1 sm:flex-none">
+            <Button variant="outline" size="lg" className="w-full justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]">
               <Home className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
               <span>Landing Page</span>
             </Button>
@@ -190,14 +190,14 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             onClick={() => setQrOpen(true)}
             variant="purple"
             size="lg"
-            className="gap-2 text-sm sm:text-base font-black shadow-[4px_4px_0px_0px_#111111]"
+            className="flex-1 sm:flex-none justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]"
           >
             <QrCode className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             <span>Share & QR Code</span>
           </Button>
 
-          <Link href={`/${currentUsername}`} target="_blank">
-            <Button variant="default" size="lg" className="gap-2 text-sm sm:text-base font-black shadow-[4px_4px_0px_0px_#111111]">
+          <Link href={`/${currentUsername}`} target="_blank" className="w-full sm:w-auto">
+            <Button variant="default" size="lg" className="w-full justify-center gap-2 text-xs sm:text-base font-black shadow-[3px_3px_0px_0px_#111111]">
               <span>View Public Page</span>
               <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3]" />
             </Button>
@@ -208,14 +208,14 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       {/* Main 2-Column Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
         {/* Left Column (lg:col-span-7): Account Info + Tab Switcher + Selected Tab Content */}
-        <div className="lg:col-span-7 space-y-8 w-full">
+        <div className="lg:col-span-7 space-y-8 w-full min-w-0">
           {/* Account Information Card (Overview) */}
-          <Card className="bg-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-5 md:p-8 w-full overflow-hidden">
+          <Card className="bg-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-6 md:p-8 w-full overflow-hidden">
             <CardHeader className="px-0 pt-0 pb-5 border-b-2 border-dashed border-[#111111]/20">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <CardTitle className="text-xl sm:text-2xl font-black truncate">Account Information</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm font-bold truncate">
+                  <CardTitle className="text-xl sm:text-2xl font-black break-words">Account Information</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm font-bold break-words">
                     Customize your display photo, name, username, and bio
                   </CardDescription>
                 </div>
@@ -229,13 +229,13 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     }}
                     variant="yellow"
                     size="sm"
-                    className="gap-1.5 font-black text-xs shadow-[2px_2px_0px_0px_#111111] shrink-0"
+                    className="gap-1.5 font-black text-xs shadow-[2px_2px_0px_0px_#111111] shrink-0 self-start sm:self-center"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Profile</span>
                   </Button>
                 ) : (
-                  <Badge variant="purple" className="text-xs font-black shrink-0">
+                  <Badge variant="purple" className="text-xs font-black shrink-0 self-start sm:self-center">
                     EDITING
                   </Badge>
                 )}
@@ -243,19 +243,19 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
             </CardHeader>
 
             <CardContent className="px-0 pt-5 space-y-5">
-              {/* Avatar & Display Name Header (Strictly Responsive & Truncated so it NEVER overflows!) */}
-              <div className="flex items-center gap-3.5 sm:gap-5 min-w-0">
+              {/* Avatar & Display Name Header (Auto wraps downward naturally on small screens!) */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-5 min-w-0">
                 <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="sm:w-16 sm:h-16 shrink-0" />
-                <div className="space-y-0.5 min-w-0 flex-1 overflow-hidden">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <h3 className="text-lg sm:text-2xl font-black text-[#111111] truncate">{displayName}</h3>
+                <div className="space-y-1 min-w-0 flex-1 w-full">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                    <h3 className="text-lg sm:text-2xl font-black text-[#111111] break-words">{displayName}</h3>
                     {isVerified && (
                       <span title="Verified Creator" className="shrink-0">
                         <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
                       </span>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm font-black text-[#3B82F6] uppercase tracking-wide truncate">
+                  <p className="text-xs sm:text-sm font-black text-[#3B82F6] uppercase tracking-wide break-all sm:break-words">
                     kyvo.fun/{currentUsername}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 pt-0.5">
@@ -276,10 +276,10 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       <span>Custom Profile Picture (Max 2 MB)</span>
                     </label>
                     
-                    <div className="flex items-center gap-4 pt-1">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
                       <Avatar src={editAvatarUrl} fallback={editName || currentUsername} size="lg" className="shrink-0" />
                       
-                      <div className="space-y-2 flex-1 min-w-0">
+                      <div className="space-y-2 flex-1 min-w-0 w-full">
                         <div className="flex flex-wrap items-center gap-2">
                           <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors">
                             <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />
@@ -303,7 +303,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                             </button>
                           )}
                         </div>
-                        <p className="text-[10px] font-extrabold text-[#111111]/70 truncate">
+                        <p className="text-[10px] font-extrabold text-[#111111]/70 break-words">
                           {editAvatarUrl ? 'Custom photo active.' : 'No photo uploaded. Using 2-letter username initial fallback.'}
                         </p>
                       </div>
@@ -366,7 +366,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       <User className="w-4 h-4 text-[#3B82F6] stroke-[2.5]" />
                       <span>Display Name</span>
                     </div>
-                    <p className="text-sm sm:text-base font-extrabold text-[#111111] truncate">{displayName}</p>
+                    <p className="text-sm sm:text-base font-extrabold text-[#111111] break-words">{displayName}</p>
                   </div>
 
                   <div className="rounded-xl border-2 border-[#111111] bg-[#FFD43B]/20 p-3.5 space-y-0.5 overflow-hidden">
@@ -416,7 +416,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         </button>
                       </form>
                     ) : (
-                      <p className="text-sm sm:text-base font-extrabold text-[#111111] truncate">@{currentUsername}</p>
+                      <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all sm:break-words">@{currentUsername}</p>
                     )}
                   </div>
 
@@ -425,7 +425,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       <Mail className="w-4 h-4 text-[#51CF66] stroke-[2.5]" />
                       <span>Email Address</span>
                     </div>
-                    <p className="text-sm sm:text-base font-extrabold text-[#111111] truncate">{email}</p>
+                    <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all">{email}</p>
                   </div>
                 </div>
               )}
@@ -436,18 +436,18 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <AlignLeft className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
                     <span>Profile Bio</span>
                   </div>
-                  <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text">{bio}</p>
+                  <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text break-words">{bio}</p>
                 </div>
               )}
 
               {/* DANGER ZONE: DELETE ACCOUNT BUTTON */}
-              <div className="pt-3 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-between gap-3">
+              <div className="pt-3 border-t-2 border-dashed border-[#111111]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-0.5 min-w-0 flex-1">
                   <span className="text-xs font-black text-[#FF4D6D] uppercase flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     <span>Danger Zone</span>
                   </span>
-                  <p className="text-[11px] font-extrabold text-[#111111]/60 truncate">
+                  <p className="text-[11px] font-extrabold text-[#111111]/60 break-all sm:break-words">
                     Delete account and release username @{currentUsername}
                   </p>
                 </div>
@@ -466,7 +466,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           </Card>
 
           {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR BELOW ACCOUNT OVERVIEW */}
-          <div className="flex items-center gap-3 border-b-4 border-[#111111] pb-3">
+          <div className="flex flex-wrap items-center gap-3 border-b-4 border-[#111111] pb-3">
             <button
               onClick={() => setActiveTab('links')}
               className={`flex items-center gap-2 px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${

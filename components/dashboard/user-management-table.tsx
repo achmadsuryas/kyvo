@@ -293,14 +293,14 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
   };
 
   return (
-    <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-6 md:p-8 space-y-6 w-full overflow-visible">
+    <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-6 md:p-8 space-y-6 w-full overflow-visible">
       <CardHeader className="px-0 pt-0 pb-6 border-b-2 border-dashed border-[#111111]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Users className="w-6 h-6 text-[#3B82F6] stroke-[2.5]" />
-            <CardTitle className="text-2xl font-black">User Directory & Admin Controls</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl font-black break-words">User Directory & Admin Controls</CardTitle>
           </div>
-          <CardDescription className="text-sm font-bold">
+          <CardDescription className="text-xs sm:text-sm font-bold break-words">
             Manage registered creator accounts, promote admin roles, issue warnings, ban users, or delete user accounts.
           </CardDescription>
         </div>
@@ -325,7 +325,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
         {/* USERS TABLE */}
         <div className="rounded-2xl border-[3.5px] border-[#111111] shadow-[4px_4px_0px_0px_#111111] bg-white overflow-visible">
           <div className="w-full overflow-x-auto lg:overflow-visible">
-            <table className="w-full text-left border-collapse min-w-[760px]">
+            <table className="w-full text-left border-collapse min-w-[720px]">
               <thead className="bg-[#FFD43B]">
                 <tr className="border-b-[3.5px] border-[#111111] text-xs font-black uppercase text-[#111111]">
                   <th className="p-4 pl-6 w-[28%] rounded-tl-xl">User Details</th>
@@ -352,30 +352,31 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                         isDropdownOpen ? 'z-40' : 'z-10'
                       }`}
                     >
-                      {/* User Info */}
+                      {/* User Info (Natural Word Wrapping!) */}
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
                           <Avatar
                             src={user.avatar_url}
                             fallback={user.display_name || user.username}
                             size="md"
+                            className="shrink-0"
                           />
-                          <div className="space-y-0.5 overflow-hidden">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-[#111111] truncate">
+                          <div className="space-y-0.5 min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-black text-[#111111] break-words">
                                 {user.display_name || user.username}
                               </span>
                               {isVerified && (
-                                <span title="Verified Creator">
+                                <span title="Verified Creator" className="shrink-0">
                                   <CheckCircle2 className="w-4 h-4 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
                                 </span>
                               )}
-                              <Link href={`/${user.username}`} target="_blank" className="hover:text-[#3B82F6]">
+                              <Link href={`/${user.username}`} target="_blank" className="hover:text-[#3B82F6] shrink-0">
                                 <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />
                               </Link>
                             </div>
-                            <p className="text-xs font-extrabold text-[#3B82F6]">@{user.username}</p>
-                            <p className="text-[11px] font-bold text-[#111111]/60 truncate">{user.email}</p>
+                            <p className="text-xs font-extrabold text-[#3B82F6] break-all">@{user.username}</p>
+                            <p className="text-[11px] font-bold text-[#111111]/60 break-all">{user.email}</p>
                           </div>
                         </div>
                       </td>
@@ -384,7 +385,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                       <td className="p-4">
                         <Badge
                           variant={user.role === 'admin' ? 'purple' : 'outline'}
-                          className="text-[10px] font-black uppercase"
+                          className="text-[10px] font-black uppercase shrink-0"
                         >
                           {user.role || 'user'}
                         </Badge>
@@ -409,7 +410,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                           </Badge>
                         )}
                         {user.status_reason && (
-                          <p className="text-[10px] font-bold text-[#111111]/60 truncate max-w-[130px] pt-0.5" title={user.status_reason}>
+                          <p className="text-[10px] font-bold text-[#111111]/60 break-words pt-0.5" title={user.status_reason}>
                             Reason: {user.status_reason}
                           </p>
                         )}
@@ -428,7 +429,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                                   style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
                                 >
                                   <IconComp className="w-3 h-3 stroke-[2.5]" />
-                                  <span>{b.name}</span>
+                                  <span className="break-words">{b.name}</span>
                                 </span>
                               );
                             })
@@ -684,10 +685,10 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                   size="md"
                 />
                 <div>
-                  <h3 className="text-xl font-black text-[#111111]">
+                  <h3 className="text-xl font-black text-[#111111] break-words">
                     Manage Badges for @{selectedUserForBadge.username}
                   </h3>
-                  <p className="text-xs font-bold text-[#111111]/70">
+                  <p className="text-xs font-bold text-[#111111]/70 break-all">
                     {selectedUserForBadge.display_name || selectedUserForBadge.email}
                   </p>
                 </div>
@@ -714,7 +715,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                         style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
                       >
                         <IconComp className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>{b.name}</span>
+                        <span className="break-words">{b.name}</span>
                         <button
                           onClick={() => handleRevokeBadge(selectedUserForBadge.id, b.id)}
                           className="ml-1 hover:text-red-600 transition-colors"
@@ -754,14 +755,14 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                         color: isAlreadyAssigned ? '#6B7280' : badge.color || '#111111',
                       }}
                     >
-                      <div className="flex items-center gap-2">
-                        <IconComp className="w-4 h-4 stroke-[2.5]" />
-                        <span className="truncate">{badge.name}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <IconComp className="w-4 h-4 stroke-[2.5] shrink-0" />
+                        <span className="break-words">{badge.name}</span>
                       </div>
                       {isAlreadyAssigned ? (
-                        <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+                        <CheckCircle2 className="w-4 h-4 stroke-[2.5] shrink-0" />
                       ) : (
-                        <Plus className="w-4 h-4 stroke-[3]" />
+                        <Plus className="w-4 h-4 stroke-[3] shrink-0" />
                       )}
                     </button>
                   );
