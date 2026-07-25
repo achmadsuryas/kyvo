@@ -79,8 +79,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [displayName, setDisplayName] = React.useState(profile?.display_name || 'Kyvo User');
   const [bio, setBio] = React.useState(profile?.bio || 'Welcome to my Kyvo page!');
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(profile?.avatar_url || null);
-  const [musicUrl, setMusicUrl] = React.useState<string | null>(profile?.music_url || null);
-  const [musicTitle, setMusicTitle] = React.useState<string>(profile?.music_title || '');
+  const [musicUrl, setMusicUrl] = React.useState<string | null>((profile as any)?.music_url || null);
+  const [musicTitle, setMusicTitle] = React.useState<string>((profile as any)?.music_title || '');
   const email = profile?.email || 'user@kyvo.fun';
   const currentUsername = profile?.username || 'user';
   const role = profile?.role || 'user';

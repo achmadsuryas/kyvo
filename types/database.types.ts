@@ -15,6 +15,8 @@ export interface Profile {
   email: string | null;
   bio: string | null;
   avatar_url: string | null;
+  music_url?: string | null;
+  music_title?: string | null;
   theme: string | null;
   role: 'user' | 'admin' | string | null;
   status: 'active' | 'warned' | 'banned' | string | null;
