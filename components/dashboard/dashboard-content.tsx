@@ -21,7 +21,7 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 /**
- * Client-Side Instant Image Compressor (Resizes 10MB photos to ultra-lightweight ~100KB WebP)
+ * Client-Side Instant Image Compressor (Resizes photos to ultra-lightweight ~100KB WebP)
  * (Skipped for animated .gif files so animations are 100% preserved!)
  */
 const compressImage = (file: File, maxWidth = 512, maxHeight = 512, quality = 0.82): Promise<string> => {
@@ -117,19 +117,19 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [isCompressing, setIsCompressing] = React.useState(false);
   const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
 
-  // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images
+  // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images (Max 4.5 MB)
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const MAX_SIZE_MB = 10;
+    const MAX_SIZE_MB = 4.5;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
     const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
 
     if (file.size > MAX_BYTES) {
-      const errorMsg = `⚠️ File size exceeds limit! Selected image (${fileSizeMb} MB) is larger than the 10 MB limit. Please upload a file smaller than 10 MB.`;
+      const errorMsg = `⚠️ File size exceeds limit! Selected image (${fileSizeMb} MB) is larger than the 4.5 MB limit. Please upload a file smaller than 4.5 MB.`;
       toast.error(errorMsg, { duration: 6000 });
-      setFileSizeError(`Image "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 10 MB.`);
+      setFileSizeError(`Image "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 4.5 MB.`);
       e.target.value = '';
       return;
     }
@@ -168,19 +168,19 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // 100% Bulletproof Pre-Signed Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Pre-Signed Audio Upload Handler (.mp3, .wav, Max 4.5 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const MAX_SIZE_MB = 10;
+    const MAX_SIZE_MB = 4.5;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
     const fileSizeMb = (file.size / (1024 * 1024)).toFixed(1);
 
     if (file.size > MAX_BYTES) {
-      const errorMsg = `⚠️ File size exceeds limit! Selected audio track (${fileSizeMb} MB) is larger than the 10 MB limit. Please upload an audio file smaller than 10 MB.`;
+      const errorMsg = `⚠️ File size exceeds limit! Selected audio track (${fileSizeMb} MB) is larger than the 4.5 MB limit. Please upload an audio file smaller than 4.5 MB.`;
       toast.error(errorMsg, { duration: 6000 });
-      setFileSizeError(`Audio track "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 10 MB.`);
+      setFileSizeError(`Audio track "${file.name}" is ${fileSizeMb} MB. Maximum allowed limit is 4.5 MB.`);
       e.target.value = '';
       return;
     }
@@ -203,7 +203,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
       let finalMusicUrl = '';
 
-      // TIER 1: Pre-Signed Upload URL (Uploads directly to Supabase S3, 100% Bypasses Vercel 4.5MB Serverless limit!)
+      // TIER 1: Pre-Signed Upload URL (Uploads directly to Supabase S3)
       const signedRes = await getMusicSignedUploadUrl(file.name);
 
       if (signedRes.success && signedRes.signedUrl && signedRes.path && signedRes.publicUrl) {
@@ -512,12 +512,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <Badge variant="default" className="text-[10px] font-black shrink-0">
                       Google Authenticated
                     </Badge>
-                    {musicUrl && (
-                      <Badge variant="purple" className="text-[10px] font-black shrink-0 gap-1">
-                        <Disc className="w-3 h-3 animate-spin" />
-                        <span>Background Music Active</span>
-                      </Badge>
-                    )}
                   </div>
                 </div>
               </div>
@@ -529,7 +523,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
                     <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
                       <Camera className="w-4 h-4 text-[#3B82F6]" />
-                      <span>Custom Profile Picture (PNG, JPG, JPEG, GIF - Max 10 MB)</span>
+                      <span>Custom Profile Picture (PNG, JPG, JPEG, GIF - Max 4.5 MB)</span>
                     </label>
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
@@ -539,7 +533,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         <div className="flex flex-wrap items-center gap-2">
                           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors ${isCompressing ? 'opacity-50 pointer-events-none' : ''}`}>
                             {isCompressing ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
-                            <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF - Max 10MB)'}</span>
+                            <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF - Max 4.5MB)'}</span>
                             <input
                               type="file"
                               accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
@@ -708,14 +702,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="text-xs sm:text-sm font-black text-[#111111] break-words">Profile Background Music</h4>
-                          {musicUrl && (
-                            <Badge variant="purple" className="text-[9px] font-black uppercase shrink-0">
-                              ACTIVE
-                            </Badge>
-                          )}
                         </div>
                         <p className="text-[11px] sm:text-xs font-bold text-[#111111]/70 break-words">
-                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded'}
+                          {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded (Max 4.5 MB)'}
                         </p>
                       </div>
                     </div>
@@ -723,7 +712,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                       <label className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#A855F7] hover:text-white transition-colors w-full sm:w-auto ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
                         {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#A855F7]" />}
-                        <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV)'}</span>
+                        <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV - Max 4.5 MB)'}</span>
                         <input
                           type="file"
                           accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
