@@ -5,7 +5,67 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 
 /**
- * Bulletproof 100% Guaranteed Audio Uploader (Auto-Creates Storage Bucket + Admin Bypass)
+ * Generate a Pre-Signed Upload URL for Direct Browser to Supabase Storage Upload (Bypasses Vercel 4.5MB limit 100%)
+ */
+export async function getMusicSignedUploadUrl(fileNameExt: string): Promise<{
+  success: boolean;
+  message?: string;
+  signedUrl?: string;
+  token?: string;
+  path?: string;
+  publicUrl?: string;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: 'You must be logged in to upload audio.' };
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://abgaxjwgsyrdwdibkist.supabase.co';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!serviceRoleKey) {
+      return { success: false, message: 'SUPABASE_SERVICE_ROLE_KEY environment variable is missing.' };
+    }
+
+    const adminClient = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    // Auto-create 'avatars' bucket if it doesn't exist yet
+    try {
+      await adminClient.storage.createBucket('avatars', { public: true });
+    } catch (e) {}
+
+    const ext = fileNameExt.toLowerCase().split('.').pop() || 'mp3';
+    const filePath = `music-${user.id}-${Date.now()}.${ext}`;
+
+    const { data, error } = await adminClient.storage
+      .from('avatars')
+      .createSignedUploadUrl(filePath);
+
+    if (error || !data) {
+      return { success: false, message: error?.message || 'Failed to create signed upload URL.' };
+    }
+
+    const publicUrlData = adminClient.storage.from('avatars').getPublicUrl(filePath);
+
+    return {
+      success: true,
+      signedUrl: data.signedUrl,
+      token: data.token,
+      path: filePath,
+      publicUrl: publicUrlData.data.publicUrl,
+    };
+  } catch (err: any) {
+    return { success: false, message: err?.message || 'Failed to generate upload URL.' };
+  }
+}
+
+/**
+ * Server Action Fallback for smaller audio files (< 4.5 MB)
  */
 export async function uploadProfileMusic(formData: FormData): Promise<{
   success: boolean;
@@ -34,13 +94,11 @@ export async function uploadProfileMusic(formData: FormData): Promise<{
     }
 
     const ext = file.name.toLowerCase().split('.').pop() || 'mp3';
-    const fileName = `${user.id}-${Date.now()}.${ext}`;
+    const fileName = `music-${user.id}-${Date.now()}.${ext}`;
 
-    // Convert file to ArrayBuffer / Buffer for server storage upload
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Initialize Admin Supabase Client using Service Role Key or standard Server Client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://abgaxjwgsyrdwdibkist.supabase.co';
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -50,22 +108,14 @@ export async function uploadProfileMusic(formData: FormData): Promise<{
       const adminClient = createAdminClient(supabaseUrl, serviceRoleKey, {
         auth: { autoRefreshToken: false, persistSession: false },
       });
-      
-      // Auto-Create 'music' storage bucket if it doesn't exist yet on Supabase!
       try {
-        await adminClient.storage.createBucket('music', {
-          public: true,
-          fileSizeLimit: 10485760, // 10 MB limit
-        });
-      } catch (errBucket) {
-        // Bucket might already exist, continue safely
-      }
-
+        await adminClient.storage.createBucket('avatars', { public: true });
+      } catch (e) {}
       storageClient = adminClient.storage;
     }
 
-    let uploadBucket = 'music';
-    let { data: uploadData, error: uploadError } = await storageClient
+    const uploadBucket = 'avatars';
+    const { data: uploadData, error: uploadError } = await storageClient
       .from(uploadBucket)
       .upload(fileName, buffer, {
         contentType: file.type || 'audio/mpeg',
@@ -73,59 +123,14 @@ export async function uploadProfileMusic(formData: FormData): Promise<{
         upsert: true,
       });
 
-    // Fallback attempt to 'avatars' bucket if 'music' bucket still had an issue
-    if (uploadError) {
-      uploadBucket = 'avatars';
-      if (serviceRoleKey) {
-        try {
-          const adminClient = createAdminClient(supabaseUrl, serviceRoleKey);
-          await adminClient.storage.createBucket('avatars', { public: true });
-          storageClient = adminClient.storage;
-        } catch (e) {}
-      }
-
-      const res = await storageClient
-        .from(uploadBucket)
-        .upload(`music-${fileName}`, buffer, {
-          contentType: file.type || 'audio/mpeg',
-          cacheControl: '3600',
-          upsert: true,
-        });
-      uploadData = res.data;
-      uploadError = res.error;
+    if (uploadError || !uploadData) {
+      return { success: false, message: uploadError?.message || 'Storage upload failed.' };
     }
 
-    let musicUrl = '';
-
-    if (!uploadError && uploadData) {
-      const { data: publicUrlData } = storageClient.from(uploadBucket).getPublicUrl(uploadData.path);
-      musicUrl = publicUrlData.publicUrl;
-    } else {
-      // Ultimate Fallback: Convert to Data URL if storage bucket cannot be written
-      const base64Str = buffer.toString('base64');
-      const mimeType = file.type || (ext === 'wav' ? 'audio/wav' : 'audio/mp3');
-      musicUrl = `data:${mimeType};base64,${base64Str}`;
-    }
-
+    const { data: publicUrlData } = storageClient.from(uploadBucket).getPublicUrl(uploadData.path);
+    const musicUrl = publicUrlData.publicUrl;
     const musicTitle = file.name.replace(/\.[^/.]+$/, '');
 
-    // Fetch current profile to clean up any old music file in storage
-    const { data: currentProfile } = await supabase
-      .from('profiles')
-      .select('music_url')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    const oldMusicUrl = (currentProfile as any)?.music_url;
-    if (oldMusicUrl && typeof oldMusicUrl === 'string' && oldMusicUrl.includes('/storage/v1/object/public/')) {
-      const bucketName = oldMusicUrl.includes('/music/') ? 'music' : 'avatars';
-      const parts = oldMusicUrl.split(`/storage/v1/object/public/${bucketName}/`);
-      if (parts[1]) {
-        await storageClient.from(bucketName).remove([parts[1]]);
-      }
-    }
-
-    // Update profiles table in PostgreSQL
     const { error: updateError } = await (supabase.from('profiles') as any)
       .update({
         music_url: musicUrl,

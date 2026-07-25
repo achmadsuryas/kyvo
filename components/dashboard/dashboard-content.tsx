@@ -16,6 +16,7 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
+import { getMusicSignedUploadUrl, uploadProfileMusic } from '@/actions/upload-music';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -167,7 +168,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Safe Production Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // 100% Bulletproof Pre-Signed Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -200,48 +201,50 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       setIsAudioProcessing(true);
       toast.loading('Uploading background audio track...', { id: 'audio-toast' });
 
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const fileExt = ext || 'mp3';
-      const fileName = `music-${user?.id || 'user'}-${Date.now()}.${fileExt}`;
-      
       let finalMusicUrl = '';
 
-      // STEP 1: Direct Browser to Supabase Cloud Storage Upload (Bypasses Vercel Serverless Body Payload Limit!)
-      if (user) {
-        const { data: uploadData, error: uploadErr } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+      // TIER 1: Pre-Signed Upload URL (Uploads directly to Supabase S3, 100% Bypasses Vercel 4.5MB Serverless limit!)
+      const signedRes = await getMusicSignedUploadUrl(file.name);
 
-        if (!uploadErr && uploadData) {
-          const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
-          finalMusicUrl = publicUrlData.publicUrl;
+      if (signedRes.success && signedRes.signedUrl && signedRes.path && signedRes.publicUrl) {
+        const supabase = createClient();
+        let uploadSuccess = false;
+
+        if (signedRes.token) {
+          const { error: uploadErr } = await supabase.storage
+            .from('avatars')
+            .uploadToSignedUrl(signedRes.path, signedRes.token, file);
+          
+          if (!uploadErr) uploadSuccess = true;
+        }
+
+        if (!uploadSuccess) {
+          const putRes = await fetch(signedRes.signedUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': file.type || 'audio/mpeg',
+              'x-upsert': 'true',
+            },
+            body: file,
+          });
+
+          if (putRes.ok) uploadSuccess = true;
+        }
+
+        if (uploadSuccess) {
+          finalMusicUrl = signedRes.publicUrl;
         }
       }
 
-      // STEP 2: Fallback to /api/upload-music API Route
+      // TIER 2: Server Action Fallback for smaller files
       if (!finalMusicUrl) {
         const formData = new FormData();
         formData.append('file', file);
-
-        const response = await fetch('/api/upload-music', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const resJson = await response.json();
-          if (resJson.success && resJson.music_url) {
-            finalMusicUrl = resJson.music_url;
-          }
+        const serverRes = await uploadProfileMusic(formData);
+        if (serverRes.success && serverRes.music_url) {
+          finalMusicUrl = serverRes.music_url;
         } else {
-          const errorText = await response.text();
-          if (response.status === 413 || errorText.includes('Request Entity') || errorText.includes('Too Large')) {
-            throw new Error(`File "${file.name}" (${fileSizeMb} MB) is too large for the web server limit (Max 4.5 MB on Vercel). Please pick a song file under 4.5 MB.`);
-          } else {
-            throw new Error('Storage upload failed.');
-          }
+          throw new Error(serverRes.message || 'Cloud storage upload failed.');
         }
       }
 
