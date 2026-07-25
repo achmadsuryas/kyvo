@@ -107,3 +107,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.update_user_role(UUID, TEXT) TO authenticated, service_role;
+
+-- 15. Ensure public storage bucket 'music' exists for super-fast background music uploads
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('music', 'music', true)
+ON CONFLICT (id) DO NOTHING;

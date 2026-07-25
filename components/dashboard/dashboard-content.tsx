@@ -16,6 +16,7 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 /**
@@ -166,7 +167,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Ultra-Fast Direct Storage Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -197,35 +198,63 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     try {
       setIsAudioProcessing(true);
-      toast.loading('Loading background audio file...', { id: 'audio-toast' });
+      toast.loading('Uploading audio to cloud storage...', { id: 'audio-toast' });
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const audioData = event.target.result as string;
-          const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+      const supabase = createClient();
+      const fileExt = ext || 'mp3';
+      const fileName = `${profile?.id || 'user'}-${Date.now()}.${fileExt}`;
+      
+      let finalMusicUrl = '';
 
-          updateUserProfileDetails({
-            display_name: displayName,
-            bio: bio,
-            avatar_url: avatarUrl,
-            music_url: audioData,
-            music_title: trackTitle,
-          }).then((res) => {
-            setIsAudioProcessing(false);
-            toast.dismiss('audio-toast');
-            if (res.success) {
-              setMusicUrl(audioData);
-              setMusicTitle(trackTitle);
-              toast.success('Background music uploaded & active on public profile!');
-            } else {
-              toast.error(res.message);
-              setFileSizeError(res.message);
-            }
-          });
-        }
-      };
-      reader.readAsDataURL(file);
+      // Direct upload to Supabase Storage bucket 'music' for super-fast speed
+      let uploadBucket = 'music';
+      let { data: uploadData, error: uploadError } = await supabase.storage
+        .from(uploadBucket)
+        .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+      if (uploadError && uploadError.message.includes('not found')) {
+        // Fallback to 'avatars' bucket if 'music' bucket hasn't been created yet
+        uploadBucket = 'avatars';
+        const res = await supabase.storage
+          .from(uploadBucket)
+          .upload(`music-${fileName}`, file, { cacheControl: '3600', upsert: true });
+        uploadData = res.data;
+        uploadError = res.error;
+      }
+
+      if (!uploadError && uploadData) {
+        const { data: publicUrlData } = supabase.storage.from(uploadBucket).getPublicUrl(uploadData.path);
+        finalMusicUrl = publicUrlData.publicUrl;
+      } else {
+        // Fallback to Data URL if storage bucket RLS restricts anon uploads
+        const reader = new FileReader();
+        finalMusicUrl = await new Promise((resolve) => {
+          reader.onload = (ev) => resolve(ev.target?.result as string);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const trackTitle = file.name.replace(/\.[^/.]+$/, '');
+
+      const res = await updateUserProfileDetails({
+        display_name: displayName,
+        bio: bio,
+        avatar_url: avatarUrl,
+        music_url: finalMusicUrl,
+        music_title: trackTitle,
+      });
+
+      setIsAudioProcessing(false);
+      toast.dismiss('audio-toast');
+
+      if (res.success) {
+        setMusicUrl(finalMusicUrl);
+        setMusicTitle(trackTitle);
+        toast.success('Background music uploaded & active on public profile!');
+      } else {
+        toast.error(res.message);
+        setFileSizeError(res.message);
+      }
     } catch (err) {
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
