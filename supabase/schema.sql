@@ -108,7 +108,20 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.update_user_role(UUID, TEXT) TO authenticated, service_role;
 
--- 15. Ensure public storage bucket 'music' exists for super-fast background music uploads
+-- 15. Ensure public storage buckets 'avatars' & 'music' exist with Public Access enabled
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('music', 'music', true)
-ON CONFLICT (id) DO NOTHING;
+VALUES 
+  ('avatars', 'avatars', true),
+  ('music', 'music', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Grant public RLS access to storage objects
+DROP POLICY IF EXISTS "Public Storage Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public Storage Insert" ON storage.objects;
+DROP POLICY IF EXISTS "Public Storage Update" ON storage.objects;
+DROP POLICY IF EXISTS "Public Storage Delete" ON storage.objects;
+
+CREATE POLICY "Public Storage Access" ON storage.objects FOR SELECT USING (true);
+CREATE POLICY "Public Storage Insert" ON storage.objects FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Storage Update" ON storage.objects FOR UPDATE USING (true);
+CREATE POLICY "Public Storage Delete" ON storage.objects FOR DELETE USING (true);
