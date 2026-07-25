@@ -12,7 +12,8 @@ export function GoogleLoginForm() {
     try {
       setIsLoading(true);
       const toastId = toast.loading('Connecting to Google...');
-      const res = await signInWithGoogle();
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const res = await signInWithGoogle(origin);
       
       if (res?.url) {
         toast.dismiss(toastId);

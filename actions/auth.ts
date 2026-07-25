@@ -3,9 +3,9 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
-export async function signInWithGoogle(): Promise<{ url?: string; error?: string }> {
+export async function signInWithGoogle(customOrigin?: string): Promise<{ url?: string; error?: string }> {
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = customOrigin || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
