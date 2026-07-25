@@ -44,9 +44,6 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
         
         {/* Pink Dot */}
         <circle cx="123" cy="112" r="5.5" fill="#FF4D6D" stroke="#111111" strokeWidth="1.5" />
-        
-        {/* Center Spindle Hole */}
-        <circle cx="100" cy="100" r="6" fill="#111111" />
       </svg>
     </div>
   );
