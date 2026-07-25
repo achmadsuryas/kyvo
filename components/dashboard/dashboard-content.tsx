@@ -16,7 +16,7 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
-import { createClient } from '@/lib/supabase/client';
+import { uploadProfileMusic } from '@/actions/upload-music';
 import { toast } from 'sonner';
 
 /**
@@ -167,7 +167,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Bulletproof Audio Upload Handler (.mp3, .wav, Max 10 MB)
+  // Bulletproof Binary FormData Audio Upload Handler (.mp3, .wav, Max 10 MB)
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -198,64 +198,19 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
     try {
       setIsAudioProcessing(true);
-      toast.loading('Uploading & processing audio file...', { id: 'audio-toast' });
+      toast.loading('Uploading background audio to cloud...', { id: 'audio-toast' });
 
-      let finalMusicUrl = '';
+      const formData = new FormData();
+      formData.append('file', file);
 
-      // Try uploading directly to Supabase Storage if available
-      try {
-        const supabase = createClient();
-        const fileExt = ext || 'mp3';
-        const fileName = `${profile?.id || 'user'}-${Date.now()}.${fileExt}`;
-        
-        let uploadBucket = 'music';
-        let { data: uploadData, error: uploadError } = await supabase.storage
-          .from(uploadBucket)
-          .upload(fileName, file, { cacheControl: '3600', upsert: true });
-
-        if (uploadError) {
-          uploadBucket = 'avatars';
-          const res = await supabase.storage
-            .from(uploadBucket)
-            .upload(`music-${fileName}`, file, { cacheControl: '3600', upsert: true });
-          uploadData = res.data;
-          uploadError = res.error;
-        }
-
-        if (!uploadError && uploadData) {
-          const { data: publicUrlData } = supabase.storage.from(uploadBucket).getPublicUrl(uploadData.path);
-          finalMusicUrl = publicUrlData.publicUrl;
-        }
-      } catch (storageErr) {
-        console.warn('Storage bucket upload fallback:', storageErr);
-      }
-
-      // If Supabase Storage is not public or missing on production, fallback to Data URL
-      if (!finalMusicUrl) {
-        const reader = new FileReader();
-        finalMusicUrl = await new Promise((resolve, reject) => {
-          reader.onload = (ev) => resolve(ev.target?.result as string);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const trackTitle = file.name.replace(/\.[^/.]+$/, '');
-
-      const res = await updateUserProfileDetails({
-        display_name: displayName,
-        bio: bio,
-        avatar_url: avatarUrl,
-        music_url: finalMusicUrl,
-        music_title: trackTitle,
-      });
+      const res = await uploadProfileMusic(formData);
 
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
 
-      if (res.success) {
-        setMusicUrl(finalMusicUrl);
-        setMusicTitle(trackTitle);
+      if (res.success && res.music_url) {
+        setMusicUrl(res.music_url);
+        setMusicTitle(res.music_title || file.name.replace(/\.[^/.]+$/, ''));
         toast.success('Background music uploaded & active on public profile!');
       } else {
         toast.error(res.message);
@@ -264,7 +219,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     } catch (err) {
       setIsAudioProcessing(false);
       toast.dismiss('audio-toast');
-      toast.error('Failed to process audio file. Please try a different audio track.');
+      toast.error('Failed to process audio file.');
     }
   };
 
