@@ -198,7 +198,7 @@ export function Navbar({ user: initialUser }: NavbarProps) {
           </button>
         </nav>
 
-        {/* Integrated Mobile Menu Drawer */}
+        {/* Integrated Mobile Menu Drawer (Includes My Public Profile Button on Mobile HP!) */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t-[3px] border-[#111111] bg-[#F8F9FA] p-4 space-y-3 rounded-b-2xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col gap-2.5 font-black text-sm">
@@ -222,13 +222,21 @@ export function Navbar({ user: initialUser }: NavbarProps) {
                   <>
                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="default" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">
-                        <LayoutDashboard className="w-4 h-4" />
+                        <LayoutDashboard className="w-4 h-4 stroke-[2.5]" />
                         <span>Go to Dashboard (@{user.username})</span>
                       </Button>
                     </Link>
+
+                    <Link href={`/${user.username}`} onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="yellow" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">
+                        <ExternalLink className="w-4 h-4 stroke-[2.5]" />
+                        <span>My Public Profile</span>
+                      </Button>
+                    </Link>
+
                     <form action={signOut}>
                       <Button variant="secondary" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="w-4 h-4 stroke-[2.5]" />
                         <span>Sign Out</span>
                       </Button>
                     </form>
