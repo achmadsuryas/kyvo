@@ -51,8 +51,8 @@ export function HeroMockup() {
           </div>
 
           {/* Verified Creator Badge Pill */}
-          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#FFD43B] text-[#111111] text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-            <CheckCircle2 className="w-3 h-3 text-[#111111]" />
+          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#3B82F6] text-white text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+            <CheckCircle2 className="w-3 h-3 text-white" />
             <span>VERIFIED CREATOR</span>
           </div>
 
