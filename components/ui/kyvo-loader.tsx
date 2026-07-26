@@ -15,10 +15,10 @@ export function KyvoLoader({
   fullScreen = false,
 }: KyvoLoaderProps) {
   const dimensions = {
-    sm: { container: 'w-16 h-16 rounded-2xl border-3 shadow-[3px_3px_0px_0px_#111111]', text: 'text-3xl', dot: 10, orbitRadius: 22 },
-    md: { container: 'w-24 h-24 rounded-2xl border-4 shadow-[5px_5px_0px_0px_#111111]', text: 'text-5xl', dot: 14, orbitRadius: 32 },
-    lg: { container: 'w-32 h-32 rounded-3xl border-4 shadow-[6px_6px_0px_0px_#111111]', text: 'text-6xl', dot: 18, orbitRadius: 44 },
-    xl: { container: 'w-40 h-40 rounded-3xl border-[5px] shadow-[8px_8px_0px_0px_#111111]', text: 'text-7xl', dot: 22, orbitRadius: 56 },
+    sm: { container: 'w-14 h-14 rounded-2xl border-3 shadow-[3px_3px_0px_0px_#111111]', text: 'text-3xl', dot: 12, orbitRadius: 20 },
+    md: { container: 'w-22 h-22 rounded-2xl border-4 shadow-[5px_5px_0px_0px_#111111]', text: 'text-5xl', dot: 16, orbitRadius: 30 },
+    lg: { container: 'w-32 h-32 rounded-3xl border-4 shadow-[6px_6px_0px_0px_#111111]', text: 'text-6xl', dot: 20, orbitRadius: 40 },
+    xl: { container: 'w-40 h-40 rounded-3xl border-[5px] shadow-[8px_8px_0px_0px_#111111]', text: 'text-7xl', dot: 24, orbitRadius: 50 },
   };
 
   const currentSize = dimensions[size] || dimensions.lg;
@@ -36,19 +36,19 @@ export function KyvoLoader({
           ease: "easeInOut"
         }}
         className={cn(
-          "relative flex items-center justify-center bg-[#FFD43B] border-[#111111] font-black overflow-hidden",
+          "relative flex items-center justify-center bg-[#FFD43B] border-[#111111] font-black overflow-hidden select-none",
           currentSize.container
         )}
       >
-        {/* Letter K centered */}
+        {/* Letter K */}
         <span 
-          className={cn("text-[#111111] font-extrabold tracking-tighter leading-none select-none flex items-center justify-center z-10", currentSize.text)}
+          className={cn("text-[#111111] font-extrabold tracking-tighter leading-none select-none flex items-center justify-center z-10 translate-y-[-1px]", currentSize.text)}
           style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
         >
           K
         </span>
 
-        {/* Orbiting Container - 360 degree rotation around central K */}
+        {/* Orbiting Container centered over K */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
           animate={{ rotate: 360 }}
@@ -58,7 +58,7 @@ export function KyvoLoader({
             ease: "linear"
           }}
         >
-          {/* Pink Dot Circling K inside the card */}
+          {/* Pink Dot pulsing big and small as it orbits K */}
           <motion.div
             className="absolute rounded-full bg-[#FF4D6D] border-2 border-[#111111] shadow-[1px_1px_0px_0px_#111111]"
             style={{
@@ -68,7 +68,8 @@ export function KyvoLoader({
               top: `calc(50% - ${currentSize.dot / 2}px)`,
             }}
             animate={{
-              scale: [1, 1.3, 1],
+              scale: [0.7, 1.4, 0.7],
+              opacity: [0.8, 1, 0.8],
             }}
             transition={{
               repeat: Infinity,
