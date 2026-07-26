@@ -97,7 +97,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Grant execution to authenticated users
 GRANT EXECUTE ON FUNCTION public.delete_current_user_account() TO authenticated;
 
--- 14. SECURITY DEFINER RPC function to update user role to admin or user
+-- 14. Ensure status and status_reason columns exist on profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS status_reason TEXT DEFAULT NULL;
+
+-- 15. SECURITY DEFINER RPC function to update user role to admin or user
 CREATE OR REPLACE FUNCTION public.update_user_role(target_user_id UUID, new_role TEXT)
 RETURNS void AS $$
 BEGIN
@@ -107,7 +111,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- 16. SECURITY DEFINER RPC function to update user status (active, warned, banned, suspended)
+CREATE OR REPLACE FUNCTION public.update_user_status(target_user_id UUID, new_status TEXT, new_reason TEXT)
+RETURNS void AS $$
+BEGIN
+  UPDATE public.profiles
+  SET status = new_status, status_reason = new_reason, updated_at = NOW()
+  WHERE id = target_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 GRANT EXECUTE ON FUNCTION public.update_user_role(UUID, TEXT) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.update_user_status(UUID, TEXT, TEXT) TO authenticated, service_role;
 
 -- 15. Ensure public storage buckets 'avatars' & 'music' exist with Public Access enabled
 INSERT INTO storage.buckets (id, name, public)

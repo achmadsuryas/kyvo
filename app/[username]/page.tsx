@@ -51,7 +51,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
   const bgColors = ['bg-[#FFD43B]', 'bg-[#3B82F6] text-white', 'bg-[#FF4D6D] text-white', 'bg-[#51CF66]', 'bg-[#A855F7] text-white'];
 
-  const isBanned = profile.status === 'banned';
+  const isBanned = profile.status === 'banned' || profile.status === 'suspended';
   const isWarned = profile.status === 'warned';
 
   // Verified checkmark appears ONLY if user has been granted Verified Creator badge by admin
@@ -75,8 +75,8 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         </Link>
       </header>
 
-      {/* ACCOUNT BANNED OR WARNED SCREEN */}
-      {isBanned || isWarned ? (
+      {/* ACCOUNT BANNED / SUSPENDED SCREEN (Profile Hidden) */}
+      {isBanned ? (
         <main className="w-full max-w-sm sm:max-w-md my-auto">
           <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-5 sm:p-6 shadow-[6px_6px_0px_0px_#111111] text-center space-y-5 relative overflow-hidden">
             <div className="flex justify-center">

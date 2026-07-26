@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Eye, Award, Volume2 } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Eye, Award, Volume2, Ban } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { getBadgeIconComponent } from '@/components/shared/badge-icons';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
 import { getMusicSignedUploadUrl, uploadProfileMusic } from '@/actions/upload-music';
+import { signOut } from '@/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
@@ -402,8 +403,74 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
+  // Account Status handling ('active' | 'warned' | 'banned' | 'suspended')
+  const accountStatus = (profile?.status || 'active').toLowerCase();
+  const statusReason = profile?.status_reason || 'Community Guidelines Review';
+  
+  // Warning modal open state (opens automatically on load when accountStatus === 'warned')
+  const [warningModalOpen, setWarningModalOpen] = React.useState(accountStatus === 'warned');
+
+  React.useEffect(() => {
+    if (accountStatus === 'warned') {
+      setWarningModalOpen(true);
+    }
+  }, [accountStatus]);
+
+  if (accountStatus === 'banned' || accountStatus === 'suspended') {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
+        <Card className="max-w-xl w-full bg-[#FF4D6D] border-[4px] border-[#111111] shadow-[10px_10px_0px_0px_#111111] p-6 sm:p-10 text-white space-y-6 text-center select-none">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-[3.5px] border-[#111111] bg-white text-[#FF4D6D] mx-auto flex items-center justify-center shadow-[4px_4px_0px_0px_#111111]">
+            <Ban className="w-10 h-10 stroke-[3]" />
+          </div>
+
+          <div className="space-y-2">
+            <Badge variant="default" className="text-xs font-black text-[#111111] bg-[#FFD43B] border-2 border-[#111111]">
+              ACCOUNT SUSPENDED / BANNED
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+              Access Restricted
+            </h1>
+            <p className="text-sm sm:text-base font-extrabold text-white/90">
+              Your Kyvo account and profile bio have been suspended by System Administrators.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border-[3px] border-[#111111] bg-white p-4 text-[#111111] text-left space-y-1 shadow-[3px_3px_0px_0px_#111111]">
+            <p className="text-xs font-black text-[#FF4D6D] uppercase tracking-wider">Reason for Suspension:</p>
+            <p className="text-sm font-extrabold text-[#111111]">
+              "{statusReason}"
+            </p>
+          </div>
+
+          <p className="text-xs font-bold text-white/80 leading-relaxed">
+            Your public link-in-bio page has been disabled from visitors. If you believe this is an error, please contact Kyvo Support.
+          </p>
+
+          <form action={signOut} className="pt-2">
+            <Button type="submit" variant="default" size="lg" className="w-full font-black text-base py-6 text-[#111111] bg-[#FFD43B] hover:bg-white shadow-[4px_4px_0px_0px_#111111]">
+              <span>Sign Out Account</span>
+            </Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 w-full overflow-hidden">
+      {/* WARNING POPUP MODAL DIALOG (Opens automatically on load/login, closable by user) */}
+      <AlertDialog
+        open={warningModalOpen}
+        onOpenChange={setWarningModalOpen}
+        title="⚠️ SYSTEM WARNING NOTICE"
+        description={`Notice from System Administration: "${statusReason}". Please make sure your profile bio and content comply with Kyvo Community Guidelines. You can continue using your dashboard normally after acknowledging this notice.`}
+        variant="warning"
+        confirmText="I Understand & Close"
+        cancelText="Close"
+        onConfirm={() => setWarningModalOpen(false)}
+      />
+
       {/* Full-width Top Banner Header */}
       <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-5 sm:p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 w-full">
         <div className="space-y-2 min-w-0 w-full lg:w-auto flex-1">

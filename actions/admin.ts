@@ -140,19 +140,37 @@ export async function adminDeleteUserAccount(profileId: string): Promise<{ succe
   }
 }
 
+async function setUserStatusInDatabase(profileId: string, status: string, reason: string | null): Promise<boolean> {
+  const supabase = await createClient();
+  
+  // 1. Try Postgres RPC SECURITY DEFINER to bypass RLS
+  const { error: rpcErr } = await (supabase as any).rpc('update_user_status', {
+    target_user_id: profileId,
+    new_status: status,
+    new_reason: reason,
+  });
+
+  if (!rpcErr) return true;
+
+  // 2. Direct Table Update Fallback
+  const { error: updateErr } = await (supabase.from('profiles') as any)
+    .update({ 
+      status: status, 
+      status_reason: reason, 
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', profileId);
+
+  return !updateErr;
+}
+
 export async function warnUserWithReason(profileId: string, reason: string): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient();
-    const { error } = await (supabase.from('profiles') as any)
-      .update({ 
-        status: 'warned', 
-        status_reason: reason.trim() || 'Terms of service violation', 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', profileId);
+    const statusReason = reason.trim() || 'Terms of service violation';
+    const success = await setUserStatusInDatabase(profileId, 'warned', statusReason);
 
-    if (error) {
-      return { success: false, message: error.message };
+    if (!success) {
+      return { success: false, message: 'Failed to issue warning. Please check database RPC settings.' };
     }
 
     revalidatePath('/dashboard');
@@ -167,17 +185,10 @@ export async function warnUserWithReason(profileId: string, reason: string): Pro
 
 export async function clearWarning(profileId: string): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient();
-    const { error } = await (supabase.from('profiles') as any)
-      .update({ 
-        status: 'active', 
-        status_reason: null, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', profileId);
+    const success = await setUserStatusInDatabase(profileId, 'active', null);
 
-    if (error) {
-      return { success: false, message: error.message };
+    if (!success) {
+      return { success: false, message: 'Failed to clear warning.' };
     }
 
     revalidatePath('/dashboard');
@@ -192,17 +203,11 @@ export async function clearWarning(profileId: string): Promise<{ success: boolea
 
 export async function banUserWithReason(profileId: string, reason: string): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient();
-    const { error } = await (supabase.from('profiles') as any)
-      .update({ 
-        status: 'banned', 
-        status_reason: reason.trim() || 'Severe Terms of service violation', 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', profileId);
+    const statusReason = reason.trim() || 'Severe Terms of service violation';
+    const success = await setUserStatusInDatabase(profileId, 'banned', statusReason);
 
-    if (error) {
-      return { success: false, message: error.message };
+    if (!success) {
+      return { success: false, message: 'Failed to ban user account.' };
     }
 
     revalidatePath('/dashboard');
@@ -217,17 +222,10 @@ export async function banUserWithReason(profileId: string, reason: string): Prom
 
 export async function unbanUser(profileId: string): Promise<{ success: boolean; message: string }> {
   try {
-    const supabase = await createClient();
-    const { error } = await (supabase.from('profiles') as any)
-      .update({ 
-        status: 'active', 
-        status_reason: null, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', profileId);
+    const success = await setUserStatusInDatabase(profileId, 'active', null);
 
-    if (error) {
-      return { success: false, message: error.message };
+    if (!success) {
+      return { success: false, message: 'Failed to unban user account.' };
     }
 
     revalidatePath('/dashboard');

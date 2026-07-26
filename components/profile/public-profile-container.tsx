@@ -7,7 +7,8 @@ import {
   Play, 
   Volume2, 
   VolumeX, 
-  Music
+  Music,
+  AlertTriangle
 } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem } from '@/types';
 import { getBadgeIconComponent } from '@/components/shared/badge-icons';
@@ -147,7 +148,15 @@ export function PublicProfileContainer({
           <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 sm:p-6 shadow-[6px_6px_0px_0px_#111111] relative overflow-hidden space-y-5">
             {/* Header Decorative Banner */}
             <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between">
-              <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
+              <div className="flex items-center gap-2 flex-wrap">
+                <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
+                {profile.status === 'warned' && (
+                  <div className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
+                    <span>WARNED</span>
+                  </div>
+                )}
+              </div>
               
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
