@@ -318,12 +318,17 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </div>
             </div>
 
-            {/* Preset Color Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Choose Color Theme</label>
-              <div className="flex flex-wrap gap-3">
+            {/* Preset & Custom Color Picker */}
+            <div className="space-y-3">
+              <label className="text-xs font-black uppercase text-[#111111] flex items-center justify-between">
+                <span>Choose Color Theme & Custom Color Picker</span>
+                <span className="text-[10px] font-extrabold text-[#111111]/70 font-mono">Hex: {editBgColor} / {editColor}</span>
+              </label>
+
+              {/* Presets */}
+              <div className="flex flex-wrap gap-2.5">
                 {PRESET_COLORS.map((c) => {
-                  const isSelected = editBgColor === c.bg;
+                  const isSelected = editBgColor === c.bg && editColor === c.text;
                   return (
                     <button
                       key={c.bg}
@@ -332,7 +337,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                         setEditBgColor(c.bg);
                         setEditColor(c.text);
                       }}
-                      className={`px-3 py-2 rounded-xl border-2 border-[#111111] text-xs font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#111111] ${
+                      className={`px-3 py-1.5 rounded-xl border-2 border-[#111111] text-xs font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#111111] ${
                         isSelected ? 'ring-2 ring-black scale-105' : 'opacity-80 hover:opacity-100'
                       }`}
                       style={{ backgroundColor: c.bg, color: c.text }}
@@ -342,6 +347,47 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Custom Color Pickers */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-[#111111] bg-white shadow-[2px_2px_0px_0px_#111111]">
+                  <input
+                    type="color"
+                    value={editBgColor}
+                    onChange={(e) => setEditBgColor(e.target.value)}
+                    className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer p-0 bg-transparent shrink-0"
+                    title="Choose Custom Badge Background Color"
+                  />
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase text-[#111111]/60">Custom Background</p>
+                    <input
+                      type="text"
+                      value={editBgColor}
+                      onChange={(e) => setEditBgColor(e.target.value)}
+                      className="w-full font-mono text-xs font-black uppercase bg-transparent outline-none text-[#111111]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-[#111111] bg-white shadow-[2px_2px_0px_0px_#111111]">
+                  <input
+                    type="color"
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer p-0 bg-transparent shrink-0"
+                    title="Choose Custom Text / Icon Color"
+                  />
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase text-[#111111]/60">Custom Text / Icon Color</p>
+                    <input
+                      type="text"
+                      value={editColor}
+                      onChange={(e) => setEditColor(e.target.value)}
+                      className="w-full font-mono text-xs font-black uppercase bg-transparent outline-none text-[#111111]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -487,12 +533,17 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </div>
             </div>
 
-            {/* Preset Color Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Choose Color Theme</label>
-              <div className="flex flex-wrap gap-3">
+            {/* Preset & Custom Color Picker */}
+            <div className="space-y-3">
+              <label className="text-xs font-black uppercase text-[#111111] flex items-center justify-between">
+                <span>Choose Color Theme & Custom Color Picker</span>
+                <span className="text-[10px] font-extrabold text-[#111111]/70 font-mono">Hex: {bgColor} / {color}</span>
+              </label>
+
+              {/* Presets */}
+              <div className="flex flex-wrap gap-2.5">
                 {PRESET_COLORS.map((c) => {
-                  const isSelected = bgColor === c.bg;
+                  const isSelected = bgColor === c.bg && color === c.text;
                   return (
                     <button
                       key={c.bg}
@@ -501,7 +552,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                         setBgColor(c.bg);
                         setColor(c.text);
                       }}
-                      className={`px-3 py-2 rounded-xl border-2 border-[#111111] text-xs font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#111111] ${
+                      className={`px-3 py-1.5 rounded-xl border-2 border-[#111111] text-xs font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#111111] ${
                         isSelected ? 'ring-2 ring-black scale-105' : 'opacity-80 hover:opacity-100'
                       }`}
                       style={{ backgroundColor: c.bg, color: c.text }}
@@ -511,6 +562,47 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Custom Color Pickers */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-[#111111] bg-white shadow-[2px_2px_0px_0px_#111111]">
+                  <input
+                    type="color"
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer p-0 bg-transparent shrink-0"
+                    title="Choose Custom Badge Background Color"
+                  />
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase text-[#111111]/60">Custom Background</p>
+                    <input
+                      type="text"
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="w-full font-mono text-xs font-black uppercase bg-transparent outline-none text-[#111111]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-[#111111] bg-white shadow-[2px_2px_0px_0px_#111111]">
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer p-0 bg-transparent shrink-0"
+                    title="Choose Custom Text / Icon Color"
+                  />
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <p className="text-[10px] font-black uppercase text-[#111111]/60">Custom Text / Icon Color</p>
+                    <input
+                      type="text"
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                      className="w-full font-mono text-xs font-black uppercase bg-transparent outline-none text-[#111111]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

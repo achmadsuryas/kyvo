@@ -41,7 +41,7 @@ export function UserBadgeShowcase({ initialUserBadges }: UserBadgeShowcaseProps)
         <div>
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-[#A855F7] stroke-[2.5]" />
-            <CardTitle className="text-xl font-black">My Badges & Equipment</CardTitle>
+            <CardTitle className="text-xl font-black">My Badges</CardTitle>
           </div>
           <CardDescription className="text-xs font-bold">
             Equip or unequip earned badges to customize your public page display
