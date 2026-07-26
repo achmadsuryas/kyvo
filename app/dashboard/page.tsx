@@ -29,7 +29,7 @@ export default async function DashboardPage() {
       <Sidebar profile={profile} />
 
       {/* Main Content Area */}
-      <main className="lg:pl-80 p-6 md:p-10 pt-8 lg:pt-10 w-full">
+      <main className="lg:pl-80 p-4 sm:p-6 md:p-10 pt-6 lg:pt-10 w-full max-w-full overflow-x-hidden">
         <DashboardContent 
           profile={profile} 
           initialLinks={links} 

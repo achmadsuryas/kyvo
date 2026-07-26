@@ -30,21 +30,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {/* Neobrutalism Login Card */}
         <div className="rounded-3xl border-[4px] border-[#111111] bg-white p-8 md:p-10 shadow-[8px_8px_0px_0px_#111111] space-y-8">
           {/* Header */}
-          <div className="text-center space-y-3">
+          <div className="flex flex-col items-center justify-center text-center space-y-4 pt-1">
             <KyvoLogo href="/" size="lg" />
             
-            <div className="flex justify-center">
-              <Badge variant="default" className="text-xs font-black">
+            <div className="pt-1">
+              <Badge variant="default" className="text-xs font-black px-3.5 py-1">
                 1-CLICK AUTH
               </Badge>
             </div>
 
-            <h1 className="text-2xl font-black text-[#111111]">
-              Sign in to Kyvo
-            </h1>
-            <p className="text-sm font-bold text-[#111111]/75">
-              Access your dashboard & manage your Kyvo profile
-            </p>
+            <div className="space-y-1.5 pt-1">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#111111]">
+                Sign in to Kyvo
+              </h1>
+              <p className="text-sm font-bold text-[#111111]/75">
+                Access your dashboard & manage your Kyvo profile
+              </p>
+            </div>
           </div>
 
           {/* Claimed Username Banner */}

@@ -75,7 +75,11 @@ export function KyvoLogo({ size = 'md', showText = true, href, className }: Kyvo
   );
 
   if (href) {
-    return <Link href={href}>{content}</Link>;
+    return (
+      <Link href={href} className="inline-flex items-center shrink-0">
+        {content}
+      </Link>
+    );
   }
 
   return content;

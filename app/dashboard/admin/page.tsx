@@ -29,7 +29,7 @@ export default async function AdminDashboardPage() {
       <Sidebar profile={profile} />
 
       {/* Main Content Area */}
-      <main className="lg:pl-80 p-6 md:p-10 pt-8 lg:pt-10 w-full space-y-8">
+      <main className="lg:pl-80 p-4 sm:p-6 md:p-10 pt-6 lg:pt-10 w-full max-w-full overflow-x-hidden space-y-8">
         {/* Top Admin Header Banner */}
         <div className="rounded-3xl border-[4px] border-[#111111] bg-[#A855F7] text-white p-6 md:p-8 shadow-[8px_8px_0px_0px_#111111] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 w-full">
           <div className="space-y-2">
