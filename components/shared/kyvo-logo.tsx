@@ -27,10 +27,10 @@ export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 
   };
 
   const dotSizes = {
-    sm: 'w-2 h-2 bottom-0.5 right-0.5 border',
-    md: 'w-2.5 h-2.5 bottom-1 right-1 border-[1.5px]',
-    lg: 'w-3.5 h-3.5 bottom-1.5 right-1.5 border-2',
-    xl: 'w-4.5 h-4.5 bottom-2 right-2 border-2',
+    sm: 'w-1.5 h-1.5 bottom-0.5 right-0.5 border',
+    md: 'w-2 h-2 bottom-0.5 right-0.5 border-[1.5px]',
+    lg: 'w-2.5 h-2.5 bottom-1 right-1 border-2',
+    xl: 'w-3.5 h-3.5 bottom-1.5 right-1.5 border-2',
   };
 
   return (
@@ -41,10 +41,10 @@ export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 
         className
       )}
     >
-      {/* Clean Capital Letter K (NO extra black text period dot!) */}
+      {/* Capital Letter K (Shifted slightly left with clear breathing space from pink dot) */}
       <span
         className={cn(
-          "text-[#111111] font-extrabold tracking-tighter leading-none flex items-center justify-center translate-y-[-1px] translate-x-[-1px]",
+          "text-[#111111] font-extrabold tracking-tighter leading-none flex items-center justify-center translate-y-[-1px] translate-x-[-3px]",
           textSizes[size] || textSizes.md
         )}
         style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
@@ -52,7 +52,7 @@ export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 
         K
       </span>
 
-      {/* Official Pink Circular Dot (#FF4D6D) */}
+      {/* Official Pink Circular Dot (#FF4D6D) with Breathing Space */}
       <span
         className={cn(
           "absolute rounded-full bg-[#FF4D6D] border-[#111111] shadow-[0.5px_0.5px_0px_0px_#111111]",
