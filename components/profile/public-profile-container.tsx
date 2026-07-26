@@ -26,7 +26,7 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
     <div className={`relative ${outerSize} shrink-0 aspect-square flex items-center justify-center`}>
       <svg
         viewBox="0 0 200 200"
-        className={`w-full h-full aspect-square shrink-0 ${isSpinning ? 'animate-[spin_6s_linear_infinite]' : ''}`}
+        className="w-full h-full aspect-square shrink-0"
       >
         {/* Outer Vinyl Disk Circle */}
         <circle cx="100" cy="100" r="96" fill="#111111" stroke="#111111" strokeWidth="4" />
@@ -117,7 +117,7 @@ export function PublicProfileContainer({
               <VinylRecordDisk size="lg" isSpinning={true} />
 
               {/* Floating Music Notes */}
-              <div className="absolute -top-2 -right-2 p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white font-black shadow-[2px_2px_0px_0px_#111111] animate-bounce">
+              <div className="absolute -top-2 -right-2 p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white font-black shadow-[2px_2px_0px_0px_#111111]">
                 <Music className="w-4 h-4" />
               </div>
             </div>
