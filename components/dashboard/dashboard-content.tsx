@@ -474,11 +474,11 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
         {/* Left Column (lg:col-span-7): Tab Navigation + Tab Contents */}
         <div className="lg:col-span-7 space-y-8 w-full min-w-0">
-          {/* DEDICATED NEOBRUTALISM 4-TAB NAVIGATION BAR */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 border-b-4 border-[#111111] pb-3 pt-1 px-1">
+          {/* DEDICATED NEOBRUTALISM 4-TAB NAVIGATION BAR (2 ROWS FILLING FULL WIDTH) */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 border-b-4 border-[#111111] pb-4 pt-1 w-full">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer w-full ${
                 activeTab === 'overview'
                   ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
@@ -490,7 +490,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
             <button
               onClick={() => setActiveTab('badges')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer w-full ${
                 activeTab === 'badges'
                   ? 'bg-[#A855F7] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
@@ -502,7 +502,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
             <button
               onClick={() => setActiveTab('links')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer w-full ${
                 activeTab === 'links'
                   ? 'bg-[#FF4D6D] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
@@ -514,7 +514,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer w-full ${
                 activeTab === 'analytics'
                   ? 'bg-[#3B82F6] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
@@ -884,7 +884,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-5 md:p-6 w-full overflow-hidden space-y-4">
             <div className="flex items-center justify-between border-b-2 border-dashed border-[#111111]/20 pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#FFD43B]" />
                 <h3 className="text-base sm:text-lg font-black text-[#111111]">Live Profile Card Preview</h3>
               </div>
               <Link href={`/${currentUsername}`} target="_blank">

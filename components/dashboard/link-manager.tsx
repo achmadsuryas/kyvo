@@ -443,13 +443,13 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
                       <div className="flex items-center gap-3.5 overflow-hidden">
                         {/* Graphical SVG Icon Badge */}
                         <div
-                          className="p-3 rounded-xl border-2 border-[#111111] flex-shrink-0 shadow-[2px_2px_0px_0px_#111111]"
+                          className="w-12 h-12 rounded-xl border-2 border-[#111111] shrink-0 aspect-square flex items-center justify-center shadow-[2px_2px_0px_0px_#111111]"
                           style={{
                             backgroundColor: linkBgColor,
                             color: getContrastColor(linkBgColor),
                           }}
                         >
-                          <IconComp className="w-6 h-6" />
+                          <IconComp className="w-6 h-6 shrink-0 aspect-square" />
                         </div>
                         <div className="overflow-hidden">
                           <div className="flex items-center gap-2">

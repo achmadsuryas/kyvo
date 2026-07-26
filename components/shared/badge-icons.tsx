@@ -27,16 +27,16 @@ export const BADGE_ICONS_MAP: Record<string, React.ComponentType<LucideProps>> =
 };
 
 export const AVAILABLE_BADGE_ICONS = [
-  { name: 'Rocket', label: 'Rocket 🚀' },
-  { name: 'Sparkles', label: 'Sparkles ✨' },
-  { name: 'Crown', label: 'Crown 👑' },
-  { name: 'CheckCircle2', label: 'Verified Check ✔️' },
-  { name: 'ShieldCheck', label: 'Shield 🛡️' },
-  { name: 'Flame', label: 'Flame 🔥' },
-  { name: 'Zap', label: 'Zap ⚡' },
-  { name: 'Award', label: 'Award 🏅' },
-  { name: 'Heart', label: 'Heart ❤️' },
-  { name: 'Star', label: 'Star ⭐' },
+  { name: 'Rocket', label: 'Rocket' },
+  { name: 'Sparkles', label: 'Sparkles' },
+  { name: 'Crown', label: 'Crown' },
+  { name: 'CheckCircle2', label: 'Verified Check' },
+  { name: 'ShieldCheck', label: 'Shield' },
+  { name: 'Flame', label: 'Flame' },
+  { name: 'Zap', label: 'Zap' },
+  { name: 'Award', label: 'Award' },
+  { name: 'Heart', label: 'Heart' },
+  { name: 'Star', label: 'Star' },
 ];
 
 export function getBadgeIconComponent(iconName?: string | null): React.ComponentType<LucideProps> {
