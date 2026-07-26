@@ -19,22 +19,24 @@ export function KyvoLoader({
   className,
   fullScreen = false,
 }: KyvoLoaderProps) {
-  const [internalProgress, setInternalProgress] = React.useState(15);
+  const [internalProgress, setInternalProgress] = React.useState(10);
 
   React.useEffect(() => {
     if (customProgress !== undefined) return;
     if (!autoProgress) return;
 
+    // Fast, continuous progress timer from 10% to 100%
+    setInternalProgress(15);
     const interval = setInterval(() => {
       setInternalProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        const step = Math.floor(Math.random() * 18) + 12;
+        const step = Math.floor(Math.random() * 20) + 12;
         return Math.min(100, prev + step);
       });
-    }, 200);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [customProgress, autoProgress]);

@@ -9,24 +9,31 @@ export function WelcomeScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // 5 seconds smooth progress timer (0% to 100%)
+    // 5 seconds 60fps smooth progress animation (0% to 100%)
     const startTime = Date.now();
     const duration = 5000;
 
-    const interval = setInterval(() => {
+    let animFrame: number;
+
+    const updateProgress = () => {
       const elapsed = Date.now() - startTime;
       const pct = Math.min(100, (elapsed / duration) * 100);
       setProgress(pct);
 
-      if (elapsed >= duration) {
-        clearInterval(interval);
+      if (elapsed < duration) {
+        animFrame = requestAnimationFrame(updateProgress);
+      } else {
         setTimeout(() => {
           setIsVisible(false);
-        }, 150);
+        }, 120);
       }
-    }, 40);
+    };
 
-    return () => clearInterval(interval);
+    animFrame = requestAnimationFrame(updateProgress);
+
+    return () => {
+      if (animFrame) cancelAnimationFrame(animFrame);
+    };
   }, []);
 
   useEffect(() => {
@@ -50,7 +57,7 @@ export function WelcomeScreen() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[9999] bg-[#F8F9FA] bg-grid-lines flex flex-col items-center justify-center p-4 selection:bg-[#FFD43B]"
         >
-          {/* Static Logo Loader with Progress Bar */}
+          {/* Static Logo Loader with 60fps Smooth Progress Bar */}
           <div className="flex flex-col items-center gap-6">
             <KyvoLoader size="lg" progress={progress} autoProgress={false} />
 

@@ -66,9 +66,19 @@ const compressImage = (file: File, maxWidth = 512, maxHeight = 512, quality = 0.
       };
       img.onerror = (err) => reject(err);
     };
-    reader.onerror = (err) => reject(err);
   });
 };
+
+function getContrastTextColor(hexColor?: string | null): string {
+  if (!hexColor || !hexColor.startsWith('#')) return 'text-[#111111]';
+  const hex = hexColor.replace('#', '');
+  if (hex.length !== 6) return 'text-[#111111]';
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? 'text-[#111111]' : 'text-white';
+}
 
 interface DashboardContentProps {
   profile: Profile | null;
@@ -885,12 +895,25 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
               </Link>
             </div>
 
-            {/* Mockup Card Body */}
-            <div className="rounded-2xl border-[3px] border-[#111111] bg-[#F8F9FA] p-4 sm:p-5 space-y-4">
-              {/* Profile Header */}
-              <div className="flex flex-col items-center text-center space-y-2">
+            {/* Mockup Card Body (100% Identical to Public Profile Page!) */}
+            <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 sm:p-5 shadow-[5px_5px_0px_0px_#111111] relative overflow-hidden space-y-4">
+              {/* Header Decorative Banner */}
+              <div className="h-16 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-2.5 flex items-start justify-between">
+                <div className="inline-flex items-center gap-1.5 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                  <Eye className="w-3 h-3 text-[#111111] stroke-[2.5]" />
+                  <span>Preview Mode</span>
+                </div>
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
+                  <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FFD43B]" />
+                  <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#51CF66]" />
+                </div>
+              </div>
+
+              {/* Profile Header & Info */}
+              <div className="flex flex-col items-center text-center -mt-11 relative z-10 space-y-2">
                 <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="w-16 h-16 border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111]" />
-                <div>
+                <div className="space-y-0.5">
                   <div className="flex items-center justify-center gap-1.5">
                     <h4 className="text-lg sm:text-xl font-black text-[#111111] break-words">{displayName}</h4>
                     {isVerified && <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white shrink-0" />}
@@ -899,74 +922,94 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                 </div>
 
                 {bio && (
-                  <p className="text-xs font-bold text-[#111111]/80 max-w-xs pt-0.5 break-words">{bio}</p>
+                  <p className="text-xs font-bold text-[#111111]/80 max-w-xs leading-relaxed pt-0.5 break-words">{bio}</p>
                 )}
 
                 {/* EQUIPPED BADGES SHOWCASE */}
-                <div className="w-full pt-2">
-                  <p className="text-[10px] font-black uppercase text-[#111111]/60 mb-2">Equipped Badges</p>
-                  {equippedBadges.length > 0 ? (
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      {equippedBadges.map((ub) => {
-                        const BadgeIcon = getBadgeIconComponent(ub.badge?.icon);
-                        return (
-                          <div
-                            key={ub.id}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
-                          >
-                            <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                            <span>{ub.badge?.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-xs font-bold text-[#111111]/50 italic">No badges equipped yet. Equip badges in "My Badges" tab!</p>
-                  )}
-                </div>
-              </div>
-
-              {/* ACTIVE LINKS */}
-              <div className="space-y-2.5 pt-3 border-t-2 border-dashed border-[#111111]/20">
-                <p className="text-[10px] font-black uppercase text-[#111111]/60">Active Links ({activeLinks.length})</p>
-                {activeLinks.length > 0 ? (
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                    {activeLinks.map((link) => {
-                      const SocialIcon = getIconComponent(link.icon || 'Globe');
+                {equippedBadges.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                    {equippedBadges.map((ub) => {
+                      const BadgeIcon = getBadgeIconComponent(ub.badge?.icon);
                       return (
-                        <a
-                          key={link.id}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full rounded-xl border-2 border-[#111111] bg-white p-2.5 shadow-[2.5px_2.5px_0px_0px_#111111] flex items-center justify-between font-black text-xs text-[#111111] hover:bg-[#FFD43B] transition-colors"
+                        <span
+                          key={ub.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border border-[#111111] font-black text-[10px] uppercase shadow-[1.5px_1.5px_0px_0px_#111111]"
+                          style={{ backgroundColor: ub.badge?.bg_color || '#FFD43B', color: ub.badge?.color || '#111111' }}
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="p-1.5 rounded-lg border border-[#111111] bg-[#FFD43B] text-[#111111] shrink-0">
-                              <SocialIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                            </div>
-                            <span className="truncate">{link.title}</span>
-                          </div>
-                          <ExternalLink className="w-3.5 h-3.5 stroke-[3] shrink-0" />
-                        </a>
+                          <BadgeIcon className="w-3 h-3 stroke-[2.5]" />
+                          <span>{ub.badge?.name}</span>
+                        </span>
                       );
                     })}
                   </div>
+                )}
+              </div>
+
+              {/* MUSIC PLAYER WIDGET WITH SPINNING VINYL DISK (IF MUSIC EXISTS) */}
+              {musicUrl && (
+                <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#FFD43B]/30 p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {/* SVG Spinning Vinyl Disk */}
+                    <div className="relative w-10 h-10 shrink-0 aspect-square flex items-center justify-center">
+                      <svg viewBox="0 0 200 200" className="w-full h-full aspect-square shrink-0 animate-[spin_6s_linear_infinite]">
+                        <circle cx="100" cy="100" r="96" fill="#111111" stroke="#111111" strokeWidth="4" />
+                        <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" />
+                        <circle cx="100" cy="100" r="68" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1.5" />
+                        <circle cx="100" cy="100" r="54" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="1.5" />
+                        <circle cx="100" cy="100" r="40" fill="#FFD43B" stroke="#111111" strokeWidth="3.5" />
+                        <text x="96" y="113" fontFamily="Arial Black, Impact, sans-serif" fontSize="42" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
+                        <circle cx="123" cy="112" r="5.5" fill="#FF4D6D" stroke="#111111" strokeWidth="1.5" />
+                      </svg>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] font-black uppercase text-[#111111]/60 tracking-wider">Background Music</p>
+                      <p className="text-xs font-black text-[#111111] truncate">{musicTitle || 'Audio Track'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button className="px-2.5 py-1 rounded-xl border-2 border-[#111111] bg-white text-[#111111] font-black text-[11px] shadow-[1.5px_1.5px_0px_0px_#111111] flex items-center gap-1">
+                      <Volume2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      <span>Mute</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ACTIVE LINKS LIST WITH EXACT CUSTOM COLOR & ICON MATCH */}
+              <div className="space-y-2 pt-1">
+                {activeLinks.length > 0 ? (
+                  activeLinks.map((link, idx) => {
+                    const SocialIcon = getIconComponent(link.icon || 'Globe');
+                    const customBg = link.bg_color || null;
+                    const fallbackBgColors = ['bg-[#FFD43B]', 'bg-[#3B82F6] text-white', 'bg-[#FF4D6D] text-white', 'bg-[#51CF66]', 'bg-[#A855F7] text-white'];
+                    const fallbackBg = fallbackBgColors[idx % fallbackBgColors.length];
+                    const textColor = customBg ? getContrastTextColor(customBg) : 'text-[#111111]';
+
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={customBg ? { backgroundColor: customBg } : undefined}
+                        className={`group w-full rounded-xl border-[2.5px] border-[#111111] ${customBg ? textColor : fallbackBg} p-2.5 sm:p-3 shadow-[3px_3px_0px_0px_#111111] hover:shadow-[4px_4px_0px_0px_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all flex items-center justify-between font-extrabold text-xs sm:text-sm cursor-pointer`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="p-1.5 rounded-lg border-2 border-[#111111] bg-white text-[#111111] shrink-0">
+                            <SocialIcon className="w-4 h-4 stroke-[2.5]" />
+                          </div>
+                          <span className="truncate">{link.title}</span>
+                        </div>
+                        <ExternalLink className="w-4 h-4 stroke-[2.5] opacity-80 shrink-0" />
+                      </a>
+                    );
+                  })
                 ) : (
                   <p className="text-xs font-bold text-[#111111]/50 italic text-center py-2">No active links added yet.</p>
                 )}
               </div>
-
-              {/* MUSIC INDICATOR IF ACTIVE */}
-              {musicUrl && (
-                <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-between text-xs font-black text-[#A855F7]">
-                  <div className="flex items-center gap-2 truncate">
-                    <Disc className="w-4 h-4 animate-spin shrink-0" />
-                    <span className="truncate">Track: "{musicTitle || 'Custom Audio'}"</span>
-                  </div>
-                  <Badge variant="purple" className="text-[10px] font-black shrink-0">Playing</Badge>
-                </div>
-              )}
             </div>
           </Card>
 
