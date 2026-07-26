@@ -26,7 +26,7 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
     <div className={`relative ${outerSize} shrink-0 aspect-square flex items-center justify-center`}>
       <svg
         viewBox="0 0 200 200"
-        className="w-full h-full aspect-square shrink-0"
+        className={`w-full h-full aspect-square shrink-0 ${isSpinning ? 'animate-[spin_6s_linear_infinite]' : ''}`}
       >
         {/* Outer Vinyl Disk Circle */}
         <circle cx="100" cy="100" r="96" fill="#111111" stroke="#111111" strokeWidth="4" />
@@ -39,11 +39,8 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
         {/* Center Yellow Label Circle */}
         <circle cx="100" cy="100" r="40" fill="#FFD43B" stroke="#111111" strokeWidth="3.5" />
         
-        {/* Center K Logo Text */}
-        <text x="96" y="113" fontFamily="Arial Black, Impact, sans-serif" fontSize="42" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
-        
-        {/* Pink Dot */}
-        <circle cx="123" cy="112" r="5.5" fill="#FF4D6D" stroke="#111111" strokeWidth="1.5" />
+        {/* Clean Centered K Logo Text */}
+        <text x="100" y="114" fontFamily="Arial Black, Impact, sans-serif" fontSize="44" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
       </svg>
     </div>
   );
