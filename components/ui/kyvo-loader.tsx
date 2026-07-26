@@ -15,46 +15,17 @@ export function KyvoLoader({
   fullScreen = false,
 }: KyvoLoaderProps) {
   const dimensions = {
-    sm: { container: 'w-12 h-12 rounded-xl border-2 shadow-[3px_3px_0px_0px_#111111]', text: 'text-2xl', dot: 12, orbitRadius: 36 },
-    md: { container: 'w-20 h-20 rounded-2xl border-3 shadow-[5px_5px_0px_0px_#111111]', text: 'text-4xl', dot: 16, orbitRadius: 58 },
-    lg: { container: 'w-28 h-28 rounded-3xl border-4 shadow-[6px_6px_0px_0px_#111111]', text: 'text-6xl', dot: 20, orbitRadius: 78 },
-    xl: { container: 'w-36 h-36 rounded-3xl border-4 shadow-[8px_8px_0px_0px_#111111]', text: 'text-7xl', dot: 24, orbitRadius: 98 },
+    sm: { container: 'w-16 h-16 rounded-2xl border-3 shadow-[3px_3px_0px_0px_#111111]', text: 'text-3xl', dot: 10, orbitRadius: 22 },
+    md: { container: 'w-24 h-24 rounded-2xl border-4 shadow-[5px_5px_0px_0px_#111111]', text: 'text-5xl', dot: 14, orbitRadius: 32 },
+    lg: { container: 'w-32 h-32 rounded-3xl border-4 shadow-[6px_6px_0px_0px_#111111]', text: 'text-6xl', dot: 18, orbitRadius: 44 },
+    xl: { container: 'w-40 h-40 rounded-3xl border-[5px] shadow-[8px_8px_0px_0px_#111111]', text: 'text-7xl', dot: 22, orbitRadius: 56 },
   };
 
   const currentSize = dimensions[size] || dimensions.lg;
 
   const content = (
-    <div className={cn("relative flex items-center justify-center p-8 select-none", className)}>
-      {/* Orbiting Container (Positioned outside the yellow box) */}
-      <motion.div
-        className="absolute flex items-center justify-center pointer-events-none z-20"
-        animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          duration: 1.6,
-          ease: "linear"
-        }}
-      >
-        {/* Pink Dot with Pulse Effect */}
-        <motion.div
-          className="absolute rounded-full bg-[#FF4D6D] border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111]"
-          style={{
-            width: currentSize.dot,
-            height: currentSize.dot,
-            transform: `translate(${currentSize.orbitRadius}px, 0px)`
-          }}
-          animate={{
-            scale: [1, 1.35, 1],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.2,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
-
-      {/* Neobrutalist Kyvo Logo Box with Subtle Pulse */}
+    <div className={cn("relative flex items-center justify-center p-2 select-none", className)}>
+      {/* Neobrutalist Kyvo Logo Box */}
       <motion.div
         animate={{
           scale: [1, 1.03, 1],
@@ -65,17 +36,47 @@ export function KyvoLoader({
           ease: "easeInOut"
         }}
         className={cn(
-          "relative flex items-center justify-center bg-[#FFD43B] border-[#111111] font-black z-10",
+          "relative flex items-center justify-center bg-[#FFD43B] border-[#111111] font-black overflow-hidden",
           currentSize.container
         )}
       >
-        {/* Letter K */}
+        {/* Letter K centered */}
         <span 
-          className={cn("text-[#111111] font-extrabold tracking-tighter leading-none translate-y-[-1px]", currentSize.text)}
+          className={cn("text-[#111111] font-extrabold tracking-tighter leading-none select-none flex items-center justify-center z-10", currentSize.text)}
           style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
         >
           K
         </span>
+
+        {/* Orbiting Container - 360 degree rotation around central K */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+          animate={{ rotate: 360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.3,
+            ease: "linear"
+          }}
+        >
+          {/* Pink Dot Circling K inside the card */}
+          <motion.div
+            className="absolute rounded-full bg-[#FF4D6D] border-2 border-[#111111] shadow-[1px_1px_0px_0px_#111111]"
+            style={{
+              width: currentSize.dot,
+              height: currentSize.dot,
+              left: `calc(50% + ${currentSize.orbitRadius}px - ${currentSize.dot / 2}px)`,
+              top: `calc(50% - ${currentSize.dot / 2}px)`,
+            }}
+            animate={{
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.3,
+              ease: "easeInOut"
+            }}
+          />
+        </motion.div>
       </motion.div>
     </div>
   );
