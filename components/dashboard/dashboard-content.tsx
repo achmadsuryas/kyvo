@@ -93,7 +93,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [activeTab, setActiveTab] = React.useState<'overview' | 'links' | 'analytics'>('overview');
 
   const equippedBadges = userBadgeItems.filter((ub) => ub.is_displayed !== false);
-  const activeLinks = initialLinks.filter((l) => l.is_enabled !== false);
+  const activeLinks = initialLinks.filter((l) => l.is_active !== false);
 
   // QR Modal state & Delete Account Modal State
   const [qrOpen, setQrOpen] = React.useState(false);
