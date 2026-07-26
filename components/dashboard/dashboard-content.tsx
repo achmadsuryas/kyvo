@@ -980,9 +980,15 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
               <div className="flex flex-col items-center text-center -mt-11 relative z-10 space-y-2">
                 <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="w-16 h-16 border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111]" />
                 <div className="space-y-0.5">
-                  <div className="flex items-center justify-center gap-1.5">
+                  <div className="flex items-center justify-center gap-1.5 flex-wrap">
                     <h4 className="text-lg sm:text-xl font-black text-[#111111] break-words">{displayName}</h4>
                     {isVerified && <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white shrink-0" />}
+                    {accountStatus === 'warned' && (
+                      <span title="Official Warning Issued" className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
+                        <span>WARNED</span>
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">kyvo.fun/{currentUsername}</p>
                 </div>

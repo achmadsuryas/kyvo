@@ -148,15 +148,7 @@ export function PublicProfileContainer({
           <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 sm:p-6 shadow-[6px_6px_0px_0px_#111111] relative overflow-hidden space-y-5">
             {/* Header Decorative Banner */}
             <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between">
-              <div className="flex items-center gap-2 flex-wrap">
-                <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
-                {profile.status === 'warned' && (
-                  <div className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-                    <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
-                    <span>WARNED</span>
-                  </div>
-                )}
-              </div>
+              <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
               
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
@@ -173,14 +165,20 @@ export function PublicProfileContainer({
                 displayName={profile.display_name || profile.username}
               />
               
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-center gap-1.5">
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-1.5 flex-wrap">
                   <h1 className="text-xl sm:text-2xl font-black text-[#111111]">
                     {profile.display_name || profile.username}
                   </h1>
                   {isVerifiedByAdmin && (
                     <span title="Verified Creator">
                       <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
+                    </span>
+                  )}
+                  {profile.status === 'warned' && (
+                    <span title="Official Warning Issued" className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                      <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
+                      <span>WARNED</span>
                     </span>
                   )}
                 </div>
