@@ -8,6 +8,7 @@ import { Accordion } from '@/components/ui/accordion';
 import { HeroMockup } from '@/components/cards/hero-mockup';
 import { FeatureCard } from '@/components/cards/feature-card';
 import { ClaimUsernameForm } from '@/components/forms/claim-username-form';
+import { getCurrentUserProfile } from '@/services/profile';
 import { FEATURES, FAQS, APP_CONFIG } from '@/constants';
 import { WelcomeScreen } from '@/components/landing/welcome-screen';
 
