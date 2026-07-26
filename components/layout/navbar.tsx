@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { signOut } from '@/actions/auth';
 import { NAV_LINKS, APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 interface NavbarProps {
   user?: {
@@ -89,16 +90,7 @@ export function Navbar({ user: initialUser }: NavbarProps) {
         {/* Navbar Top Bar */}
         <nav className="px-4 py-2.5 sm:px-5 sm:py-3 flex items-center justify-between">
           {/* Kyvo Favicon Logo & Text */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <img
-              src="/favicon.svg"
-              alt="Kyvo Logo"
-              className="w-7 h-7 sm:w-8 sm:h-8 group-hover:scale-105 transition-transform duration-200 drop-shadow-[2px_2px_0px_#111111]"
-            />
-            <span className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform duration-200">
-              {APP_CONFIG.name}
-            </span>
-          </Link>
+          <KyvoLogo href="/" />
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-6 font-black text-sm">

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { TwitterIcon, GithubIcon, LinkedinIcon, YoutubeIcon } from '@/components/shared/social-icons';
 import { APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 export function Footer() {
   const pathname = usePathname();
@@ -33,12 +34,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-4xl font-black tracking-tight text-[#111111]">
-              {APP_CONFIG.name}
-            </span>
-            <span className="w-3.5 h-3.5 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
-          </Link>
+          <KyvoLogo href="/" size="lg" />
           <p className="text-base md:text-lg font-bold text-[#111111]/80 max-w-md">
             {APP_CONFIG.tagline} {APP_CONFIG.description}
           </p>

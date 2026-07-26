@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Profile } from '@/types';
 import { signOut } from '@/actions/auth';
-import { APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 interface SidebarProps {
   profile: Profile | null;
@@ -25,7 +25,6 @@ export function Sidebar({ profile }: SidebarProps) {
   const avatarUrl = profile?.avatar_url || '';
   const isAdmin = profile?.role === 'admin';
 
-  // Navigation Items (My Public Profile removed as requested)
   const navItems = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   ];
@@ -34,10 +33,7 @@ export function Sidebar({ profile }: SidebarProps) {
     <>
       {/* Mobile Top Header */}
       <div className="lg:hidden sticky top-0 z-40 bg-[#F8F9FA] border-b-[3px] border-[#111111] p-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-black text-[#111111]">{APP_CONFIG.name}</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
-        </Link>
+        <KyvoLogo href="/" size="sm" />
         <button
           onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
           className="p-2 rounded-xl border-2 border-[#111111] bg-[#FFD43B] shadow-[2px_2px_0px_0px_#111111]"
@@ -51,12 +47,9 @@ export function Sidebar({ profile }: SidebarProps) {
       <aside className="hidden lg:flex w-72 flex-col fixed inset-y-0 left-0 bg-white border-r-[3px] border-[#111111] p-6 justify-between z-30">
         <div className="space-y-8">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 group pt-2">
-            <span className="text-3xl font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform duration-200">
-              {APP_CONFIG.name}
-            </span>
-            <span className="w-3 h-3 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
-          </Link>
+          <div className="pt-2">
+            <KyvoLogo href="/" size="md" />
+          </div>
 
           {/* User Brief Info Card */}
           <div className="rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B]/20 p-4 flex items-center gap-3 shadow-[3px_3px_0px_0px_#111111]">
@@ -140,7 +133,7 @@ export function Sidebar({ profile }: SidebarProps) {
           <div className="w-4/5 max-w-xs bg-white border-l-[3px] border-[#111111] h-full p-6 flex flex-col justify-between shadow-[-6px_0px_0px_0px_#111111]">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-black">{APP_CONFIG.name}</span>
+                <KyvoLogo href="/" size="sm" />
                 <button
                   onClick={() => setMobileDrawerOpen(false)}
                   className="p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white"

@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PublicProfileContainer } from '@/components/profile/public-profile-container';
 import { APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,15 +150,12 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         />
       )}
 
-      {/* Footer Branding with Custom Favicon Logo */}
+      {/* Footer Branding with Official KyvoLogo */}
       <footer className="w-full max-w-sm sm:max-w-md text-center py-2">
-        <p className="text-[11px] font-black text-[#111111]/60 flex items-center justify-center gap-1.5">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-black text-[#111111]/70">
           <span>Powered by</span>
-          <Link href="/" className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity">
-            <img src="/favicon.svg" alt="Kyvo Logo" className="w-4 h-4" />
-            <span className="underline font-black text-[#111111]">Kyvo</span>
-          </Link>
-        </p>
+          <KyvoLogo href="/" size="sm" />
+        </div>
       </footer>
     </div>
   );
