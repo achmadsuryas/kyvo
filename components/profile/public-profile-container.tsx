@@ -41,7 +41,7 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
         <circle cx="100" cy="100" r="40" fill="#FFD43B" stroke="#111111" strokeWidth="3.5" />
         
         {/* Clean Centered K Logo Text */}
-        <text x="100" y="114" fontFamily="Arial Black, Impact, sans-serif" fontSize="44" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
+        <text x="100" y="114" fontFamily='var(--font-bricolage), "Arial Black", Impact, sans-serif' fontSize="44" fontWeight="900" textAnchor="middle" fill="#111111">K</text>
       </svg>
     </div>
   );

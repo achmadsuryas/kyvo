@@ -37,10 +37,10 @@ export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 
       {/* Clean Centered Capital Letter K (Sharp Square Box, NO dots) */}
       <span
         className={cn(
-          "text-[#111111] font-extrabold tracking-tighter leading-none flex items-center justify-center translate-y-[-1px]",
+          "text-[#111111] font-black tracking-tighter leading-none flex items-center justify-center translate-y-[-1px]",
           textSizes[size] || textSizes.md
         )}
-        style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
+        style={{ fontFamily: 'var(--font-bricolage), "Arial Black", Impact, sans-serif' }}
       >
         K
       </span>
@@ -66,7 +66,7 @@ export function KyvoLogo({ size = 'md', showText = true, href, className }: Kyvo
             "font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform",
             textSizes[size] || textSizes.md
           )}
-          style={{ fontFamily: 'Arial Black, Impact, sans-serif' }}
+          style={{ fontFamily: 'var(--font-bricolage), "Arial Black", Impact, sans-serif' }}
         >
           Kyvo
         </span>
