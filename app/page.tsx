@@ -9,7 +9,7 @@ import { HeroMockup } from '@/components/cards/hero-mockup';
 import { FeatureCard } from '@/components/cards/feature-card';
 import { ClaimUsernameForm } from '@/components/forms/claim-username-form';
 import { getCurrentUserProfile } from '@/services/profile';
-import { FEATURES, FAQS, APP_CONFIG } from '@/constants';
+import { WelcomeScreen } from '@/components/landing/welcome-screen';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +18,9 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] bg-grid-lines flex flex-col font-sans selection:bg-[#FFD43B] relative overflow-hidden">
+      {/* 5-second Neobrutalism Welcome Screen Overlay */}
+      <WelcomeScreen />
+
       {/* Floating Centered Navbar */}
       <Navbar
         user={
