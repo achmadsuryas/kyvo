@@ -6,11 +6,8 @@
   <rect x="24" y="24" width="440" height="440" rx="96" fill="#FFD43B" stroke="#111111" stroke-width="28" />
   
   <!-- Black K Letter -->
-  <text x="210" y="340" font-family="Arial Black, Impact, sans-serif" font-size="280" font-weight="900" text-anchor="middle" fill="#111111">K</text>
+  <text x="235" y="340" font-family="Arial Black, Impact, sans-serif" font-size="290" font-weight="900" text-anchor="middle" fill="#111111">K</text>
   
-  <!-- Black Dot . -->
-  <text x="350" y="340" font-family="Arial Black, Impact, sans-serif" font-size="280" font-weight="900" text-anchor="middle" fill="#111111">.</text>
-  
-  <!-- Pink Circular Dot -->
+  <!-- Official Pink Circular Dot (#FF4D6D) -->
   <circle cx="365" cy="355" r="44" fill="#FF4D6D" stroke="#111111" stroke-width="16" />
 </svg>

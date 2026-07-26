@@ -3,16 +3,14 @@ import { Home, Sparkles, ArrowLeft, SearchX, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-between p-4 md:p-8 font-sans selection:bg-[#FFD43B]">
       {/* Top Header */}
       <header className="w-full max-w-xl flex items-center justify-between py-4">
-        <Link href="/" className="flex items-center gap-2 font-black text-3xl text-[#111111] hover:scale-105 transition-transform">
-          <span>{APP_CONFIG.name}</span>
-          <span className="w-3 h-3 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
-        </Link>
+        <KyvoLogo href="/" size="md" />
       </header>
 
       {/* Main 404 Error Content Box */}

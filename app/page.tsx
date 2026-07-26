@@ -36,7 +36,7 @@ export default async function LandingPage() {
       />
 
       {/* Subtle Neobrutalist Floating Background Accent Shapes */}
-      <div className="absolute top-28 left-10 w-24 h-24 rounded-full border-[3px] border-[#111111] bg-[#FFD43B]/20 pointer-events-none -z-10 hidden md:block" />
+      <div className="absolute top-28 left-10 w-24 h-24 rounded-3xl border-[3px] border-[#111111] bg-[#FFD43B]/20 -rotate-6 pointer-events-none -z-10 hidden md:block" />
       <div className="absolute top-96 right-12 w-32 h-32 rounded-3xl border-[3px] border-[#111111] bg-[#3B82F6]/15 rotate-12 pointer-events-none -z-10 hidden md:block" />
       <div className="absolute bottom-60 left-1/4 w-20 h-20 rounded-2xl border-[3px] border-[#111111] bg-[#FF4D6D]/20 -rotate-6 pointer-events-none -z-10 hidden md:block" />
 

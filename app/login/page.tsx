@@ -3,6 +3,7 @@ import { ArrowLeft, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 import { GoogleLoginForm } from '@/components/forms/google-login-form';
 import { Badge } from '@/components/ui/badge';
 import { APP_CONFIG } from '@/constants';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
 interface LoginPageProps {
   searchParams: Promise<{
@@ -30,12 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="rounded-3xl border-[4px] border-[#111111] bg-white p-8 md:p-10 shadow-[8px_8px_0px_0px_#111111] space-y-8">
           {/* Header */}
           <div className="text-center space-y-3">
-            <Link href="/" className="inline-flex items-center gap-2 group">
-              <span className="text-4xl font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform">
-                {APP_CONFIG.name}
-              </span>
-              <span className="w-3.5 h-3.5 rounded-full bg-[#FF4D6D] border-2 border-[#111111]" />
-            </Link>
+            <KyvoLogo href="/" size="lg" />
             
             <div className="flex justify-center">
               <Badge variant="default" className="text-xs font-black">

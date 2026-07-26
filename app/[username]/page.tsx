@@ -65,16 +65,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-between items-center p-3 sm:p-6 font-sans selection:bg-[#FFD43B]">
       {/* Top Header Bar with Custom Favicon Logo */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-1.5">
-        <Link href="/" className="flex items-center gap-2 group hover:scale-105 transition-transform">
-          <img
-            src="/favicon.svg"
-            alt="Kyvo Logo"
-            className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow-[2px_2px_0px_#111111]"
-          />
-          <span className="text-xl sm:text-2xl font-black tracking-tight text-[#111111]">
-            {APP_CONFIG.name}
-          </span>
-        </Link>
+        <KyvoLogo href="/" size="sm" />
 
         <Link href="/login">
           <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]">
