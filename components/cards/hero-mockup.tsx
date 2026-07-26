@@ -8,14 +8,33 @@ export function HeroMockup() {
   const GithubIcon = getIconComponent('Github');
   const TwitterIcon = getIconComponent('Twitter');
 
+  const [isWiggling, setIsWiggling] = React.useState(false);
+
+  React.useEffect(() => {
+    // Dynamic 3-second wiggle shake animation to bring landing page card to life!
+    const interval = setInterval(() => {
+      setIsWiggling(true);
+      setTimeout(() => {
+        setIsWiggling(false);
+      }, 600);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="w-full max-w-[310px] sm:max-w-[330px] relative group">
       {/* Background Accent Decorative Box */}
       <div className="absolute -inset-1.5 bg-[#FFD43B] rounded-3xl border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] rotate-2 group-hover:rotate-3 transition-transform duration-300 pointer-events-none" />
 
-      {/* Main Compact Mockup Card */}
-      <div className="relative rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 shadow-[6px_6px_0px_0px_#111111] space-y-4 -rotate-1 group-hover:rotate-0 transition-transform duration-300 overflow-hidden">
-        
+      {/* Main Compact Mockup Card with Dynamic 3-Second Wiggle Animation */}
+      <div
+        className={`relative rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 space-y-4 transition-all duration-300 overflow-hidden ${
+          isWiggling 
+            ? 'rotate-3 -translate-y-2 scale-[1.03] shadow-[9px_9px_0px_0px_#111111]' 
+            : '-rotate-1 group-hover:rotate-0 shadow-[6px_6px_0px_0px_#111111]'
+        }`}
+      >
         {/* Top Profile Banner with Views Counter & Window Controls */}
         <div className="relative w-full bg-[#3B82F6] rounded-2xl border-[2.5px] border-[#111111] p-2.5 h-24 flex items-start justify-between shadow-[2.5px_2.5px_0px_0px_#111111]">
           {/* Views Counter Pill */}

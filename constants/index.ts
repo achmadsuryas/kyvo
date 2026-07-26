@@ -58,17 +58,41 @@ export const NAV_LINKS = [
 
 export const FEATURES: FeatureItem[] = [
   {
+    id: 'music-player',
+    title: 'Background Music',
+    description: 'Upload your favorite MP3/WAV background music with an interactive vinyl record player on your profile.',
+    iconName: 'Music',
+    badge: 'Audio',
+    bgColor: '#A855F7',
+  },
+  {
+    id: 'custom-colors',
+    title: 'Custom Color Picker',
+    description: 'Customize button colors and themes using a built-in custom color picker with automatic contrast.',
+    iconName: 'Palette',
+    badge: 'Design',
+    bgColor: '#FFD43B',
+  },
+  {
+    id: 'badges-system',
+    title: 'Equipped Badges & Events',
+    description: 'Equip earned creator badges (Verified, Early Adopter, VIP) and claim free event promo badges.',
+    iconName: 'Award',
+    badge: 'Showcase',
+    bgColor: '#3B82F6',
+  },
+  {
     id: 'analytics',
     title: 'Real-time Analytics',
-    description: 'Track clicks, profile views, traffic sources, and audience engagement with live insights.',
+    description: 'Track link clicks, total profile views, and audience engagement with instant live performance insights.',
     iconName: 'BarChart3',
     badge: 'Insights',
-    bgColor: '#FFD43B',
+    bgColor: '#51CF66',
   },
   {
     id: 'qr-code',
     title: 'Instant QR Code',
-    description: 'Generate a downloadable, high-res Neobrutalist QR code to share your Kyvo page anywhere offline.',
+    description: 'Generate a downloadable high-res Neobrutalist QR code to share your profile anywhere offline.',
     iconName: 'QrCode',
     badge: 'Sharing',
     bgColor: '#FF4D6D',
@@ -76,10 +100,10 @@ export const FEATURES: FeatureItem[] = [
   {
     id: 'social-icons',
     title: 'Rich Social Icons',
-    description: 'Connect 30+ platforms including Instagram, TikTok, YouTube, GitHub, LinkedIn, Spotify & more.',
+    description: 'Connect 30+ platforms including Instagram, TikTok, YouTube, GitHub, LinkedIn, Spotify, WhatsApp & more.',
     iconName: 'Share2',
     badge: 'Integrations',
-    bgColor: '#A855F7',
+    bgColor: '#FFD43B',
   },
 ];
 

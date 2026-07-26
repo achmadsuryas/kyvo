@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Link as LinkIcon, BarChart3, QrCode, Zap, Share2, Palette, LucideIcon } from 'lucide-react';
+import { Link as LinkIcon, BarChart3, QrCode, Zap, Share2, Palette, Music, Award, LucideIcon } from 'lucide-react';
 import { FeatureItem } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
@@ -12,6 +12,8 @@ const iconMap: Record<string, LucideIcon> = {
   Zap,
   Share2,
   Palette,
+  Music,
+  Award,
 };
 
 interface FeatureCardProps {
