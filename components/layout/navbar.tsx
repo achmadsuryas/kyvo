@@ -145,14 +145,16 @@ export function Navbar({ user: initialUser }: NavbarProps) {
                       <span>Go to Dashboard</span>
                     </Link>
 
-                    <Link
+                    <a
                       href={`/${user.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 p-2 rounded-xl border-2 border-[#111111] bg-[#FFD43B] text-[#111111] font-extrabold text-xs hover:translate-x-1 transition-transform"
                     >
                       <ExternalLink className="w-4 h-4 stroke-[2.5]" />
                       <span>My Public Profile</span>
-                    </Link>
+                    </a>
 
                     <form action={signOut}>
                       <button
@@ -221,18 +223,24 @@ export function Navbar({ user: initialUser }: NavbarProps) {
                 {user ? (
                   <>
                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="default" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">
+                      <Button variant="default" className="w-full justify-center gap-2 text-xs font-black bg-[#3B82F6] text-white hover:bg-[#2563EB] shadow-[2.5px_2.5px_0px_0px_#111111]">
                         <LayoutDashboard className="w-4 h-4 stroke-[2.5]" />
                         <span>Go to Dashboard (@{user.username})</span>
                       </Button>
                     </Link>
 
-                    <Link href={`/${user.username}`} onClick={() => setMobileMenuOpen(false)}>
+                    <a
+                      href={`/${user.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full"
+                    >
                       <Button variant="yellow" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">
                         <ExternalLink className="w-4 h-4 stroke-[2.5]" />
                         <span>My Public Profile</span>
                       </Button>
-                    </Link>
+                    </a>
 
                     <form action={signOut}>
                       <Button variant="secondary" className="w-full justify-center gap-2 text-xs font-black shadow-[2.5px_2.5px_0px_0px_#111111]">

@@ -126,6 +126,38 @@
   }
 }
 
+/* Custom Neobrutalism Scrollbar Theme for All Browsers */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F9FA;
+  border-left: 2.5px solid #111111;
+  border-top: 2.5px solid #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFD43B;
+  border: 2.5px solid #111111;
+  border-radius: 9999px;
+  box-shadow: inset 1px 1px 0px 0px #111111;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF4D6D;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #3B82F6;
+}
+
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #FFD43B #F8F9FA;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
