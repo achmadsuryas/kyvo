@@ -89,8 +89,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const currentUsername = profile?.username || 'user';
   const role = profile?.role || 'user';
 
-  // Dashboard Tab state ('overview' | 'links' | 'analytics')
-  const [activeTab, setActiveTab] = React.useState<'overview' | 'links' | 'analytics'>('overview');
+  // Dashboard Tab state ('overview' | 'badges' | 'links' | 'analytics')
+  const [activeTab, setActiveTab] = React.useState<'overview' | 'badges' | 'links' | 'analytics'>('overview');
 
   const equippedBadges = userBadgeItems.filter((ub) => ub.is_displayed !== false);
   const activeLinks = initialLinks.filter((l) => l.is_active !== false);
@@ -464,48 +464,60 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
         {/* Left Column (lg:col-span-7): Tab Navigation + Tab Contents */}
         <div className="lg:col-span-7 space-y-8 w-full min-w-0">
-          {/* DEDICATED NEOBRUTALISM TAB NAVIGATION BAR */}
+          {/* DEDICATED NEOBRUTALISM 4-TAB NAVIGATION BAR */}
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 border-b-4 border-[#111111] pb-3 pt-1 px-1">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
               }`}
             >
               <User className="w-4 h-4 stroke-[2.5]" />
-              <span>Overview & Profile</span>
+              <span>Overview</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('badges')}
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+                activeTab === 'badges'
+                  ? 'bg-[#A855F7] text-white shadow-[4px_4px_0px_0px_#111111]'
+                  : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
+              }`}
+            >
+              <Award className="w-4 h-4 stroke-[2.5]" />
+              <span>My Badges</span>
             </button>
 
             <button
               onClick={() => setActiveTab('links')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
                 activeTab === 'links'
                   ? 'bg-[#FF4D6D] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
               }`}
             >
               <LinkIcon className="w-4 h-4 stroke-[2.5]" />
-              <span>My Badges & Links</span>
+              <span>Links</span>
             </button>
 
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl border-[3px] border-[#111111] font-black text-xs sm:text-sm transition-all cursor-pointer ${
                 activeTab === 'analytics'
                   ? 'bg-[#3B82F6] text-white shadow-[4px_4px_0px_0px_#111111]'
                   : 'bg-white text-[#111111] opacity-70 hover:opacity-100 hover:bg-gray-100'
               }`}
             >
               <BarChart3 className="w-4 h-4 stroke-[2.5]" />
-              <span>Analytics & Performance</span>
+              <span>Analytics</span>
             </button>
           </div>
 
-          {/* TAB CONTENT 1: OVERVIEW & PROFILE (ACCOUNT INFO + LIVE CARD PREVIEW) */}
+          {/* TAB CONTENT 1: OVERVIEW (ACCOUNT INFORMATION CARD) */}
           {activeTab === 'overview' && (
-            <div className="space-y-8 w-full animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Account Information Card */}
               <Card className="bg-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-6 md:p-8 w-full overflow-hidden">
                 <CardHeader className="px-0 pt-0 pb-5 border-b-2 border-dashed border-[#111111]/20">
@@ -831,125 +843,24 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   </div>
                 </CardContent>
               </Card>
-
-              {/* LIVE PROFILE CARD PREVIEW SHOWING EQUIPPED BADGES & ACTIVE LINKS */}
-              <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-6 md:p-8 w-full overflow-hidden space-y-5">
-                <div className="flex items-center justify-between border-b-2 border-dashed border-[#111111]/20 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-[#FFD43B]" />
-                    <h3 className="text-lg font-black text-[#111111]">Live Profile Card Preview</h3>
-                  </div>
-                  <Link href={`/${currentUsername}`} target="_blank">
-                    <Button variant="outline" size="sm" className="gap-1.5 font-black text-xs shadow-[2px_2px_0px_0px_#111111]">
-                      <span>Open Public Page</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Mockup Card Body */}
-                <div className="rounded-2xl border-[3px] border-[#111111] bg-[#F8F9FA] p-4 sm:p-6 space-y-4">
-                  {/* Profile Header */}
-                  <div className="flex flex-col items-center text-center space-y-2">
-                    <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="w-16 h-16 border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111]" />
-                    <div>
-                      <div className="flex items-center justify-center gap-1.5">
-                        <h4 className="text-xl font-black text-[#111111] break-words">{displayName}</h4>
-                        {isVerified && <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white shrink-0" />}
-                      </div>
-                      <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">kyvo.fun/{currentUsername}</p>
-                    </div>
-
-                    {bio && (
-                      <p className="text-xs font-bold text-[#111111]/80 max-w-md pt-0.5 break-words">{bio}</p>
-                    )}
-
-                    {/* EQUIPPED BADGES SHOWCASE */}
-                    <div className="w-full pt-2">
-                      <p className="text-[10px] font-black uppercase text-[#111111]/60 mb-2">Equipped Badges</p>
-                      {equippedBadges.length > 0 ? (
-                        <div className="flex flex-wrap items-center justify-center gap-2">
-                          {equippedBadges.map((ub) => {
-                            const BadgeIcon = getBadgeIconComponent(ub.badge?.icon);
-                            return (
-                              <div
-                                key={ub.id}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
-                              >
-                                <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                                <span>{ub.badge?.name}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-xs font-bold text-[#111111]/50 italic">No badges equipped yet. Switch to "My Badges & Links" tab to equip badges!</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ACTIVE LINKS */}
-                  <div className="space-y-2.5 pt-3 border-t-2 border-dashed border-[#111111]/20">
-                    <p className="text-[10px] font-black uppercase text-[#111111]/60">Active Links ({activeLinks.length})</p>
-                    {activeLinks.length > 0 ? (
-                      <div className="space-y-2">
-                        {activeLinks.map((link) => {
-                          const SocialIcon = getIconComponent(link.icon || 'Globe');
-                          return (
-                            <a
-                              key={link.id}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs text-[#111111] hover:bg-[#FFD43B] transition-colors"
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="p-1.5 rounded-lg border border-[#111111] bg-[#FFD43B] text-[#111111] shrink-0">
-                                  <SocialIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                                </div>
-                                <span className="truncate">{link.title}</span>
-                              </div>
-                              <ExternalLink className="w-3.5 h-3.5 stroke-[3] shrink-0" />
-                            </a>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-xs font-bold text-[#111111]/50 italic text-center py-2">No active links added yet.</p>
-                    )}
-                  </div>
-
-                  {/* MUSIC INDICATOR IF ACTIVE */}
-                  {musicUrl && (
-                    <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-between text-xs font-black text-[#A855F7]">
-                      <div className="flex items-center gap-2">
-                        <Disc className="w-4 h-4 animate-spin" />
-                        <span>Track: "{musicTitle || 'Custom Audio'}"</span>
-                      </div>
-                      <Badge variant="purple" className="text-[10px] font-black">Playing</Badge>
-                    </div>
-                  )}
-                </div>
-              </Card>
             </div>
           )}
 
-          {/* TAB CONTENT 2: MY BADGES & LINK MANAGER TOGETHER */}
+          {/* TAB CONTENT 2: MY BADGES (SEPARATE TAB) */}
+          {activeTab === 'badges' && (
+            <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
+              <UserBadgeShowcase initialUserBadges={userBadgeItems} />
+            </div>
+          )}
+
+          {/* TAB CONTENT 3: LINKS MANAGER (SEPARATE TAB) */}
           {activeTab === 'links' && (
-            <div className="space-y-8 w-full animate-in fade-in slide-in-from-top-2 duration-200">
-              {/* User Badge Equipment Showcase Card */}
-              <div className="w-full">
-                <UserBadgeShowcase initialUserBadges={userBadgeItems} />
-              </div>
-
-              {/* Link Manager Card */}
-              <div className="w-full">
-                <LinkManager initialLinks={initialLinks} />
-              </div>
+            <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
+              <LinkManager initialLinks={initialLinks} />
             </div>
           )}
 
-          {/* TAB CONTENT 3: DEDICATED ANALYTICS SECTION */}
+          {/* TAB CONTENT 4: DEDICATED ANALYTICS SECTION */}
           {activeTab === 'analytics' && (
             <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
               <AnalyticsSection profile={profile} links={initialLinks} />
@@ -957,8 +868,109 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           )}
         </div>
 
-        {/* Right Column: Dedicated for Kyvo Event / Ads */}
+        {/* Right Column (lg:col-span-5): LIVE PROFILE CARD PREVIEW (ALWAYS VISIBLE ABOVE KYVO EVENT BANNER ACROSS ALL TABS!) */}
         <div className="lg:col-span-5 space-y-8 w-full sticky top-24">
+          {/* LIVE PROFILE CARD PREVIEW */}
+          <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-5 md:p-6 w-full overflow-hidden space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-dashed border-[#111111]/20 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#FFD43B]" />
+                <h3 className="text-base sm:text-lg font-black text-[#111111]">Live Profile Card Preview</h3>
+              </div>
+              <Link href={`/${currentUsername}`} target="_blank">
+                <Button variant="outline" size="sm" className="gap-1.5 font-black text-xs shadow-[2px_2px_0px_0px_#111111]">
+                  <span>Open</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Mockup Card Body */}
+            <div className="rounded-2xl border-[3px] border-[#111111] bg-[#F8F9FA] p-4 sm:p-5 space-y-4">
+              {/* Profile Header */}
+              <div className="flex flex-col items-center text-center space-y-2">
+                <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="w-16 h-16 border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111]" />
+                <div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <h4 className="text-lg sm:text-xl font-black text-[#111111] break-words">{displayName}</h4>
+                    {isVerified && <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white shrink-0" />}
+                  </div>
+                  <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">kyvo.fun/{currentUsername}</p>
+                </div>
+
+                {bio && (
+                  <p className="text-xs font-bold text-[#111111]/80 max-w-xs pt-0.5 break-words">{bio}</p>
+                )}
+
+                {/* EQUIPPED BADGES SHOWCASE */}
+                <div className="w-full pt-2">
+                  <p className="text-[10px] font-black uppercase text-[#111111]/60 mb-2">Equipped Badges</p>
+                  {equippedBadges.length > 0 ? (
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {equippedBadges.map((ub) => {
+                        const BadgeIcon = getBadgeIconComponent(ub.badge?.icon);
+                        return (
+                          <div
+                            key={ub.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
+                          >
+                            <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>{ub.badge?.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs font-bold text-[#111111]/50 italic">No badges equipped yet. Equip badges in "My Badges" tab!</p>
+                  )}
+                </div>
+              </div>
+
+              {/* ACTIVE LINKS */}
+              <div className="space-y-2.5 pt-3 border-t-2 border-dashed border-[#111111]/20">
+                <p className="text-[10px] font-black uppercase text-[#111111]/60">Active Links ({activeLinks.length})</p>
+                {activeLinks.length > 0 ? (
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {activeLinks.map((link) => {
+                      const SocialIcon = getIconComponent(link.icon || 'Globe');
+                      return (
+                        <a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full rounded-xl border-2 border-[#111111] bg-white p-2.5 shadow-[2.5px_2.5px_0px_0px_#111111] flex items-center justify-between font-black text-xs text-[#111111] hover:bg-[#FFD43B] transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="p-1.5 rounded-lg border border-[#111111] bg-[#FFD43B] text-[#111111] shrink-0">
+                              <SocialIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                            </div>
+                            <span className="truncate">{link.title}</span>
+                          </div>
+                          <ExternalLink className="w-3.5 h-3.5 stroke-[3] shrink-0" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs font-bold text-[#111111]/50 italic text-center py-2">No active links added yet.</p>
+                )}
+              </div>
+
+              {/* MUSIC INDICATOR IF ACTIVE */}
+              {musicUrl && (
+                <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-between text-xs font-black text-[#A855F7]">
+                  <div className="flex items-center gap-2 truncate">
+                    <Disc className="w-4 h-4 animate-spin shrink-0" />
+                    <span className="truncate">Track: "{musicTitle || 'Custom Audio'}"</span>
+                  </div>
+                  <Badge variant="purple" className="text-[10px] font-black shrink-0">Playing</Badge>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* KYVO EVENT BANNER CARD */}
           <AdBannerCard 
             currentUsername={currentUsername} 
             availableEvents={availableBadges} 
