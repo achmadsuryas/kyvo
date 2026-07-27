@@ -61,7 +61,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
         </div>
 
         {/* LIST OF NEWS POSTS, PATCH NOTES & EVENT CARDS */}
-        <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
+        <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1 divide-y-2 divide-dashed divide-white/30">
           {!hasActiveEvents ? (
             /* CLEAN COMING SOON NEWS TEMPLATE */
             <div className="rounded-3xl border-[3px] border-[#111111] bg-white text-[#111111] p-6 md:p-8 shadow-[6px_6px_0px_0px_#111111] text-center space-y-4 my-auto">
@@ -79,7 +79,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
               </div>
             </div>
           ) : (
-            activeEventBadges.map((event) => {
+            activeEventBadges.map((event, idx) => {
               const BadgeIconComp = getBadgeIconComponent(event.icon);
 
               const isAlreadyClaimed = userBadgeItems.some(
@@ -95,12 +95,12 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
               // Claimable Badge post type (only if explicit or created as event badge)
               const isClaimableBadge = event.event_custom_title === 'claimable' || (!isPatchNote && !isAnnouncement);
 
-              // Plain Text Display for Announcements & Patch Notes (No card box, plain text with line dividers!)
+              // Plain Text Display for Announcements & Patch Notes (No card box, plain text with clean single divider!)
               if (!isClaimableBadge) {
                 return (
                   <div
                     key={event.id}
-                    className="pb-4 border-b-2 border-dashed border-white/30 last:border-b-0 last:pb-0 space-y-2 text-white"
+                    className={`${idx > 0 ? 'pt-4' : ''} space-y-2 text-white`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-2.5 min-w-0 flex-1">
@@ -131,57 +131,59 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
               return (
                 <div
                   key={event.id}
-                  className="rounded-2xl border-[3px] border-[#111111] bg-white text-[#111111] p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3"
+                  className={idx > 0 ? 'pt-4' : ''}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      {/* Icon Container */}
-                      <div
-                        className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0 mt-0.5"
-                        style={{ backgroundColor: event.bg_color || '#FFD43B', color: event.color || '#111111' }}
+                  <div className="rounded-2xl border-[3px] border-[#111111] bg-white text-[#111111] p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        {/* Icon Container */}
+                        <div
+                          className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0 mt-0.5"
+                          style={{ backgroundColor: event.bg_color || '#FFD43B', color: event.color || '#111111' }}
+                        >
+                          <BadgeIconComp className="w-5 h-5 stroke-[2.5]" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <h4 className="text-base font-black leading-tight break-words">{event.name}</h4>
+                          </div>
+                          <div className="text-xs font-bold text-[#111111]/80 leading-relaxed pt-1 break-words whitespace-pre-line">
+                            {event.description || 'Kyvo platform news and updates.'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <Badge
+                        variant="purple"
+                        className="text-[10px] font-black uppercase shrink-0"
                       >
-                        <BadgeIconComp className="w-5 h-5 stroke-[2.5]" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <h4 className="text-base font-black leading-tight break-words">{event.name}</h4>
-                        </div>
-                        <div className="text-xs font-bold text-[#111111]/80 leading-relaxed pt-1 break-words whitespace-pre-line">
-                          {event.description || 'Kyvo platform news and updates.'}
-                        </div>
-                      </div>
+                        Event
+                      </Badge>
                     </div>
 
-                    <Badge
-                      variant="purple"
-                      className="text-[10px] font-black uppercase shrink-0"
+                    <Button
+                      onClick={() => handleClaim(event.id)}
+                      disabled={isClaimingThis || isClaimedFinal}
+                      variant={isClaimedFinal ? "green" : "purple"}
+                      size="sm"
+                      className={`w-full justify-center font-black gap-2 text-xs shadow-[2px_2px_0px_0px_#111111] ${
+                        isClaimedFinal ? 'opacity-90 cursor-not-allowed bg-[#51CF66] text-[#111111]' : ''
+                      }`}
                     >
-                      Event
-                    </Badge>
+                      {isClaimingThis ? (
+                        <span className="animate-spin">⏳</span>
+                      ) : isClaimedFinal ? (
+                        <CheckCircle2 className="w-4 h-4 stroke-[3]" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 fill-[#FFD43B]" />
+                      )}
+                      <span>
+                        {isClaimedFinal
+                          ? 'Badge Claimed ✓'
+                          : 'Claim Free Event Badge'}
+                      </span>
+                    </Button>
                   </div>
-
-                  <Button
-                    onClick={() => handleClaim(event.id)}
-                    disabled={isClaimingThis || isClaimedFinal}
-                    variant={isClaimedFinal ? "green" : "purple"}
-                    size="sm"
-                    className={`w-full justify-center font-black gap-2 text-xs shadow-[2px_2px_0px_0px_#111111] ${
-                      isClaimedFinal ? 'opacity-90 cursor-not-allowed bg-[#51CF66] text-[#111111]' : ''
-                    }`}
-                  >
-                    {isClaimingThis ? (
-                      <span className="animate-spin">⏳</span>
-                    ) : isClaimedFinal ? (
-                      <CheckCircle2 className="w-4 h-4 stroke-[3]" />
-                    ) : (
-                      <Sparkles className="w-4 h-4 fill-[#FFD43B]" />
-                    )}
-                    <span>
-                      {isClaimedFinal
-                        ? 'Badge Claimed ✓'
-                        : 'Claim Free Event Badge'}
-                    </span>
-                  </Button>
                 </div>
               );
             })

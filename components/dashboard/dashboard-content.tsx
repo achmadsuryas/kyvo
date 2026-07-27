@@ -1085,7 +1085,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
       {/* FLOATING STICKY UNSAVED CHANGES ALERT BAR */}
       {hasUnsavedChanges && (
-        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] p-3 sm:p-3.5 shadow-[6px_6px_0px_0px_#111111] flex items-center justify-between gap-2 sm:gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-lg rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] p-3 sm:p-4 shadow-[5px_5px_0px_0px_#111111] flex items-center justify-between gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <div className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-[#111111] shrink-0 stroke-[2.5]" />
             <span className="text-xs sm:text-sm font-black text-[#111111] truncate">

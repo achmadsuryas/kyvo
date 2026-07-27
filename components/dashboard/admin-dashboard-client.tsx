@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Headphones, Users, Award } from 'lucide-react';
+import { Headphones, Users, Megaphone } from 'lucide-react';
 import { Profile, BadgeItem, AdminUserItem, SupportTicket } from '@/types';
 import { AdminSupportManager } from '@/components/dashboard/admin-support-manager';
 import { UserManagementTable } from '@/components/dashboard/user-management-table';
@@ -68,8 +68,8 @@ export function AdminDashboardClient({
               : 'bg-transparent text-[#111111]/70 hover:bg-[#FFD43B]/20 hover:text-[#111111]'
           }`}
         >
-          <Award className="w-4 h-4 stroke-[2.5]" />
-          <span>Badge Manager</span>
+          <Megaphone className="w-4 h-4 stroke-[2.5]" />
+          <span>KYVO NEWS</span>
           <span className="ml-1 text-[11px] px-2 py-0.5 rounded-md bg-[#FF4D6D] text-white border border-[#111111]">
             {badges.length}
           </span>

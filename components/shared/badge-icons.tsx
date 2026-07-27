@@ -33,7 +33,7 @@ export const BADGE_ICONS_MAP: Record<string, React.ComponentType<LucideProps>> =
 };
 
 export const AVAILABLE_BADGE_ICONS = [
-  { name: 'Megaphone', label: 'Megaphone (Toa 📢)' },
+  { name: 'Megaphone', label: 'Megaphone' },
   { name: 'Rocket', label: 'Rocket' },
   { name: 'Sparkles', label: 'Sparkles' },
   { name: 'Crown', label: 'Crown' },
