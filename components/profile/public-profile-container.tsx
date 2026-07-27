@@ -255,28 +255,46 @@ export function PublicProfileContainer({
             )}
 
             {/* SOCIAL MEDIA ICONS ROW BELOW BIO */}
-            {profile.social_links && Object.keys(profile.social_links).some((key) => Boolean(profile.social_links?.[key])) && (
-              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
-                {Object.entries(profile.social_links).map(([platform, val]) => {
-                  if (!val || !val.trim()) return null;
-                  const finalUrl = formatSocialUrl(platform, val);
-                  const IconComponent = getIconComponent(platform);
+            {(() => {
+              let parsedSocialLinks: Record<string, string> = {};
+              if (profile.social_links) {
+                if (typeof profile.social_links === 'string') {
+                  try {
+                    parsedSocialLinks = JSON.parse(profile.social_links);
+                  } catch {
+                    parsedSocialLinks = {};
+                  }
+                } else if (typeof profile.social_links === 'object') {
+                  parsedSocialLinks = profile.social_links;
+                }
+              }
 
-                  return (
-                    <a
-                      key={platform}
-                      href={finalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={platform}
-                      className={`p-2.5 sm:p-3 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center`}
-                    >
-                      <IconComponent className="w-5 h-5 stroke-[2.5]" />
-                    </a>
-                  );
-                })}
-              </div>
-            )}
+              const hasLinks = Object.keys(parsedSocialLinks).some((k) => Boolean(parsedSocialLinks[k] && typeof parsedSocialLinks[k] === 'string' && parsedSocialLinks[k].trim()));
+              if (!hasLinks) return null;
+
+              return (
+                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                  {Object.entries(parsedSocialLinks).map(([platform, val]) => {
+                    if (!val || typeof val !== 'string' || !val.trim()) return null;
+                    const finalUrl = formatSocialUrl(platform, val);
+                    const IconComponent = getIconComponent(platform);
+
+                    return (
+                      <a
+                        key={platform}
+                        href={finalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={platform}
+                        className="p-2.5 sm:p-3 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center"
+                      >
+                        <IconComponent className="w-5 h-5 stroke-[2.5]" />
+                      </a>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           {/* ANIMATED SPINNING VINYL RECORD DISK & CONTROLLER (SHARP BORDERS NO ROUNDED) */}

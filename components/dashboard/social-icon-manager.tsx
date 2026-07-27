@@ -116,11 +116,13 @@ export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps
         )}
       </div>
 
-      {/* Add Social Icon Form */}
+      {/* Add Social Icon Form with Graphical SVG Icon Picker */}
       {isAddOpen && (
-        <form onSubmit={handleAddOrUpdate} className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-3 animate-in zoom-in-95 duration-200">
+        <form onSubmit={handleAddOrUpdate} className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-3.5 animate-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between border-b border-dashed border-[#111111]/20 pb-2">
-            <span className="text-xs font-black uppercase text-[#111111]">Add New Social Icon</span>
+            <span className="text-xs font-black uppercase text-[#111111]">
+              Select Social Icon ({currentPlatformObj.label})
+            </span>
             <button
               type="button"
               onClick={() => setIsAddOpen(false)}
@@ -130,35 +132,48 @@ export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div className="sm:col-span-5 space-y-1">
-              <label className="text-xs font-black uppercase text-[#111111]/70">Platform</label>
-              <select
-                value={selectedPlatform}
-                onChange={(e) => {
-                  setSelectedPlatform(e.target.value);
-                  setInputValue(socialLinks[e.target.value] || '');
-                }}
-                className="w-full rounded-xl border-2 border-[#111111] bg-white p-2 font-black text-xs outline-none cursor-pointer"
-              >
-                {SOCIAL_PLATFORMS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
+          {/* Visual SVG Icon Picker Grid */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-black uppercase text-[#111111]/70">
+              Choose Platform Icon
+            </label>
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-2 rounded-xl border-2 border-[#111111] bg-white">
+              {SOCIAL_PLATFORMS.map((p) => {
+                const IconComp = p.icon;
+                const isSelected = selectedPlatform === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedPlatform(p.id);
+                      setInputValue(socialLinks[p.id] || '');
+                    }}
+                    className={`aspect-square p-2 rounded-xl border-2 border-[#111111] flex items-center justify-center transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'bg-[#FFD43B] text-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] scale-105'
+                        : 'bg-[#F8F9FA] text-[#111111]/80 hover:bg-[#3B82F6] hover:text-white'
+                    }`}
+                    title={p.label}
+                  >
+                    <IconComp className="w-5 h-5 flex-shrink-0" />
+                  </button>
+                );
+              })}
             </div>
+          </div>
 
-            <div className="sm:col-span-7 space-y-1">
-              <label className="text-xs font-black uppercase text-[#111111]/70">Handle / URL</label>
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder={currentPlatformObj.placeholder}
-                className="w-full rounded-xl border-2 border-[#111111] bg-white p-2 font-bold text-xs outline-none focus:border-[#3B82F6]"
-              />
-            </div>
+          <div className="space-y-1 pt-1">
+            <label className="text-xs font-black uppercase text-[#111111]/70">
+              {currentPlatformObj.label} Handle / URL
+            </label>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder={currentPlatformObj.placeholder}
+              className="w-full rounded-xl border-2 border-[#111111] bg-white p-2.5 font-bold text-xs outline-none focus:border-[#3B82F6]"
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-1">

@@ -227,6 +227,20 @@ export const PRESET_ICONS = [
 ];
 
 export const getIconComponent = (iconName: string): React.ComponentType<{ className?: string }> => {
-  const found = PRESET_ICONS.find(i => i.name.toLowerCase() === (iconName || '').toLowerCase());
+  const query = (iconName || '').toLowerCase().trim();
+  if (query === 'telegram' || query === 'send') return Send;
+  if (query === 'x' || query === 'twitter') return TwitterIcon;
+  if (query === 'website' || query === 'portfolio' || query === 'globe') return Globe;
+  if (query === 'ig' || query === 'instagram') return InstagramIcon;
+  if (query === 'yt' || query === 'youtube') return YoutubeIcon;
+  if (query === 'tiktok') return TiktokIcon;
+  if (query === 'spotify') return SpotifyIcon;
+  if (query === 'github') return GithubIcon;
+  if (query === 'linkedin') return LinkedinIcon;
+  if (query === 'discord') return DiscordIcon;
+  if (query === 'whatsapp') return WhatsappIcon;
+  if (query === 'facebook') return FacebookIcon;
+
+  const found = PRESET_ICONS.find(i => i.name.toLowerCase() === query);
   return found ? found.component : Globe;
 };
