@@ -227,25 +227,32 @@ export function PublicProfileContainer({
                 @{profile.username}
               </p>
 
-              {/* Granted Badges Pills */}
-              {profile.badges && profile.badges.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
-                  {profile.badges.map((b) => {
-                    const BadgeIcon = getBadgeIconComponent(b.icon);
+              {/* Granted Badges Pills (Excludes Verified Creator badge pill, which is shown as blue checkmark icon instead!) */}
+              {(() => {
+                const displayableBadges = (profile.badges || []).filter(
+                  (b) => !b.name.toLowerCase().includes('verified')
+                );
+                if (displayableBadges.length === 0) return null;
 
-                    return (
-                      <span
-                        key={b.id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#111111] font-black text-xs uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
-                        style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
-                      >
-                        <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>{b.name}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
+                return (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
+                    {displayableBadges.map((b) => {
+                      const BadgeIcon = getBadgeIconComponent(b.icon);
+
+                      return (
+                        <span
+                          key={b.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#111111] font-black text-xs uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
+                          style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
+                        >
+                          <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>{b.name}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             {profile.bio && (

@@ -184,10 +184,10 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
         <div>
           <div className="flex items-center gap-2">
             <Award className="w-6 h-6 text-[#A855F7] stroke-[2.5]" />
-            <CardTitle className="text-2xl font-black">Badge & Event Manager</CardTitle>
+            <CardTitle className="text-2xl font-black">Bulletin, Patch Notes & Event Manager</CardTitle>
           </div>
           <CardDescription className="text-sm font-bold">
-            Create system badges, verify creators, or publish free claimable Event Badges for user dashboard promo banners.
+            Post Kyvo bulletin updates, system patch notes, announcements, or publish free claimable Event Badges on user notice board.
           </CardDescription>
         </div>
 
@@ -201,7 +201,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
           className="gap-2 font-black shadow-[3px_3px_0px_0px_#111111]"
         >
           <Plus className="w-5 h-5 stroke-[3]" />
-          <span>{isOpen ? 'Close Form' : 'Create New Badge / Event'}</span>
+          <span>{isOpen ? 'Close Form' : 'Publish Bulletin / Patch Note / Event'}</span>
         </Button>
       </CardHeader>
 

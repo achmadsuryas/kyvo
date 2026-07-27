@@ -21,7 +21,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
   const [claimingId, setClaimingId] = React.useState<string | null>(null);
   const [recentlyClaimedIds, setRecentlyClaimedIds] = React.useState<string[]>([]);
 
-  // Filter ONLY active event banners (Ended events are hidden from user promo list)
+  // Filter ONLY active bulletin posts and event banners
   const activeEventBadges = availableEvents.filter((b) => b.is_event && b.is_active !== false);
 
   const handleClaim = async (badgeId: string) => {
@@ -41,46 +41,43 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
   };
 
   const hasActiveEvents = activeEventBadges.length > 0;
-  const topActiveEvent = activeEventBadges[0];
 
   return (
     <Card className="bg-[#3B82F6] text-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-5 md:p-8 space-y-6 h-full flex flex-col justify-between relative overflow-hidden">
       <div className="space-y-6 relative z-10">
-        {/* Top Banner Header Tag */}
+        {/* Top Bulletin Header Tag */}
         <div className="flex items-center justify-between">
-          <Badge variant="default" className="text-xs font-black text-[#111111] gap-1.5">
-            <Megaphone className="w-3.5 h-3.5" />
-            <span>KYVO EVENTS</span>
+          <Badge variant="default" className="text-xs font-black text-[#111111] gap-1.5 bg-[#FFD43B]">
+            <Megaphone className="w-3.5 h-3.5 text-[#111111]" />
+            <span>KYVO BULLETIN & PATCH NOTES</span>
           </Badge>
         </div>
 
-        {/* Dynamic Admin-Customized Promo Section Header (Only visible when active events exist) */}
-        {hasActiveEvents && (
-          <div className="space-y-2 animate-in fade-in duration-200">
-            <h3 className="text-2xl md:text-3xl font-black leading-tight break-words">
-              {topActiveEvent?.name || 'Claim Creator Event Badges! 🚀'}
-            </h3>
-            <p className="text-xs sm:text-sm font-bold text-white/90 leading-relaxed break-words">
-              {topActiveEvent?.description || 'Exclusive Creator Events created by Admin. Claim free badges to equip on your public profile!'}
-            </p>
-          </div>
-        )}
+        {/* Section Title */}
+        <div className="space-y-1.5 animate-in fade-in duration-200">
+          <h3 className="text-2xl md:text-3xl font-black leading-tight break-words">
+            Notice Board 📌
+          </h3>
+          <p className="text-xs sm:text-sm font-bold text-white/90 leading-relaxed break-words">
+            Official Kyvo announcements, system patch notes, events, and creator news.
+          </p>
+        </div>
 
-        {/* LIST OF ACTIVE EVENT BADGES OR CLEAN COMING SOON TEMPLATE */}
+        {/* LIST OF BULLETIN POSTS / EVENT CARDS */}
         <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
           {!hasActiveEvents ? (
-            /* CLEAN COMING SOON TEMPLATE CARD WHEN NO ACTIVE EVENTS EXIST */
+            /* CLEAN COMING SOON BULLETIN TEMPLATE */
             <div className="rounded-3xl border-[3px] border-[#111111] bg-white text-[#111111] p-6 md:p-8 shadow-[6px_6px_0px_0px_#111111] text-center space-y-4 my-auto">
               <div className="w-16 h-16 rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] mx-auto flex items-center justify-center shadow-[3px_3px_0px_0px_#111111]">
                 <CalendarCheck className="w-8 h-8 text-[#111111] stroke-[2.5]" />
               </div>
               <div className="space-y-2">
                 <Badge variant="purple" className="text-[10px] font-black uppercase">
-                  COMING SOON
+                  BULLETIN BOARD
                 </Badge>
-                <h4 className="text-xl font-black text-[#111111]">No Active Events Right Now</h4>
+                <h4 className="text-xl font-black text-[#111111]">No New Notices</h4>
                 <p className="text-xs font-bold text-[#111111]/70 leading-relaxed max-w-xs mx-auto pt-1">
-                  Stay tuned! New exclusive creator badges and special promo events will be launched soon by Admin. Check back regularly!
+                  Everything is up to date! Check back later for new platform updates, patch notes, and creator events.
                 </p>
               </div>
             </div>
@@ -94,6 +91,8 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
               const isClaimedFinal = isAlreadyClaimed || recentlyClaimedIds.includes(event.id);
               const isClaimingThis = claimingId === event.id;
 
+              const isPatchNote = event.name.toLowerCase().includes('patch') || event.name.toLowerCase().includes('update');
+
               return (
                 <div
                   key={event.id}
@@ -101,7 +100,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      {/* Admin Custom Vector Icon */}
+                      {/* Icon Container */}
                       <div
                         className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0"
                         style={{ backgroundColor: event.bg_color || '#FFD43B', color: event.color || '#111111' }}
@@ -112,21 +111,21 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                         <div className="flex items-center gap-1.5 min-w-0">
                           <h4 className="text-base font-black leading-tight break-words">{event.name}</h4>
                         </div>
-                        <p className="text-xs font-bold text-[#111111]/70 leading-normal pt-0.5 break-words">
-                          {event.description || 'Special event badge for creators'}
+                        <p className="text-xs font-bold text-[#111111]/80 leading-relaxed pt-1 break-words">
+                          {event.description || 'Kyvo platform notice and creator news.'}
                         </p>
                       </div>
                     </div>
 
                     <Badge
-                      variant="green"
+                      variant={isPatchNote ? "green" : "purple"}
                       className="text-[10px] font-black uppercase shrink-0"
                     >
-                      Active
+                      {isPatchNote ? 'Patch Note' : 'Event'}
                     </Badge>
                   </div>
 
-                  {/* Claim Button */}
+                  {/* Claim Button for Event Badges */}
                   <Button
                     onClick={() => handleClaim(event.id)}
                     disabled={isClaimingThis || isClaimedFinal}
@@ -156,7 +155,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
         </div>
       </div>
 
-      {/* Bottom Link (Points to Kyvo Home Page) */}
+      {/* Bottom Link */}
       <div className="pt-3 border-t-2 border-dashed border-white/30 flex items-center justify-between text-xs font-extrabold text-white/90 relative z-10">
         <span className="truncate flex items-center gap-1.5">
           <Home className="w-3.5 h-3.5" />

@@ -50,13 +50,27 @@ export function UserBadgeShowcase({ initialUserBadges }: UserBadgeShowcaseProps)
       </CardHeader>
 
       <CardContent className="px-0 pt-1 space-y-3">
-        {userBadges.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {userBadges.map((ub) => {
-              if (!ub.badge) return null;
-              const IconComp = getBadgeIconComponent(ub.badge.icon);
-              const isEquipped = ub.is_displayed !== false;
-              const isLoading = loadingBadgeId === ub.id;
+        {(() => {
+          const displayableBadges = userBadges.filter(
+            (ub) => ub.badge && !ub.badge.name.toLowerCase().includes('verified')
+          );
+          if (displayableBadges.length === 0) {
+            return (
+              <div className="rounded-xl border-2 border-dashed border-[#111111]/20 p-4 text-center bg-[#F8F9FA]">
+                <p className="text-xs font-bold text-[#111111]/60">
+                  No equipped profile badges available. Event badges claimed will appear here!
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {displayableBadges.map((ub) => {
+                if (!ub.badge) return null;
+                const IconComp = getBadgeIconComponent(ub.badge.icon);
+                const isEquipped = ub.is_displayed !== false;
+                const isLoading = loadingBadgeId === ub.id;
 
               return (
                 <div
@@ -117,16 +131,9 @@ export function UserBadgeShowcase({ initialUserBadges }: UserBadgeShowcaseProps)
               );
             })}
           </div>
-        ) : (
-          <div className="p-6 text-center rounded-2xl border-2 border-dashed border-[#111111]/30 bg-[#F8F9FA] space-y-1.5">
-            <Sparkles className="w-6 h-6 text-[#FF4D6D] mx-auto" />
-            <p className="text-xs font-black text-[#111111]">No Badges Earned Yet</p>
-            <p className="text-[11px] font-bold text-[#111111]/60">
-              Claim the free event badge in the promo card to get started!
-            </p>
-          </div>
-        )}
-      </CardContent>
+        );
+      })()}
+    </CardContent>
     </Card>
   );
 }
