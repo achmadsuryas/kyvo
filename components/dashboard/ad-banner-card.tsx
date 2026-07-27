@@ -123,7 +123,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                     </div>
 
                     <Badge
-                      variant={isPatchNote ? "green" : isAnnouncement ? "yellow" : "purple"}
+                      variant={isPatchNote ? "green" : isAnnouncement ? "default" : "purple"}
                       className="text-[10px] font-black uppercase shrink-0"
                     >
                       {isPatchNote ? 'Patch Note' : isAnnouncement ? 'News' : 'Event'}

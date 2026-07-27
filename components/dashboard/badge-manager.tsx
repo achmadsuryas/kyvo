@@ -12,7 +12,9 @@ import {
   Loader2, 
   Sparkles, 
   Edit3,
-  Power
+  Power,
+  Megaphone,
+  FileText,
 } from 'lucide-react';
 import { BadgeItem } from '@/types';
 import { createBadge, updateBadge, deleteBadge, toggleBadgeActive } from '@/actions/badges';
@@ -738,7 +740,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </Button>
               <Button type="submit" variant="yellow" size="sm" disabled={isCreating} className="gap-1 font-black">
                 {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Award className="w-4 h-4 stroke-[3]" />}
-                <span>{badgeType === 'event' ? 'Publish Event Badge' : 'Publish Regular Badge'}</span>
+                <span>{postCategory === 'regular' ? 'Publish Regular Badge' : 'Publish to Kyvo News'}</span>
               </Button>
             </div>
           </form>
