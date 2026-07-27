@@ -1098,10 +1098,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           {/* TAB CONTENT 2: DEDICATED MY BADGES SHOWCASE (SEPARATE TAB) */}
           {activeTab === 'badges' && (
             <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
-              <UserBadgeShowcase 
-                userBadgeItems={userBadgeItems} 
-                availableBadges={availableBadges} 
-              />
+              <UserBadgeShowcase initialUserBadges={userBadgeItems} />
             </div>
           )}
 
