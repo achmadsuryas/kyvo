@@ -86,7 +86,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [musicUrl, setMusicUrl] = React.useState<string | null>((profile as any)?.music_url || null);
   const [musicTitle, setMusicTitle] = React.useState<string>((profile as any)?.music_title || '');
   const email = profile?.email || 'user@kyvo.fun';
-  const currentUsername = profile?.username || 'user';
+  const [currentUsername, setCurrentUsername] = React.useState(profile?.username || 'user');
   const role = profile?.role || 'user';
 
   // Dashboard Tab state ('overview' | 'badges' | 'links' | 'analytics')
