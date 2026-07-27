@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Eye, Award, Volume2, Ban } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Eye, Award, Volume2, Ban, Palette } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -132,6 +132,62 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
   const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
+
+  // Theme Cards & Custom Outer Background state
+  const [selectedTheme, setSelectedTheme] = React.useState<string>(profile?.theme || 'neobrutalism');
+  const [customBgColor, setCustomBgColor] = React.useState<string>(profile?.theme_bg_color || '#F8F9FA');
+  const [isSavingTheme, setIsSavingTheme] = React.useState(false);
+
+  const THEME_CARDS = [
+    {
+      id: 'neobrutalism',
+      name: 'Default Neobrutalism',
+      description: 'Classic yellow neobrutalism theme',
+      previewCardBg: 'bg-white text-[#111111] border-[#111111]',
+      accentBg: '#FFD43B',
+      defaultOuterBg: '#F8F9FA',
+      badgeText: 'DEFAULT',
+    },
+    {
+      id: 'feminine',
+      name: 'Cute Pink',
+      description: 'Soft pastel pink theme for girls',
+      previewCardBg: 'bg-[#FFF0F5] text-[#111111] border-[#FF4D6D]',
+      accentBg: '#FF4D6D',
+      defaultOuterBg: '#FFE4E1',
+      badgeText: 'FEMININE',
+    },
+    {
+      id: 'dark',
+      name: 'Cyberpunk Dark',
+      description: 'Sleek dark mode theme with purple accents',
+      previewCardBg: 'bg-[#18181B] text-white border-[#A855F7]',
+      accentBg: '#A855F7',
+      defaultOuterBg: '#09090B',
+      badgeText: 'DARK',
+    },
+  ];
+
+  const handleSaveTheme = async (themeId: string, bgCol: string) => {
+    setIsSavingTheme(true);
+    const res = await updateUserProfileDetails({
+      display_name: displayName,
+      bio: bio,
+      avatar_url: avatarUrl,
+      theme: themeId,
+      theme_bg_color: bgCol,
+    });
+    setIsSavingTheme(false);
+
+    if (res.success) {
+      toast.success('Theme & Background color updated!');
+      setSelectedTheme(themeId);
+      setCustomBgColor(bgCol);
+      router.refresh();
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images (Max 4.5 MB)
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -824,6 +880,135 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         <span>Profile Bio</span>
                       </div>
                       <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text break-words">{bio}</p>
+                    </div>
+                  )}
+
+                  {/* PROFILE THEMES & CUSTOM BACKGROUND COLOR SELECTOR WIDGET */}
+                  {!isEditingDetails && (
+                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-4 w-full min-w-0">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/20 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-5 h-5 text-[#3B82F6] stroke-[2.5]" />
+                            <h4 className="text-sm font-black text-[#111111]">Profile Theme Cards</h4>
+                          </div>
+                          <p className="text-xs font-bold text-[#111111]/70">
+                            Choose a theme card style and customize outer page background color
+                          </p>
+                        </div>
+                        
+                        <Button
+                          onClick={() => handleSaveTheme(selectedTheme, customBgColor)}
+                          disabled={isSavingTheme}
+                          variant="yellow"
+                          size="sm"
+                          className="font-black text-xs gap-1 shadow-[2px_2px_0px_0px_#111111] shrink-0"
+                        >
+                          {isSavingTheme ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                          <span>Save Theme</span>
+                        </Button>
+                      </div>
+
+                      {/* 3 Theme Selection Cards Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {THEME_CARDS.map((item) => {
+                          const isSelected = selectedTheme === item.id;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedTheme(item.id);
+                                setCustomBgColor(item.defaultOuterBg);
+                              }}
+                              className={`rounded-xl border-2 p-3 text-left transition-all cursor-pointer relative flex flex-col justify-between space-y-3 ${item.previewCardBg} ${
+                                isSelected
+                                  ? 'border-[3px] border-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.02]'
+                                  : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md border border-[#111111] bg-white text-[#111111] shadow-[1px_1px_0px_0px_#111111]">
+                                  {item.badgeText}
+                                </span>
+                                {isSelected && (
+                                  <span className="w-5 h-5 rounded-full bg-[#51CF66] border border-[#111111] text-[#111111] flex items-center justify-center shadow-[1px_1px_0px_0px_#111111]">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                  </span>
+                                )}
+                              </div>
+
+                              <div>
+                                <h5 className="text-xs font-black">{item.name}</h5>
+                                <p className="text-[10px] font-bold opacity-75">{item.description}</p>
+                              </div>
+
+                              {/* Mini Color Swatch */}
+                              <div className="flex items-center gap-1.5 pt-1 border-t border-current/20">
+                                <span
+                                  className="w-4 h-4 rounded-full border border-[#111111]"
+                                  style={{ backgroundColor: item.accentBg }}
+                                  title="Accent Color"
+                                />
+                                <span
+                                  className="w-4 h-4 rounded-full border border-[#111111]"
+                                  style={{ backgroundColor: item.defaultOuterBg }}
+                                  title="Outer BG Color"
+                                />
+                                <span className="text-[9px] font-extrabold opacity-60">Preview</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Custom Outer Background Color Picker */}
+                      <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 space-y-2">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                          <label className="text-xs font-black uppercase text-[#111111]/80 flex items-center gap-1.5">
+                            <Palette className="w-3.5 h-3.5 text-[#A855F7]" />
+                            <span>Outer Page Background Color</span>
+                          </label>
+                          
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={customBgColor}
+                              onChange={(e) => setCustomBgColor(e.target.value)}
+                              className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer bg-transparent p-0"
+                              title="Choose custom background color"
+                            />
+                            <span className="text-xs font-black text-[#111111] uppercase bg-white px-2 py-1 rounded-md border border-[#111111]">
+                              {customBgColor}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentThemeObj = THEME_CARDS.find((t) => t.id === selectedTheme);
+                                if (currentThemeObj) setCustomBgColor(currentThemeObj.defaultOuterBg);
+                              }}
+                              className="text-[10px] font-black underline text-[#3B82F6] hover:text-[#111111]"
+                            >
+                              Reset Default
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Quick Color Preset Pills */}
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                          <span className="text-[10px] font-black text-[#111111]/60">Quick Presets:</span>
+                          {['#F8F9FA', '#FFE4E1', '#09090B', '#FFD43B', '#3B82F6', '#51CF66', '#A855F7', '#FF4D6D'].map((hex) => (
+                            <button
+                              key={hex}
+                              type="button"
+                              onClick={() => setCustomBgColor(hex)}
+                              className="w-5 h-5 rounded-full border border-[#111111] shadow-[1px_1px_0px_0px_#111111] transition-transform hover:scale-110 cursor-pointer"
+                              style={{ backgroundColor: hex }}
+                              title={hex}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
 

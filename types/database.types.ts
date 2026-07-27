@@ -18,6 +18,7 @@ export interface Profile {
   music_url?: string | null;
   music_title?: string | null;
   theme: string | null;
+  theme_bg_color?: string | null;
   role: 'user' | 'admin' | string | null;
   status: 'active' | 'warned' | 'banned' | string | null;
   status_reason?: string | null;

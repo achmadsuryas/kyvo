@@ -61,8 +61,16 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     )
   );
 
+  const isDarkTheme = profile.theme === 'dark';
+  const isFeminineTheme = profile.theme === 'feminine';
+  const defaultOuterBg = isDarkTheme ? '#09090B' : isFeminineTheme ? '#FFE4E1' : '#F8F9FA';
+  const outerBgColor = profile.theme_bg_color || defaultOuterBg;
+
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-between items-center p-3 sm:p-6 font-sans selection:bg-[#FFD43B]">
+    <div
+      className="min-h-screen flex flex-col justify-between items-center p-3 sm:p-6 font-sans selection:bg-[#FFD43B] transition-colors duration-300"
+      style={{ backgroundColor: outerBgColor }}
+    >
       {/* Top Header Bar with Custom Favicon Logo */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-1.5">
         <KyvoLogo href="/" size="sm" />

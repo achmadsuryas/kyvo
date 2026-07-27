@@ -79,6 +79,8 @@ export async function updateUserProfileDetails(details: {
   avatar_url?: string | null;
   music_url?: string | null;
   music_title?: string | null;
+  theme?: string | null;
+  theme_bg_color?: string | null;
 }): Promise<{ success: boolean; message: string }> {
   try {
     const supabase = await createClient();
@@ -93,6 +95,14 @@ export async function updateUserProfileDetails(details: {
       bio: details.bio.trim(),
       updated_at: new Date().toISOString(),
     };
+
+    if (details.theme !== undefined) {
+      updatePayload.theme = details.theme;
+    }
+
+    if (details.theme_bg_color !== undefined) {
+      updatePayload.theme_bg_color = details.theme_bg_color;
+    }
 
     // Fetch current profile to check for old avatar/music files in storage
     const { data: currentProfile } = await supabase

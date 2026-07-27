@@ -9,9 +9,10 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS views_count INTEGER DEFAULT
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_onboarded BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.profiles ALTER COLUMN is_onboarded SET DEFAULT FALSE;
 
--- 3. Ensure music_url and music_title columns exist on profiles table for background music
+-- 3. Ensure music_url, music_title, and theme_bg_color columns exist on profiles table
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS music_url TEXT DEFAULT NULL;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS music_title TEXT DEFAULT NULL;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS theme_bg_color TEXT DEFAULT NULL;
 
 -- 4. Ensure clicks_count, bg_color, and sort_order columns exist on links table
 ALTER TABLE public.links ADD COLUMN IF NOT EXISTS clicks_count INTEGER DEFAULT 0;

@@ -63,6 +63,21 @@ export function PublicProfileContainer({
 }: PublicProfileContainerProps) {
   const hasMusic = Boolean(profile.music_url);
 
+  const isDarkTheme = profile.theme === 'dark';
+  const isFeminineTheme = profile.theme === 'feminine';
+
+  const cardStyle = isDarkTheme
+    ? 'bg-[#18181B] text-white border-[#A855F7] shadow-[6px_6px_0px_0px_#A855F7]'
+    : isFeminineTheme
+    ? 'bg-[#FFF0F5] text-[#111111] border-[#FF4D6D] shadow-[6px_6px_0px_0px_#FF4D6D]'
+    : 'bg-white text-[#111111] border-[#111111] shadow-[6px_6px_0px_0px_#111111]';
+
+  const bannerBg = isDarkTheme
+    ? 'bg-[#A855F7] border-[#A855F7]'
+    : isFeminineTheme
+    ? 'bg-[#FF4D6D] border-[#FF4D6D]'
+    : 'bg-[#3B82F6] border-[#111111]';
+
   // If user has music, visitor must click trigger button to unlock audio autoplay and view profile card!
   const [hasTriggered, setHasTriggered] = React.useState(!hasMusic);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -125,7 +140,7 @@ export function PublicProfileContainer({
                 {profile.display_name || profile.username}
               </h2>
               <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs mx-auto">
-                {profile.music_title ? `Track: "${profile.music_title}"` : 'Click below to enter profile & enjoy music!'}
+                {profile.music_title ? `Track: "${profile.music_title}"` : 'Click below to enter profile & listen music!'}
               </p>
             </div>
 
@@ -145,9 +160,9 @@ export function PublicProfileContainer({
       {/* 2. MAIN PUBLIC CREATOR PROFILE CARD */}
       {hasTriggered && (
         <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6 animate-in fade-in duration-300">
-          <div className="rounded-3xl border-[3.5px] border-[#111111] bg-white p-4 sm:p-6 shadow-[6px_6px_0px_0px_#111111] relative overflow-hidden space-y-5">
+          <div className={`rounded-3xl border-[3.5px] p-4 sm:p-6 relative overflow-hidden space-y-5 ${cardStyle}`}>
             {/* Header Decorative Banner */}
-            <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between">
+            <div className={`h-16 sm:h-20 w-full rounded-2xl border-[2.5px] relative overflow-hidden p-3 flex items-start justify-between ${bannerBg}`}>
               <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
               
               <div className="flex gap-1.5">
