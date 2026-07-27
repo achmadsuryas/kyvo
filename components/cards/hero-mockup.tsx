@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Globe, ExternalLink, CheckCircle2, QrCode, Share2, Sparkles, Crown } from 'lucide-react';
+import { Globe, ExternalLink, CheckCircle2, QrCode, Share2, Sparkles } from 'lucide-react';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
@@ -64,12 +64,6 @@ export function HeroMockup() {
             </p>
           </div>
 
-          {/* Granted Badge Showcase Pill */}
-          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#A855F7] text-white text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-            <Crown className="w-3 h-3 text-white stroke-[2.5]" />
-            <span>KYVO VIP</span>
-          </div>
-
           {/* Bio Text */}
           <p className="text-xs font-extrabold text-[#111111]/80 max-w-[240px] leading-snug pt-0.5">
             One Link. Everywhere. ⚡ Creating bold Neobrutalist bio pages for creators worldwide.
@@ -119,21 +113,11 @@ export function HeroMockup() {
           </div>
         </div>
 
-        {/* Share & QR Code Line Footer */}
-        <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-between text-[10px] font-black text-[#FF4D6D]">
-          <span className="flex items-center gap-1">
-            <Share2 className="w-3 h-3 stroke-[2.5]" />
-            <span>Share Profile</span>
-          </span>
-          <span className="flex items-center gap-1 text-[#3B82F6]">
-            <span>Scan QR</span>
-            <QrCode className="w-3 h-3" />
-          </span>
-        </div>
-
-        {/* Footer Accent */}
-        <div className="text-center text-[9px] font-black text-[#111111]/60 uppercase tracking-widest pt-0.5">
-          POWERED BY <span className="underline text-[#111111]">KYVO</span>
+        {/* Centered Share & Scan QR Code Line Footer */}
+        <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-center gap-1.5 text-[10px] font-black text-[#FF4D6D]">
+          <Share2 className="w-3 h-3 stroke-[2.5]" />
+          <span>Share Profile & Scan QR Code</span>
+          <QrCode className="w-3 h-3 text-[#3B82F6]" />
         </div>
       </div>
     </div>
