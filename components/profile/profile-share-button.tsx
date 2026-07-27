@@ -7,24 +7,26 @@ import { QRCodeModal } from '@/components/shared/qr-code-modal';
 interface ProfileShareButtonProps {
   username: string;
   displayName: string;
-  isDarkTheme?: boolean;
+  isDarkBg?: boolean;
 }
 
-export function ProfileShareButton({ username, displayName, isDarkTheme }: ProfileShareButtonProps) {
+export function ProfileShareButton({ username, displayName, isDarkBg }: ProfileShareButtonProps) {
   const [qrOpen, setQrOpen] = React.useState(false);
 
   return (
     <>
-      <button
-        onClick={() => setQrOpen(true)}
-        className={`w-full pt-4 border-t-2 border-dashed ${
-          isDarkTheme ? 'border-white/20 text-white hover:text-[#A855F7]' : 'border-[#111111]/20 text-[#111111] hover:text-[#3B82F6]'
-        } flex items-center justify-center text-xs font-black transition-colors cursor-pointer gap-2`}
-      >
-        <Share2 className="w-4 h-4 text-[#FF4D6D]" />
-        <span>Share Profile & Scan QR Code</span>
-        <QrCode className="w-4 h-4 text-[#3B82F6]" />
-      </button>
+      <div className="w-full pt-4 flex justify-center">
+        <button
+          onClick={() => setQrOpen(true)}
+          className={`w-full max-w-xs sm:max-w-sm py-2.5 px-4 rounded-xl border-2 border-[#111111] ${
+            isDarkBg ? 'bg-[#18181B] text-white hover:bg-[#FFD43B] hover:text-[#111111]' : 'bg-white text-[#111111] hover:bg-[#FFD43B]'
+          } shadow-[2.5px_2.5px_0px_0px_#111111] flex items-center justify-center text-xs font-black transition-all cursor-pointer gap-2`}
+        >
+          <Share2 className="w-4 h-4 text-[#FF4D6D]" />
+          <span>Share Profile & Scan QR Code</span>
+          <QrCode className="w-4 h-4 text-[#3B82F6]" />
+        </button>
+      </div>
 
       <QRCodeModal
         open={qrOpen}

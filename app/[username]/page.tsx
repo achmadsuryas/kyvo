@@ -41,6 +41,17 @@ export async function generateMetadata({ params }: PublicProfileProps): Promise<
   };
 }
 
+function isDarkColor(hexColor?: string | null): boolean {
+  if (!hexColor || !hexColor.startsWith('#')) return false;
+  const hex = hexColor.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance <= 0.5;
+}
+
 export default async function PublicProfilePage({ params }: PublicProfileProps) {
   const resolvedParams = await params;
   const profile = await getProfileByUsername(resolvedParams.username);
@@ -61,10 +72,8 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     )
   );
 
-  const isDarkTheme = profile.theme === 'dark';
-  const isFeminineTheme = profile.theme === 'feminine';
-  const defaultOuterBg = isDarkTheme ? '#09090B' : isFeminineTheme ? '#FFE4E1' : '#F8F9FA';
-  const outerBgColor = profile.theme_bg_color || defaultOuterBg;
+  const outerBgColor = profile.theme_bg_color || '#F8F9FA';
+  const isDarkBg = isDarkColor(outerBgColor);
 
   return (
     <div
@@ -73,7 +82,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     >
       {/* Top Header Bar with Custom Favicon Logo */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-1.5">
-        <KyvoLogo href="/" size="sm" textColor={isDarkTheme ? "text-white" : "text-[#111111]"} />
+        <KyvoLogo href="/" size="sm" textColor={isDarkBg ? "text-white" : "text-[#111111]"} />
 
         <Link href="/login">
           <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]">
@@ -141,21 +150,13 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
           </div>
         </main>
       ) : (
-        /* SLEEK PUBLIC PROFILE CONTAINER (Supports Music Trigger, Spinning Vinyl Disk & Play/Pause Controls!) */
+        /* SLEEK PUBLIC PROFILE CONTAINER */
         <PublicProfileContainer
           profile={profile}
           isVerifiedByAdmin={isVerifiedByAdmin}
           bgColors={bgColors}
         />
       )}
-
-      {/* Footer Branding with Official KyvoLogo */}
-      <footer className="w-full max-w-sm sm:max-w-md text-center py-2">
-        <div className={`flex items-center justify-center gap-1.5 text-xs font-black ${isDarkTheme ? "text-white/80" : "text-[#111111]/70"}`}>
-          <span>Powered by</span>
-          <KyvoLogo href="/" size="sm" textColor={isDarkTheme ? "text-white" : "text-[#111111]"} />
-        </div>
-      </footer>
     </div>
   );
 }

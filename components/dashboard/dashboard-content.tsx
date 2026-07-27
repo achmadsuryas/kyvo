@@ -876,90 +876,38 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     </div>
                   )}
 
-                  {/* PROFILE THEMES & CUSTOM BACKGROUND COLOR SELECTOR WIDGET */}
+                  {/* PUBLIC PROFILE BACKGROUND COLOR SELECTOR WIDGET */}
                   {!isEditingDetails && (
-                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-4 w-full min-w-0">
+                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3 w-full min-w-0">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/20 pb-3">
                         <div>
                           <div className="flex items-center gap-2">
                             <Palette className="w-5 h-5 text-[#3B82F6] stroke-[2.5]" />
-                            <h4 className="text-sm font-black text-[#111111]">Profile Theme Cards</h4>
+                            <h4 className="text-sm font-black text-[#111111]">Background Color</h4>
                           </div>
                           <p className="text-xs font-bold text-[#111111]/70">
-                            Choose a theme card style and customize outer page background color
+                            Customize the background color for your public profile page
                           </p>
                         </div>
                         
                         <Button
-                          onClick={() => handleSaveTheme(selectedTheme, customBgColor)}
+                          onClick={() => handleSaveTheme('default', customBgColor)}
                           disabled={isSavingTheme}
                           variant="yellow"
                           size="sm"
                           className="font-black text-xs gap-1 shadow-[2px_2px_0px_0px_#111111] shrink-0"
                         >
                           {isSavingTheme ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                          <span>Save Theme</span>
+                          <span>Save Background Color</span>
                         </Button>
                       </div>
 
-                      {/* 3 Theme Selection Cards Grid (Compact & Space-Efficient) */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        {THEME_CARDS.map((item) => {
-                          const isSelected = selectedTheme === item.id;
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedTheme(item.id);
-                                setCustomBgColor(item.defaultOuterBg);
-                              }}
-                              className={`rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer relative flex flex-col justify-between space-y-2 ${item.previewCardBg} ${
-                                isSelected
-                                  ? 'border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] scale-[1.01]'
-                                  : 'opacity-80 hover:opacity-100'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-1.5">
-                                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-[#111111] bg-white text-[#111111] shadow-[1px_1px_0px_0px_#111111]">
-                                  {item.badgeText}
-                                </span>
-                                {isSelected && (
-                                  <span className="w-4 h-4 rounded-full bg-[#51CF66] border border-[#111111] text-[#111111] flex items-center justify-center shadow-[1px_1px_0px_0px_#111111]">
-                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                  </span>
-                                )}
-                              </div>
-
-                              <div>
-                                <h5 className="text-xs font-black leading-tight">{item.name}</h5>
-                              </div>
-
-                              {/* Compact Swatch */}
-                              <div className="flex items-center gap-1.5 pt-1 border-t border-current/20">
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border border-[#111111]"
-                                  style={{ backgroundColor: item.accentBg }}
-                                  title="Accent Color"
-                                />
-                                <span
-                                  className="w-3.5 h-3.5 rounded-full border border-[#111111]"
-                                  style={{ backgroundColor: item.defaultOuterBg }}
-                                  title="Outer BG Color"
-                                />
-                                <span className="text-[9px] font-bold opacity-60">Theme Color</span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Custom Outer Background Color Picker */}
-                      <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 space-y-2">
+                      {/* Background Color Picker & Presets */}
+                      <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 space-y-2.5">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                           <label className="text-xs font-black uppercase text-[#111111]/80 flex items-center gap-1.5">
                             <Palette className="w-3.5 h-3.5 text-[#A855F7]" />
-                            <span>Outer Page Background Color</span>
+                            <span>Select Color</span>
                           </label>
                           
                           <div className="flex items-center gap-2">
@@ -970,15 +918,12 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                               className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer bg-transparent p-0"
                               title="Choose custom background color"
                             />
-                            <span className="text-xs font-black text-[#111111] uppercase bg-white px-2 py-1 rounded-md border border-[#111111]">
+                            <span className="text-xs font-black text-[#111111] uppercase bg-white px-2.5 py-1 rounded-md border border-[#111111] shadow-[1px_1px_0px_0px_#111111]">
                               {customBgColor}
                             </span>
                             <button
                               type="button"
-                              onClick={() => {
-                                const currentThemeObj = THEME_CARDS.find((t) => t.id === selectedTheme);
-                                if (currentThemeObj) setCustomBgColor(currentThemeObj.defaultOuterBg);
-                              }}
+                              onClick={() => setCustomBgColor('#F8F9FA')}
                               className="text-[10px] font-black underline text-[#3B82F6] hover:text-[#111111]"
                             >
                               Reset Default
@@ -987,8 +932,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         </div>
 
                         {/* Quick Color Preset Pills */}
-                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                          <span className="text-[10px] font-black text-[#111111]/60">Quick Presets:</span>
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-black/10">
+                          <span className="text-[10px] font-black text-[#111111]/60">Presets:</span>
                           {['#F8F9FA', '#FFE4E1', '#09090B', '#FFD43B', '#3B82F6', '#51CF66', '#A855F7', '#FF4D6D'].map((hex) => (
                             <button
                               key={hex}

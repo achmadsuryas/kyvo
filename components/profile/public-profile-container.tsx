@@ -47,6 +47,17 @@ function VinylRecordDisk({ size = 'lg', isSpinning = true }: { size?: 'sm' | 'lg
   );
 }
 
+function isDarkColor(hexColor?: string | null): boolean {
+  if (!hexColor || !hexColor.startsWith('#')) return false;
+  const hex = hexColor.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance <= 0.5;
+}
+
 interface PublicProfileContainerProps {
   profile: Profile & {
     links: LinkItem[];
@@ -62,21 +73,7 @@ export function PublicProfileContainer({
   bgColors,
 }: PublicProfileContainerProps) {
   const hasMusic = Boolean(profile.music_url);
-
-  const isDarkTheme = profile.theme === 'dark';
-  const isFeminineTheme = profile.theme === 'feminine';
-
-  const cardStyle = isDarkTheme
-    ? 'bg-[#18181B] text-white border-[#A855F7] shadow-[6px_6px_0px_0px_#A855F7]'
-    : isFeminineTheme
-    ? 'bg-[#FFF0F5] text-[#111111] border-[#FF4D6D] shadow-[6px_6px_0px_0px_#FF4D6D]'
-    : 'bg-white text-[#111111] border-[#111111] shadow-[6px_6px_0px_0px_#111111]';
-
-  const bannerBg = isDarkTheme
-    ? 'bg-[#A855F7] border-[#A855F7]'
-    : isFeminineTheme
-    ? 'bg-[#FF4D6D] border-[#FF4D6D]'
-    : 'bg-[#3B82F6] border-[#111111]';
+  const isDarkBg = isDarkColor(profile.theme_bg_color);
 
   // If user has music, visitor must click trigger button to unlock audio autoplay and view profile card!
   const [hasTriggered, setHasTriggered] = React.useState(!hasMusic);
@@ -157,138 +154,128 @@ export function PublicProfileContainer({
         </div>
       )}
 
-      {/* 2. MAIN PUBLIC CREATOR PROFILE CARD */}
+      {/* 2. MAIN PUBLIC CREATOR PROFILE (SEAMLESS CLEAN PROFILE WITHOUT OUTER CARD BORDER) */}
       {hasTriggered && (
-        <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6 animate-in fade-in duration-300">
-          <div className={`rounded-3xl border-[3.5px] p-4 sm:p-6 relative overflow-hidden space-y-5 ${cardStyle}`}>
-            {/* Header Decorative Banner */}
-            <div className={`h-16 sm:h-20 w-full rounded-2xl border-[2.5px] relative overflow-hidden p-3 flex items-start justify-between ${bannerBg}`}>
-              <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
-              
-              <div className="flex gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FFD43B]" />
-                <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#51CF66]" />
-              </div>
+        <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6 animate-in fade-in duration-300 space-y-5">
+          {/* Header Decorative Banner */}
+          <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between shadow-[3px_3px_0px_0px_#111111]">
+            <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
+            
+            <div className="flex gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
+              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FFD43B]" />
+              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#51CF66]" />
             </div>
+          </div>
 
-            {/* User Info Section */}
-            <div className="flex flex-col items-center text-center -mt-12 sm:-mt-14 relative z-10 space-y-2">
-              <InteractiveAvatar
-                src={profile.avatar_url}
-                fallback={profile.display_name || profile.username}
-                displayName={profile.display_name || profile.username}
-              />
-              
-              <div className="space-y-1">
-                <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  <h1 className={`text-xl sm:text-2xl font-black ${isDarkTheme ? 'text-white' : 'text-[#111111]'}`}>
-                    {profile.display_name || profile.username}
-                  </h1>
-                  {isVerifiedByAdmin && (
-                    <span title="Verified Creator">
-                      <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
-                    </span>
-                  )}
-                  {profile.status === 'warned' && (
-                    <span title="Official Warning Issued" className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-                      <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
-                      <span>WARNED</span>
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">
-                  @{profile.username}
-                </p>
-
-                {/* Granted Badges Pills */}
-                {profile.badges && profile.badges.length > 0 && (
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
-                    {profile.badges.map((b) => {
-                      const BadgeIcon = getBadgeIconComponent(b.icon);
-
-                      return (
-                        <span
-                          key={b.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#111111] font-black text-[10px] uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
-                          style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
-                        >
-                          <BadgeIcon className="w-3 h-3 stroke-[2.5]" />
-                          <span>{b.name}</span>
-                        </span>
-                      );
-                    })}
-                  </div>
+          {/* User Info Section */}
+          <div className="flex flex-col items-center text-center -mt-12 sm:-mt-14 relative z-10 space-y-2">
+            <InteractiveAvatar
+              src={profile.avatar_url}
+              fallback={profile.display_name || profile.username}
+              displayName={profile.display_name || profile.username}
+            />
+            
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                <h1 className={`text-xl sm:text-2xl font-black ${isDarkBg ? 'text-white' : 'text-[#111111]'}`}>
+                  {profile.display_name || profile.username}
+                </h1>
+                {isVerifiedByAdmin && (
+                  <span title="Verified Creator">
+                    <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
+                  </span>
+                )}
+                {profile.status === 'warned' && (
+                  <span title="Official Warning Issued" className="inline-flex items-center gap-1 bg-[#FFD43B] text-[#111111] px-2 py-0.5 rounded-lg border-2 border-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#FF4D6D] stroke-[2.5]" />
+                    <span>WARNED</span>
+                  </span>
                 )}
               </div>
+              <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">
+                @{profile.username}
+              </p>
 
-              {profile.bio && (
-                <p className={`text-xs sm:text-sm font-extrabold max-w-xs leading-relaxed pt-0.5 ${isDarkTheme ? 'text-white/90' : 'text-[#111111]/80'}`}>
-                  {profile.bio}
-                </p>
+              {/* Granted Badges Pills */}
+              {profile.badges && profile.badges.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
+                  {profile.badges.map((b) => {
+                    const BadgeIcon = getBadgeIconComponent(b.icon);
+
+                    return (
+                      <span
+                        key={b.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#111111] font-black text-[10px] uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
+                        style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
+                      >
+                        <BadgeIcon className="w-3 h-3 stroke-[2.5]" />
+                        <span>{b.name}</span>
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            {/* ANIMATED SPINNING PERFECT VINYL RECORD DISK & MUTE CONTROLLER */}
-            {hasMusic && (
-              <div className={`rounded-2xl border-[2.5px] p-3 flex items-center justify-between gap-3 ${
-                isDarkTheme
-                  ? 'bg-[#27272A] border-[#A855F7] text-white shadow-[3px_3px_0px_0px_#A855F7]'
-                  : isFeminineTheme
-                  ? 'bg-[#FFD6E8] border-[#FF4D6D] text-[#111111] shadow-[3px_3px_0px_0px_#FF4D6D]'
-                  : 'bg-[#FFD43B]/25 border-[#111111] text-[#111111] shadow-[3px_3px_0px_0px_#111111]'
-              }`}>
-                {/* Left: Perfectly Round Pure Vector Vinyl Disk */}
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <VinylRecordDisk size="sm" isSpinning={isPlaying} />
+            {profile.bio && (
+              <p className={`text-xs sm:text-sm font-extrabold max-w-xs leading-relaxed pt-0.5 ${isDarkBg ? 'text-white/90' : 'text-[#111111]/80'}`}>
+                {profile.bio}
+              </p>
+            )}
+          </div>
 
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-[10px] font-black uppercase tracking-wider ${isDarkTheme ? 'text-white/70' : 'text-[#111111]/60'}`}>
-                      Background Music
-                    </p>
-                    <p className={`text-xs font-black truncate ${isDarkTheme ? 'text-white' : 'text-[#111111]'}`}>
-                      {profile.music_title || 'Audio Track'}
-                    </p>
-                  </div>
-                </div>
+          {/* ANIMATED SPINNING VINYL RECORD DISK & CONTROLLER */}
+          {hasMusic && (
+            <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-3 flex items-center justify-between gap-3 shadow-[3px_3px_0px_0px_#111111] text-[#111111]">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <VinylRecordDisk size="sm" isSpinning={isPlaying} />
 
-                {/* Right: Mute / Unmute Control Button Only */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    onClick={toggleMute}
-                    className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] font-black text-xs shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors flex items-center gap-1.5 cursor-pointer"
-                    title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
-                  >
-                    {isMuted ? (
-                      <>
-                        <VolumeX className="w-4 h-4 text-[#FF4D6D]" />
-                        <span>Unmute</span>
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="w-4 h-4 text-[#3B82F6]" />
-                        <span>Mute</span>
-                      </>
-                    )}
-                  </button>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-[#111111]/60">
+                    Background Music
+                  </p>
+                  <p className="text-xs font-black truncate text-[#111111]">
+                    {profile.music_title || 'Audio Track'}
+                  </p>
                 </div>
               </div>
-            )}
 
-            {/* Links List with Click Tracking */}
-            <div className="space-y-2.5 pt-1">
-              {profile.links.map((link, idx) => (
-                <TrackedLinkItem
-                  key={link.id}
-                  link={link}
-                  bgClass={bgColors[idx % bgColors.length]}
-                />
-              ))}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={toggleMute}
+                  className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] text-[#111111] font-black text-xs shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+                >
+                  {isMuted ? (
+                    <>
+                      <VolumeX className="w-4 h-4 text-[#FF4D6D]" />
+                      <span>Unmute</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="w-4 h-4 text-[#3B82F6]" />
+                      <span>Mute</span>
+                    </>
+                  ) }
+                </button>
+              </div>
             </div>
+          )}
 
-            {/* Share Profile & QR Code Action */}
-            <ProfileShareButton username={profile.username} displayName={profile.display_name || profile.username} isDarkTheme={isDarkTheme} />
+          {/* Links List with Click Tracking */}
+          <div className="space-y-2.5 pt-1">
+            {profile.links.map((link, idx) => (
+              <TrackedLinkItem
+                key={link.id}
+                link={link}
+                bgClass={bgColors[idx % bgColors.length]}
+              />
+            ))}
           </div>
+
+          {/* Share Profile & Scan QR Code Footer Action */}
+          <ProfileShareButton username={profile.username} displayName={profile.display_name || profile.username} isDarkBg={isDarkBg} />
         </main>
       )}
     </div>
