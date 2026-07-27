@@ -736,9 +736,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                               setEditAvatarUrl(null);
                               toast.info('Photo removed! Click "Save All Settings" to apply.');
                             }}
-                            variant="destructive"
+                            variant="outline"
                             size="sm"
-                            className="font-black text-xs gap-1.5 shadow-[2px_2px_0px_0px_#111111] cursor-pointer flex-1 sm:flex-initial justify-center"
+                            className="font-black text-xs gap-1.5 shadow-[2px_2px_0px_0px_#111111] cursor-pointer flex-1 sm:flex-initial justify-center bg-[#FF4D6D] text-white hover:bg-[#FF4D6D]/90"
                           >
                             <Trash2 className="w-4 h-4" />
                             <span>Remove Photo</span>
