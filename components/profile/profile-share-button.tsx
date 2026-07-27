@@ -15,15 +15,15 @@ export function ProfileShareButton({ username, displayName, isDarkBg }: ProfileS
 
   return (
     <>
-      <div className="w-full pt-4 flex justify-center">
+      <div className="w-full pt-2 flex justify-center">
         <button
           onClick={() => setQrOpen(true)}
-          className={`w-full max-w-xs sm:max-w-sm py-2.5 px-4 rounded-xl border-2 border-[#111111] ${
-            isDarkBg ? 'bg-[#18181B] text-white hover:bg-[#FFD43B] hover:text-[#111111]' : 'bg-white text-[#111111] hover:bg-[#FFD43B]'
-          } shadow-[2.5px_2.5px_0px_0px_#111111] flex items-center justify-center text-xs font-black transition-all cursor-pointer gap-2`}
+          className={`inline-flex items-center justify-center gap-2 py-2 px-3 text-xs sm:text-sm font-black transition-all cursor-pointer hover:opacity-80 ${
+            isDarkBg ? 'text-white' : 'text-[#111111]'
+          }`}
         >
           <Share2 className="w-4 h-4 text-[#FF4D6D]" />
-          <span>Share Profile & Scan QR Code</span>
+          <span className="underline decoration-2 underline-offset-4">Share Profile & Scan QR Code</span>
           <QrCode className="w-4 h-4 text-[#3B82F6]" />
         </button>
       </div>
