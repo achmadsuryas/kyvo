@@ -475,7 +475,7 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                                 className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-[#111111] bg-[#3B82F6] text-white font-black text-xs hover:translate-x-1 transition-transform cursor-pointer"
                               >
                                 <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-                                <span>{isVerified ? 'Unverify Creator' : 'Verify Creator (Checkmark)'}</span>
+                                <span>{isVerified ? 'Unverify Creator' : 'Verify Creator'}</span>
                               </button>
 
                               {/* Manage Badges */}

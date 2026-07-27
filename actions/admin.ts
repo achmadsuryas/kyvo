@@ -258,7 +258,27 @@ export async function toggleVerifiedBadge(profileId: string, currentIsVerified: 
       revalidatePath('/[username]');
       return { success: true, message: 'Verified Creator status removed.' };
     } else {
-      // Grant Verified Badge
+      // Ensure system "Verified Creator" badge row exists in badges table so FK constraint never fails
+      const { data: existingBadge } = await supabase
+        .from('badges')
+        .select('id')
+        .eq('id', verifiedBadgeId)
+        .maybeSingle();
+
+      if (!existingBadge) {
+        await (supabase.from('badges') as any).upsert({
+          id: verifiedBadgeId,
+          name: 'Verified Creator',
+          description: 'Verified authentic creator badge',
+          icon: 'CheckCircle2',
+          color: '#3B82F6',
+          bg_color: '#3B82F6',
+          is_event: false,
+          is_active: true,
+        });
+      }
+
+      // Grant Verified Badge to user
       const { error } = await (supabase.from('user_badges') as any).insert({
         profile_id: profileId,
         badge_id: verifiedBadgeId,
@@ -269,7 +289,7 @@ export async function toggleVerifiedBadge(profileId: string, currentIsVerified: 
       revalidatePath('/dashboard');
       revalidatePath('/dashboard/admin');
       revalidatePath('/[username]');
-      return { success: true, message: 'Verified Creator status granted! Checkmark active. ✨' };
+      return { success: true, message: 'Verified Creator status granted! ✨' };
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to toggle verification.';
