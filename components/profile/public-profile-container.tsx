@@ -18,6 +18,39 @@ import { TrackedLinkItem } from '@/components/profile/public-profile-tracker';
 import { InteractiveAvatar } from '@/components/profile/interactive-avatar';
 import { recordProfileView } from '@/actions/analytics';
 
+import { getIconComponent } from '@/components/shared/social-icons';
+
+function formatSocialUrl(platform: string, input: string): string {
+  let val = (input || '').trim();
+  if (!val) return '';
+  if (val.startsWith('http://') || val.startsWith('https://')) return val;
+  val = val.replace(/^@/, '');
+
+  switch (platform.toLowerCase()) {
+    case 'instagram':
+      return `https://instagram.com/${val}`;
+    case 'twitter':
+    case 'x':
+      return `https://x.com/${val}`;
+    case 'tiktok':
+      return `https://tiktok.com/@${val}`;
+    case 'youtube':
+      return `https://youtube.com/@${val}`;
+    case 'spotify':
+      return val.includes('spotify.com') ? `https://${val}` : `https://open.spotify.com/search/${val}`;
+    case 'github':
+      return `https://github.com/${val}`;
+    case 'linkedin':
+      return `https://linkedin.com/in/${val}`;
+    case 'discord':
+      return val.startsWith('discord.gg') ? `https://${val}` : `https://discord.com/users/${val}`;
+    case 'telegram':
+      return `https://t.me/${val}`;
+    default:
+      return `https://${val}`;
+  }
+}
+
 /**
  * Pure Vector SVG Vinyl Record Disk (Mathematically 100% Perfect Circle!)
  */
@@ -219,6 +252,30 @@ export function PublicProfileContainer({
               <p className={`text-xs sm:text-sm font-extrabold max-w-xs leading-relaxed pt-0.5 ${isDarkBg ? 'text-white/90' : 'text-[#111111]/80'}`}>
                 {profile.bio}
               </p>
+            )}
+
+            {/* SOCIAL MEDIA ICONS ROW BELOW BIO */}
+            {profile.social_links && Object.keys(profile.social_links).some((key) => Boolean(profile.social_links?.[key])) && (
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                {Object.entries(profile.social_links).map(([platform, val]) => {
+                  if (!val || !val.trim()) return null;
+                  const finalUrl = formatSocialUrl(platform, val);
+                  const IconComponent = getIconComponent(platform);
+
+                  return (
+                    <a
+                      key={platform}
+                      href={finalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={platform}
+                      className={`p-2 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center`}
+                    >
+                      <IconComponent className="w-4 h-4 stroke-[2.5]" />
+                    </a>
+                  );
+                })}
+              </div>
             )}
           </div>
 

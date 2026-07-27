@@ -374,3 +374,32 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; message: s
     return { success: false, message: msg };
   }
 }
+
+export async function updateUserSocialLinks(socialLinks: Record<string, string>): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: 'You must be logged in.' };
+    }
+
+    const { error } = await (supabase.from('profiles') as any)
+      .update({
+        social_links: socialLinks,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/[username]');
+    return { success: true, message: 'Social media icons saved successfully!' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to save social links.';
+    return { success: false, message: msg };
+  }
+}

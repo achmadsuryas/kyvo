@@ -24,6 +24,7 @@ export interface Profile {
   status_reason?: string | null;
   views_count?: number;
   is_onboarded?: boolean;
+  social_links?: Record<string, string> | null;
   created_at: string;
   updated_at: string;
 }
