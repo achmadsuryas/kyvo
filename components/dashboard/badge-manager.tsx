@@ -330,7 +330,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-black text-xs flex items-center gap-1.5">
-                      <Crown className="w-4 h-4 text-white" />
+                      <Crown className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
                       <span>Regular Badge (Admin Only)</span>
                     </span>
                     <Badge variant="purple" className="text-[9px] font-black">REGULAR</Badge>
@@ -599,7 +599,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-black text-xs flex items-center gap-1.5">
-                      <Crown className="w-4 h-4 text-white" />
+                      <Crown className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
                       <span>Regular Badge (Admin Only)</span>
                     </span>
                     <Badge variant="purple" className="text-[9px] font-black">REGULAR</Badge>

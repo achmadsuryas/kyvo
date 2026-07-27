@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Globe, ExternalLink, CheckCircle2, Eye, QrCode, Share2 } from 'lucide-react';
+import { Globe, ExternalLink, CheckCircle2, Eye, QrCode, Share2, Crown } from 'lucide-react';
 import { getIconComponent } from '@/components/shared/social-icons';
 
 export function HeroMockup() {
@@ -69,10 +69,10 @@ export function HeroMockup() {
             </p>
           </div>
 
-          {/* Verified Creator Badge Pill */}
-          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#3B82F6] text-white text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-            <CheckCircle2 className="w-3 h-3 text-white" />
-            <span>VERIFIED CREATOR</span>
+          {/* System Badge Showcase Pill */}
+          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#A855F7] text-white text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+            <Crown className="w-3 h-3 text-white stroke-[2.5]" />
+            <span>KYVO VIP</span>
           </div>
 
           {/* Bio Text */}
