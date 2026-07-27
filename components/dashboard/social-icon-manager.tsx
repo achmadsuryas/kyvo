@@ -31,56 +31,37 @@ const SOCIAL_PLATFORMS = [
 ];
 
 interface SocialIconManagerProps {
-  initialSocialLinks?: Record<string, string> | null;
+  socialLinks: Record<string, string>;
+  onChangeSocialLinks: (newLinks: Record<string, string>) => void;
 }
 
-export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps) {
-  const [socialLinks, setSocialLinks] = React.useState<Record<string, string>>(initialSocialLinks || {});
+export function SocialIconManager({ socialLinks, onChangeSocialLinks }: SocialIconManagerProps) {
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [selectedPlatform, setSelectedPlatform] = React.useState('instagram');
   const [inputValue, setInputValue] = React.useState('');
-  const [isSaving, setIsSaving] = React.useState(false);
 
   // Active added social platforms
-  const activePlatforms = Object.entries(socialLinks).filter(([_, val]) => Boolean(val && val.trim()));
+  const activePlatforms = Object.entries(socialLinks || {}).filter(([_, val]) => Boolean(val && typeof val === 'string' && val.trim()));
 
-  const handleAddOrUpdate = async (e: React.FormEvent) => {
+  const handleAddOrUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) {
-      toast.error('Please enter a username or URL.');
+      toast.error('Please enter a URL.');
       return;
     }
 
-    const updated = { ...socialLinks, [selectedPlatform]: inputValue.trim() };
-    setSocialLinks(updated);
+    const updated = { ...(socialLinks || {}), [selectedPlatform]: inputValue.trim() };
+    onChangeSocialLinks(updated);
     setInputValue('');
     setIsAddOpen(false);
-
-    setIsSaving(true);
-    const res = await updateUserSocialLinks(updated);
-    setIsSaving(false);
-
-    if (res.success) {
-      toast.success(res.message);
-    } else {
-      toast.error(res.message);
-    }
+    toast.success(`${currentPlatformObj.label} icon added! Click "Save All Settings" at the top to apply.`);
   };
 
-  const handleRemove = async (platformId: string) => {
-    const updated = { ...socialLinks };
+  const handleRemove = (platformId: string) => {
+    const updated = { ...(socialLinks || {}) };
     delete updated[platformId];
-    setSocialLinks(updated);
-
-    setIsSaving(true);
-    const res = await updateUserSocialLinks(updated);
-    setIsSaving(false);
-
-    if (res.success) {
-      toast.success('Social icon removed.');
-    } else {
-      toast.error(res.message);
-    }
+    onChangeSocialLinks(updated);
+    toast.info('Social icon removed from draft.');
   };
 
   const currentPlatformObj = SOCIAL_PLATFORMS.find((p) => p.id === selectedPlatform) || SOCIAL_PLATFORMS[0];
@@ -188,13 +169,12 @@ export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps
             </Button>
             <Button
               type="submit"
-              disabled={isSaving}
               variant="yellow"
               size="sm"
               className="text-xs font-black gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]"
             >
-              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
-              <span>Save Icon</span>
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+              <span>Add Icon</span>
             </Button>
           </div>
         </form>
@@ -238,7 +218,6 @@ export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps
                 <button
                   type="button"
                   onClick={() => handleRemove(platformId)}
-                  disabled={isSaving}
                   className="p-1 rounded-md text-[#FF4D6D] hover:bg-[#FF4D6D] hover:text-white transition-colors cursor-pointer"
                   title="Remove icon"
                 >

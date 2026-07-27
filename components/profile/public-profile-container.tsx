@@ -286,7 +286,8 @@ export function PublicProfileContainer({
                         target="_blank"
                         rel="noopener noreferrer"
                         title={platform}
-                        className="p-2.5 sm:p-3 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center"
+                        className="p-2 transition-transform hover:scale-125 cursor-pointer flex items-center justify-center hover:opacity-80"
+                        style={{ color: isDarkBg ? '#FFFFFF' : '#111111' }}
                       >
                         <IconComponent className="w-5 h-5 stroke-[2.5]" />
                       </a>

@@ -107,72 +107,150 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     (ub) => ub.badge?.name.toLowerCase().includes('verified') && ub.is_displayed !== false
   );
 
-  // Editing states
-  const [isEditingUsername, setIsEditingUsername] = React.useState(false);
+  // Social links helper
+  const parseSocials = (raw: any): Record<string, string> => {
+    if (!raw) return {};
+    if (typeof raw === 'string') {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return {};
+      }
+    }
+    return raw;
+  };
+
+  const [socialLinks, setSocialLinks] = React.useState<Record<string, string>>(() => parseSocials(profile?.social_links));
+  const [draftSocialLinks, setDraftSocialLinks] = React.useState<Record<string, string>>(() => parseSocials(profile?.social_links));
+
+  // Editing draft states
   const [newUsername, setNewUsername] = React.useState(currentUsername);
-  
-  const [isEditingDetails, setIsEditingDetails] = React.useState(false);
   const [editName, setEditName] = React.useState(displayName);
   const [editBio, setEditBio] = React.useState(bio);
   const [editAvatarUrl, setEditAvatarUrl] = React.useState<string | null>(avatarUrl);
+
+  // Theme Cards & Custom Outer Background state
+  const [customBgColor, setCustomBgColor] = React.useState<string>(profile?.theme_bg_color || '#F8F9FA');
+  const [editBgColor, setEditBgColor] = React.useState<string>(profile?.theme_bg_color || '#F8F9FA');
+
+  // Photo Pop-Up Modal state
+  const [photoModalOpen, setPhotoModalOpen] = React.useState(false);
+
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
   const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
 
-  // Theme Cards & Custom Outer Background state
-  const [selectedTheme, setSelectedTheme] = React.useState<string>(profile?.theme || 'neobrutalism');
-  const [customBgColor, setCustomBgColor] = React.useState<string>(profile?.theme_bg_color || '#F8F9FA');
-  const [isSavingTheme, setIsSavingTheme] = React.useState(false);
+  // Detect unsaved changes across ALL profile settings
+  const hasUnsavedChanges = React.useMemo(() => {
+    if (editName !== displayName) return true;
+    if (newUsername !== currentUsername) return true;
+    if (editBio !== bio) return true;
+    if (editAvatarUrl !== avatarUrl) return true;
+    if (editBgColor !== customBgColor) return true;
+    if (JSON.stringify(draftSocialLinks) !== JSON.stringify(socialLinks)) return true;
+    return false;
+  }, [editName, displayName, newUsername, currentUsername, editBio, bio, editAvatarUrl, avatarUrl, editBgColor, customBgColor, draftSocialLinks, socialLinks]);
 
-  const THEME_CARDS = [
-    {
-      id: 'neobrutalism',
-      name: 'Default Neobrutalism',
-      description: 'Classic yellow neobrutalism theme',
-      previewCardBg: 'bg-white text-[#111111] border-[#111111]',
-      accentBg: '#FFD43B',
-      defaultOuterBg: '#F8F9FA',
-      badgeText: 'DEFAULT',
-    },
-    {
-      id: 'feminine',
-      name: 'Cute Pink',
-      description: 'Soft pastel pink theme for girls',
-      previewCardBg: 'bg-[#FFF0F5] text-[#111111] border-[#FF4D6D]',
-      accentBg: '#FF4D6D',
-      defaultOuterBg: '#FFE4E1',
-      badgeText: 'FEMININE',
-    },
-    {
-      id: 'dark',
-      name: 'Cyberpunk Dark',
-      description: 'Sleek dark mode theme with purple accents',
-      previewCardBg: 'bg-[#18181B] text-white border-[#A855F7]',
-      accentBg: '#A855F7',
-      defaultOuterBg: '#09090B',
-      badgeText: 'DARK',
-    },
-  ];
+  // Window beforeunload listener when unsaved changes exist
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
-  const handleSaveTheme = async (themeId: string, bgCol: string) => {
-    setIsSavingTheme(true);
-    const res = await updateUserProfileDetails({
-      display_name: displayName,
-      bio: bio,
-      avatar_url: avatarUrl,
-      theme: themeId,
-      theme_bg_color: bgCol,
-    });
-    setIsSavingTheme(false);
-
-    if (res.success) {
-      toast.success('Theme & Background color updated!');
-      setSelectedTheme(themeId);
-      setCustomBgColor(bgCol);
-      router.refresh();
-    } else {
-      toast.error(res.message);
+  // Unified Save All Settings Handler
+  const handleSaveAllSettings = async () => {
+    if (!editName.trim()) {
+      toast.error('Display Name cannot be empty.');
+      return;
     }
+
+    const cleanUser = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (!cleanUser || cleanUser.length < 2) {
+      toast.error('Username must be at least 2 characters long.');
+      return;
+    }
+
+    setIsSaving(true);
+    toast.loading('Saving profile settings...', { id: 'save-all-toast' });
+
+    try {
+      // 1. Username
+      if (cleanUser !== currentUsername) {
+        const availability = await checkUsernameAvailable(cleanUser);
+        if (!availability.available) {
+          toast.dismiss('save-all-toast');
+          toast.error(availability.message);
+          setIsSaving(false);
+          return;
+        }
+
+        const userRes = await updateUserUsername(cleanUser);
+        if (!userRes.success) {
+          toast.dismiss('save-all-toast');
+          toast.error(userRes.message);
+          setIsSaving(false);
+          return;
+        }
+        setCurrentUsername(cleanUser);
+      }
+
+      // 2. Profile Details & Background Color
+      const detailsRes = await updateUserProfileDetails({
+        display_name: editName,
+        bio: editBio,
+        avatar_url: editAvatarUrl,
+        theme_bg_color: editBgColor,
+      });
+
+      if (!detailsRes.success) {
+        toast.dismiss('save-all-toast');
+        toast.error(detailsRes.message);
+        setIsSaving(false);
+        return;
+      }
+
+      // 3. Social Links
+      const socialsRes = await updateUserSocialLinks(draftSocialLinks);
+
+      if (!socialsRes.success) {
+        toast.dismiss('save-all-toast');
+        toast.error(socialsRes.message);
+        setIsSaving(false);
+        return;
+      }
+
+      // Commit baseline state
+      setDisplayName(editName);
+      setBio(editBio);
+      setAvatarUrl(editAvatarUrl);
+      setCustomBgColor(editBgColor);
+      setSocialLinks(draftSocialLinks);
+
+      setIsSaving(false);
+      toast.dismiss('save-all-toast');
+      toast.success('All profile settings saved successfully!');
+      router.refresh();
+    } catch (err: any) {
+      setIsSaving(false);
+      toast.dismiss('save-all-toast');
+      toast.error(err?.message || 'Failed to save settings.');
+    }
+  };
+
+  const handleDiscardAllChanges = () => {
+    setEditName(displayName);
+    setNewUsername(currentUsername);
+    setEditBio(bio);
+    setEditAvatarUrl(avatarUrl);
+    setEditBgColor(customBgColor);
+    setDraftSocialLinks(socialLinks);
+    toast.info('Draft changes discarded.');
   };
 
   // File Upload Handler with GIF Animation Support & Instant Auto Compression for static images (Max 4.5 MB)
@@ -672,7 +750,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
           {/* TAB CONTENT 1: OVERVIEW (ACCOUNT INFORMATION CARD) */}
           {activeTab === 'overview' && (
-            <div className="w-full animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="w-full space-y-6 animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Account Information Card */}
               <Card className="bg-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-4 sm:p-6 md:p-8 w-full overflow-hidden">
                 <CardHeader className="px-0 pt-0 pb-5 border-b-2 border-dashed border-[#111111]/20">
@@ -680,354 +758,221 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-xl sm:text-2xl font-black break-words">Account Information</CardTitle>
                       <CardDescription className="text-xs sm:text-sm font-bold break-words">
-                        Customize your display photo, name, username, bio, and background music
+                        Customize your display photo, name, username, bio, and settings below
                       </CardDescription>
                     </div>
-                    {!isEditingDetails ? (
-                      <Button
-                        onClick={() => {
-                          setEditName(displayName);
-                          setEditBio(bio);
-                          setEditAvatarUrl(avatarUrl);
-                          setNewUsername(currentUsername);
-                          setIsEditingDetails(true);
-                        }}
-                        variant="yellow"
-                        size="sm"
-                        className="gap-2 font-black text-sm px-4 py-2 shadow-[3px_3px_0px_0px_#111111] hover:scale-105 transition-transform shrink-0 self-start sm:self-center cursor-pointer"
-                      >
-                        <Edit3 className="w-4 h-4 stroke-[2.5]" />
-                        <span>Edit Profile</span>
-                      </Button>
-                    ) : (
-                      <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                      {hasUnsavedChanges && (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => setIsEditingDetails(false)}
-                          className="font-black text-xs cursor-pointer"
+                          onClick={handleDiscardAllChanges}
+                          className="font-black text-xs cursor-pointer border-2 border-[#111111]"
                         >
-                          Cancel
+                          Discard Changes
                         </Button>
-                        <Button
-                          onClick={handleUpdateDetails}
-                          disabled={isSaving || isCompressing}
-                          variant="green"
-                          size="sm"
-                          className="gap-2 font-black text-sm px-4 py-2 shadow-[3px_3px_0px_0px_#111111] hover:scale-105 transition-transform cursor-pointer"
-                        >
-                          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
-                          <span>Save Profile Changes</span>
-                        </Button>
-                      </div>
-                    )}
+                      )}
+                      <Button
+                        onClick={handleSaveAllSettings}
+                        disabled={isSaving || isCompressing}
+                        variant="green"
+                        size="sm"
+                        className={`gap-2 font-black text-sm px-5 py-2.5 shadow-[3.5px_3.5px_0px_0px_#111111] hover:scale-105 transition-transform cursor-pointer ${
+                          hasUnsavedChanges ? 'bg-[#51CF66] text-[#111111] animate-bounce' : 'bg-[#51CF66] text-[#111111]'
+                        }`}
+                      >
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
+                        <span>{hasUnsavedChanges ? 'Save All Settings' : 'All Settings Saved'}</span>
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="px-0 pt-5 space-y-5">
-                  {/* Avatar & Display Name Header */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-5 min-w-0">
-                    <div className="relative group shrink-0">
-                      <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="sm:w-16 sm:h-16 shrink-0" />
-                      {!isEditingDetails && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditName(displayName);
-                            setEditBio(bio);
-                            setEditAvatarUrl(avatarUrl);
-                            setNewUsername(currentUsername);
-                            setIsEditingDetails(true);
-                          }}
-                          className="absolute -bottom-1 -right-1 p-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] shadow-[1px_1px_0px_0px_#111111] hover:scale-110 transition-transform cursor-pointer"
-                          title="Edit Profile Photo"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                <CardContent className="px-0 pt-5 space-y-6">
+                  {/* Custom Profile Picture Section */}
+                  <div className="rounded-2xl border-2 border-[#111111] bg-[#F8F9FA] p-4 space-y-3">
+                    <div className="flex items-center justify-between border-b border-dashed border-[#111111]/20 pb-2">
+                      <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                        <Camera className="w-4 h-4 text-[#3B82F6]" />
+                        <span>Profile Picture</span>
+                      </label>
+                      <span className="text-[10px] font-black text-[#111111]/60 uppercase">
+                        {editAvatarUrl ? 'Custom Image Active' : '2-Letter Initial Fallback'}
+                      </span>
                     </div>
-                    <div className="space-y-1 min-w-0 flex-1 w-full">
-                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                        <h3 className="text-lg sm:text-2xl font-black text-[#111111] break-words">{displayName}</h3>
-                        {isVerified && (
-                          <span title="Verified Creator" className="shrink-0">
-                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
-                          </span>
-                        )}
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <Avatar src={editAvatarUrl} fallback={editName || currentUsername} size="lg" className="w-16 h-16 shrink-0 shadow-[2px_2px_0px_0px_#111111]" />
+                        <div>
+                          <h4 className="text-sm font-black text-[#111111]">{editName || currentUsername}</h4>
+                          <p className="text-xs font-bold text-[#111111]/70">
+                            {editAvatarUrl ? 'Custom profile photo active.' : 'No photo uploaded. Using 2-letter username initials.'}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-xs sm:text-sm font-black text-[#3B82F6] uppercase tracking-wide break-all sm:break-words">
-                        kyvo.fun/{currentUsername}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                        <Badge variant="default" className="text-[10px] font-black shrink-0">
-                          Google Authenticated
-                        </Badge>
+
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <Button
+                          type="button"
+                          onClick={() => setPhotoModalOpen(true)}
+                          variant="yellow"
+                          size="sm"
+                          className="font-black text-xs gap-1.5 shadow-[2px_2px_0px_0px_#111111] cursor-pointer flex-1 sm:flex-initial justify-center"
+                        >
+                          <Camera className="w-4 h-4 stroke-[2.5]" />
+                          <span>Upload / Change Photo</span>
+                        </Button>
+
+                        {editAvatarUrl && (
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setEditAvatarUrl(null);
+                              toast.info('Photo removed! Click "Save All Settings" to apply.');
+                            }}
+                            variant="destructive"
+                            size="sm"
+                            className="font-black text-xs gap-1.5 shadow-[2px_2px_0px_0px_#111111] cursor-pointer flex-1 sm:flex-initial justify-center"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Remove Photo</span>
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Editable Profile Form */}
-                  {isEditingDetails ? (
-                    <form onSubmit={handleUpdateDetails} className="space-y-5 rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B]/20 p-4 sm:p-5 shadow-[4px_4px_0px_0px_#111111]">
-                      {/* Profile Picture Uploader Section */}
-                      <div className="space-y-2 border-b-2 border-dashed border-[#111111]/20 pb-4">
-                        <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
-                          <Camera className="w-4 h-4 text-[#3B82F6]" />
-                          <span>Custom Profile Picture (PNG, JPG, JPEG, GIF - Max 4.5 MB)</span>
-                        </label>
-                        
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-1">
-                          <Avatar src={editAvatarUrl} fallback={editName || currentUsername} size="lg" className="shrink-0" />
-                          
-                          <div className="space-y-2 flex-1 min-w-0 w-full">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors ${isCompressing ? 'opacity-50 pointer-events-none' : ''}`}>
-                                {isCompressing ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
-                                <span>{isCompressing ? 'Processing Image...' : 'Upload Photo (PNG, JPG, GIF)'}</span>
-                                <input
-                                  type="file"
-                                  accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
-                                  onChange={handleImageFileChange}
-                                  disabled={isCompressing}
-                                  className="hidden"
-                                />
-                              </label>
+                  {/* Inline Form Fields Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                        <User className="w-4 h-4 text-[#3B82F6]" />
+                        <span>Display Name</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none focus:border-[#3B82F6]"
+                        placeholder="Your Display Name"
+                        required
+                      />
+                    </div>
 
-                              {editAvatarUrl && (
-                                <button
-                                  type="button"
-                                  onClick={() => setEditAvatarUrl(null)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white text-xs font-black shadow-[2px_2px_0px_0px_#111111]"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                  <span>Use Username Initial</span>
-                                </button>
-                              )}
-                            </div>
-                            <p className="text-[10px] font-extrabold text-[#111111]/70 break-words">
-                              {editAvatarUrl ? 'Photo active (Supports animated GIFs & static images).' : 'No photo uploaded. Using 2-letter username initial fallback.'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
-                            <User className="w-4 h-4 text-[#3B82F6]" />
-                            <span>Display Name</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
-                            placeholder="Your Display Name"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
-                            <AtSign className="w-4 h-4 text-[#FF4D6D]" />
-                            <span>Username</span>
-                          </label>
-                          <div className="flex items-center gap-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-2">
-                            <span className="text-sm font-black text-[#111111]/60">@</span>
-                            <input
-                              type="text"
-                              value={newUsername}
-                              onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                              className="w-full font-black text-sm text-[#111111] outline-none bg-transparent"
-                              placeholder="username"
-                              maxLength={20}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
-                          <AlignLeft className="w-4 h-4 text-[#A855F7]" />
-                          <span>Profile Bio</span>
-                        </label>
-                        <textarea
-                          value={editBio}
-                          onChange={(e) => setEditBio(e.target.value)}
-                          rows={3}
-                          className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none resize-none"
-                          placeholder="Tell the world about yourself..."
+                    <div className="space-y-1">
+                      <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                        <AtSign className="w-4 h-4 text-[#FF4D6D]" />
+                        <span>Username</span>
+                      </label>
+                      <div className="flex items-center gap-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-2.5 focus-within:border-[#3B82F6]">
+                        <span className="text-sm font-black text-[#111111]/60">@</span>
+                        <input
+                          type="text"
+                          value={newUsername}
+                          onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                          className="w-full font-black text-sm text-[#111111] outline-none bg-transparent"
+                          placeholder="username"
+                          maxLength={20}
                         />
                       </div>
-                    </form>
-                  ) : (
-                    /* Profile Info Display Grid */
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                      <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5 overflow-hidden">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                            <User className="w-4 h-4 text-[#3B82F6] stroke-[2.5]" />
-                            <span>Display Name</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditName(displayName);
-                              setEditBio(bio);
-                              setEditAvatarUrl(avatarUrl);
-                              setNewUsername(currentUsername);
-                              setIsEditingDetails(true);
-                            }}
-                            className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
-                            title="Edit Display Name"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </button>
-                        </div>
-                        <p className="text-sm sm:text-base font-extrabold text-[#111111] break-words">{displayName}</p>
-                      </div>
-
-                      <div className="rounded-xl border-2 border-[#111111] bg-[#FFD43B]/20 p-3.5 space-y-0.5 overflow-hidden">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                            <AtSign className="w-4 h-4 text-[#FF4D6D] stroke-[2.5]" />
-                            <span>Username</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditName(displayName);
-                              setEditBio(bio);
-                              setEditAvatarUrl(avatarUrl);
-                              setNewUsername(currentUsername);
-                              setIsEditingDetails(true);
-                            }}
-                            className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
-                            title="Change Username"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Change</span>
-                          </button>
-                        </div>
-                        <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all sm:break-words">@{currentUsername}</p>
-                      </div>
-
-                      <div className="md:col-span-2 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5 overflow-hidden">
-                        <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                          <Mail className="w-4 h-4 text-[#51CF66] stroke-[2.5]" />
-                          <span>Email Address</span>
-                        </div>
-                        <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all">{email}</p>
-                      </div>
                     </div>
-                  )}
 
-                  {!isEditingDetails && (
-                    <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                          <AlignLeft className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
-                          <span>Profile Bio</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditName(displayName);
-                            setEditBio(bio);
-                            setEditAvatarUrl(avatarUrl);
-                            setNewUsername(currentUsername);
-                            setIsEditingDetails(true);
-                          }}
-                          className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
-                          title="Edit Bio"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                          <span>Edit</span>
-                        </button>
-                      </div>
-                      <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text break-words">{bio}</p>
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                        <Mail className="w-4 h-4 text-[#51CF66]" />
+                        <span>Email Address (Read-only)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={email}
+                        disabled
+                        className="w-full rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 font-extrabold text-sm text-[#111111]/70 cursor-not-allowed"
+                      />
                     </div>
-                  )}
+
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                        <AlignLeft className="w-4 h-4 text-[#A855F7]" />
+                        <span>Profile Bio</span>
+                      </label>
+                      <textarea
+                        value={editBio}
+                        onChange={(e) => setEditBio(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none resize-none focus:border-[#3B82F6]"
+                        placeholder="Tell the world about yourself..."
+                      />
+                    </div>
+                  </div>
 
                   {/* SOCIAL MEDIA ICONS MANAGER WIDGET */}
-                  {!isEditingDetails && (
-                    <SocialIconManager initialSocialLinks={profile?.social_links} />
-                  )}
+                  <SocialIconManager
+                    socialLinks={draftSocialLinks}
+                    onChangeSocialLinks={setDraftSocialLinks}
+                  />
 
                   {/* PUBLIC PROFILE BACKGROUND COLOR SELECTOR WIDGET */}
-                  {!isEditingDetails && (
-                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3 w-full min-w-0">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/20 pb-3">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Palette className="w-5 h-5 text-[#3B82F6] stroke-[2.5]" />
-                            <h4 className="text-sm font-black text-[#111111]">Background Color</h4>
-                          </div>
-                          <p className="text-xs font-bold text-[#111111]/70">
-                            Customize the background color for your public profile page
-                          </p>
+                  <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3 w-full min-w-0">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/20 pb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-[#3B82F6] stroke-[2.5]" />
+                          <h4 className="text-sm font-black text-[#111111]">Background Color</h4>
                         </div>
-                        
-                        <Button
-                          onClick={() => handleSaveTheme('default', customBgColor)}
-                          disabled={isSavingTheme}
-                          variant="yellow"
-                          size="sm"
-                          className="font-black text-xs gap-1 shadow-[2px_2px_0px_0px_#111111] shrink-0"
-                        >
-                          {isSavingTheme ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                          <span>Save Background Color</span>
-                        </Button>
-                      </div>
-
-                      {/* Background Color Picker & Presets */}
-                      <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 space-y-2.5">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                          <label className="text-xs font-black uppercase text-[#111111]/80 flex items-center gap-1.5">
-                            <Palette className="w-3.5 h-3.5 text-[#A855F7]" />
-                            <span>Select Color</span>
-                          </label>
-                          
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={customBgColor}
-                              onChange={(e) => setCustomBgColor(e.target.value)}
-                              className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer bg-transparent p-0"
-                              title="Choose custom background color"
-                            />
-                            <span className="text-xs font-black text-[#111111] uppercase bg-white px-2.5 py-1 rounded-md border border-[#111111] shadow-[1px_1px_0px_0px_#111111]">
-                              {customBgColor}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setCustomBgColor('#F8F9FA')}
-                              className="text-[10px] font-black underline text-[#3B82F6] hover:text-[#111111]"
-                            >
-                              Reset Default
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Quick Color Preset Pills */}
-                        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-black/10">
-                          <span className="text-[10px] font-black text-[#111111]/60">Presets:</span>
-                          {['#F8F9FA', '#FFE4E1', '#09090B', '#FFD43B', '#3B82F6', '#51CF66', '#A855F7', '#FF4D6D'].map((hex) => (
-                            <button
-                              key={hex}
-                              type="button"
-                              onClick={() => setCustomBgColor(hex)}
-                              className="w-5 h-5 rounded-full border border-[#111111] shadow-[1px_1px_0px_0px_#111111] transition-transform hover:scale-110 cursor-pointer"
-                              style={{ backgroundColor: hex }}
-                              title={hex}
-                            />
-                          ))}
-                        </div>
+                        <p className="text-xs font-bold text-[#111111]/70 mt-0.5">
+                          Customize the background color for your public profile page
+                        </p>
                       </div>
                     </div>
-                  )}
+
+                    {/* Background Color Picker & Presets */}
+                    <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3 space-y-2.5">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <label className="text-xs font-black uppercase text-[#111111]/80 flex items-center gap-1.5">
+                          <Palette className="w-3.5 h-3.5 text-[#A855F7]" />
+                          <span>Select Color</span>
+                        </label>
+                        
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={editBgColor}
+                            onChange={(e) => setEditBgColor(e.target.value)}
+                            className="w-8 h-8 rounded-lg border-2 border-[#111111] cursor-pointer bg-transparent p-0"
+                            title="Choose custom background color"
+                          />
+                          <span className="text-xs font-black text-[#111111] uppercase bg-white px-2.5 py-1 rounded-md border border-[#111111] shadow-[1px_1px_0px_0px_#111111]">
+                            {editBgColor}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setEditBgColor('#F8F9FA')}
+                            className="text-[10px] font-black underline text-[#3B82F6] hover:text-[#111111]"
+                          >
+                            Reset Default
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Quick Color Preset Pills */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-black/10">
+                        <span className="text-[10px] font-black text-[#111111]/60">Presets:</span>
+                        {['#F8F9FA', '#FFE4E1', '#09090B', '#FFD43B', '#3B82F6', '#51CF66', '#A855F7', '#FF4D6D'].map((hex) => (
+                          <button
+                            key={hex}
+                            type="button"
+                            onClick={() => setEditBgColor(hex)}
+                            className="w-5 h-5 rounded-full border border-[#111111] shadow-[1px_1px_0px_0px_#111111] transition-transform hover:scale-110 cursor-pointer"
+                            style={{ backgroundColor: hex }}
+                            title={hex}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
                   {/* CLEAN DEDICATED PROFILE BACKGROUND MUSIC WIDGET */}
                   {!isEditingDetails && (
@@ -1142,6 +1087,113 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
           )}
         </div>
       </div>
+
+      {/* PROFILE PHOTO UPLOAD POP-UP MODAL */}
+      {photoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border-[3.5px] border-[#111111] bg-white p-5 shadow-[8px_8px_0px_0px_#111111] space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b-2 border-dashed border-[#111111]/20 pb-3">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#3B82F6] stroke-[2.5]" />
+                <h3 className="text-lg font-black text-[#111111]">Upload Profile Picture</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPhotoModalOpen(false)}
+                className="p-1 rounded-lg border-2 border-[#111111] bg-[#FF4D6D] text-white hover:scale-105 transition-transform"
+              >
+                <X className="w-4 h-4 stroke-[3]" />
+              </button>
+            </div>
+
+            {/* Format & Size Requirements Info Box */}
+            <div className="rounded-xl border-2 border-[#111111] bg-[#FFD43B]/20 p-3.5 space-y-1.5">
+              <p className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#3B82F6]" />
+                <span>Supported Specs & Features:</span>
+              </p>
+              <ul className="text-xs font-bold text-[#111111]/80 space-y-0.5 list-disc list-inside">
+                <li>Supported Formats: <span className="font-black text-[#111111]">PNG, JPG, JPEG, WebP, GIF</span></li>
+                <li>Maximum File Size: <span className="font-black text-[#FF4D6D]">4.5 MB</span></li>
+                <li>Animated GIFs are 100% supported!</li>
+              </ul>
+            </div>
+
+            {/* Image Preview & Upload Controls */}
+            <div className="flex flex-col items-center gap-3.5 py-2">
+              <Avatar src={editAvatarUrl} fallback={editName || currentUsername} size="xl" className="w-24 h-24 shadow-[4px_4px_0px_0px_#111111]" />
+
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <label className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform ${isCompressing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  {isCompressing ? <Loader2 className="w-4 h-4 animate-spin text-[#3B82F6]" /> : <Upload className="w-4 h-4 text-[#3B82F6] stroke-[2.5]" />}
+                  <span>{isCompressing ? 'Processing Image...' : 'Choose Image File'}</span>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                    onChange={handleImageFileChange}
+                    disabled={isCompressing}
+                    className="hidden"
+                  />
+                </label>
+
+                {editAvatarUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditAvatarUrl(null);
+                      toast.info('Photo removed! Click "Save All Settings" to apply.');
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove Photo</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-dashed border-[#111111]/20">
+              <Button
+                type="button"
+                onClick={() => setPhotoModalOpen(false)}
+                variant="yellow"
+                size="sm"
+                className="font-black text-xs shadow-[2px_2px_0px_0px_#111111]"
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING STICKY UNSAVED CHANGES ALERT BAR */}
+      {hasUnsavedChanges && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] p-3.5 shadow-[6px_6px_0px_0px_#111111] flex items-center justify-between gap-3 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="w-5 h-5 text-[#111111] shrink-0 stroke-[2.5]" />
+            <span className="text-xs sm:text-sm font-black text-[#111111] truncate">
+              Unsaved changes detected!
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleDiscardAllChanges}
+              className="px-2.5 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[1.5px_1.5px_0px_0px_#111111] cursor-pointer hover:bg-gray-100"
+            >
+              Discard
+            </button>
+            <button
+              onClick={handleSaveAllSettings}
+              disabled={isSaving}
+              className="px-3.5 py-1.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform flex items-center gap-1.5 cursor-pointer"
+            >
+              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+              <span>Save All</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* QR CODE SHARE MODAL */}
       <QRCodeModal
