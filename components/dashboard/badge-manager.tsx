@@ -189,11 +189,11 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
       <CardHeader className="px-0 pt-0 pb-6 border-b-2 border-dashed border-[#111111]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Award className="w-6 h-6 text-[#A855F7] stroke-[2.5]" />
-            <CardTitle className="text-2xl font-black">Bulletin, Patch Notes & Event Manager</CardTitle>
+            <Megaphone className="w-6 h-6 text-[#FFD43B] stroke-[2.5]" />
+            <CardTitle className="text-2xl font-black">Kyvo News Manager</CardTitle>
           </div>
           <CardDescription className="text-sm font-bold">
-            Post Kyvo bulletin updates, system patch notes, announcements, or publish free claimable Event Badges on user notice board.
+            Manage official Kyvo announcements, system patch notes, events, and creator news on the user dashboard.
           </CardDescription>
         </div>
 
@@ -207,7 +207,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
           className="gap-2 font-black shadow-[3px_3px_0px_0px_#111111]"
         >
           <Plus className="w-5 h-5 stroke-[3]" />
-          <span>{isOpen ? 'Close Form' : 'Publish Bulletin / Patch Note / Event'}</span>
+          <span>{isOpen ? 'Close Form' : 'Publish Kyvo News'}</span>
         </Button>
       </CardHeader>
 
@@ -490,7 +490,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
             <div className="flex items-center justify-between border-b-2 border-dashed border-[#111111]/20 pb-3">
               <span className="font-black text-lg text-[#111111] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-[#FF4D6D]" />
-                <span>Create & Publish New System Badge / Event</span>
+                <span>Create & Publish Kyvo News / Event</span>
               </span>
               <button
                 type="button"

@@ -71,7 +71,9 @@ export function Sidebar({ profile }: SidebarProps) {
           <nav className="space-y-2.5">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive = item.href === '/dashboard' 
+                ? (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) 
+                : pathname === item.href;
 
               return (
                 <Link
