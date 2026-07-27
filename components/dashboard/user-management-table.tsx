@@ -740,37 +740,47 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
             <div className="space-y-2">
               <h4 className="text-xs font-black uppercase text-[#111111]">Grant New Badge to User</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {availableBadges.map((badge) => {
-                  const IconComp = getBadgeIconComponent(badge.icon);
-                  const isAlreadyAssigned = selectedUserForBadge.badges.some((b) => b.id === badge.id);
-
-                  return (
-                    <button
-                      key={badge.id}
-                      disabled={isAlreadyAssigned}
-                      onClick={() => handleGrantBadge(selectedUserForBadge.id, badge)}
-                      className={`p-3 rounded-2xl border-2 border-[#111111] text-left transition-all flex items-center justify-between font-black text-xs shadow-[3px_3px_0px_0px_#111111] ${
-                        isAlreadyAssigned
-                          ? 'opacity-50 bg-gray-100 cursor-not-allowed'
-                          : 'hover:-translate-y-0.5 cursor-pointer'
-                      }`}
-                      style={{
-                        backgroundColor: isAlreadyAssigned ? '#E5E7EB' : badge.bg_color || '#FFD43B',
-                        color: isAlreadyAssigned ? '#6B7280' : badge.color || '#111111',
-                      }}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <IconComp className="w-4 h-4 stroke-[2.5] shrink-0" />
-                        <span className="break-words">{badge.name}</span>
+                {(() => {
+                  const grantableBadges = availableBadges.filter((b) => !b.name.toLowerCase().includes('verified'));
+                  if (grantableBadges.length === 0) {
+                    return (
+                      <div className="sm:col-span-2 text-xs font-bold text-[#111111]/50 italic py-2">
+                        No other custom badges available to grant. Create badges in KYVO NEWS tab.
                       </div>
-                      {isAlreadyAssigned ? (
-                        <CheckCircle2 className="w-4 h-4 stroke-[2.5] shrink-0" />
-                      ) : (
-                        <Plus className="w-4 h-4 stroke-[3] shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
+                    );
+                  }
+                  return grantableBadges.map((badge) => {
+                    const IconComp = getBadgeIconComponent(badge.icon);
+                    const isAlreadyAssigned = selectedUserForBadge.badges.some((b) => b.id === badge.id);
+
+                    return (
+                      <button
+                        key={badge.id}
+                        disabled={isAlreadyAssigned}
+                        onClick={() => handleGrantBadge(selectedUserForBadge.id, badge)}
+                        className={`p-3 rounded-2xl border-2 border-[#111111] text-left transition-all flex items-center justify-between font-black text-xs shadow-[3px_3px_0px_0px_#111111] ${
+                          isAlreadyAssigned
+                            ? 'opacity-50 bg-gray-100 cursor-not-allowed'
+                            : 'hover:-translate-y-0.5 cursor-pointer'
+                        }`}
+                        style={{
+                          backgroundColor: isAlreadyAssigned ? '#E5E7EB' : badge.bg_color || '#FFD43B',
+                          color: isAlreadyAssigned ? '#6B7280' : badge.color || '#111111',
+                        }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <IconComp className="w-4 h-4 stroke-[2.5] shrink-0" />
+                          <span className="break-words">{badge.name}</span>
+                        </div>
+                        {isAlreadyAssigned ? (
+                          <CheckCircle2 className="w-4 h-4 stroke-[2.5] shrink-0" />
+                        ) : (
+                          <Plus className="w-4 h-4 stroke-[3] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
