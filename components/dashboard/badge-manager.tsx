@@ -258,7 +258,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     <Badge variant="default" className="text-[9px] font-black">NEWS</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
-                    Text/News post on Kyvo News board. (No claim button)
+                    Text/News post on Kyvo News board.
                   </p>
                 </button>
 
@@ -284,7 +284,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     <Badge variant="green" className="text-[9px] font-black">PATCH NOTE</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
-                    System patch notes & update list on Kyvo News. (No claim button)
+                    System patch notes & update list on Kyvo News.
                   </p>
                 </button>
 
@@ -367,32 +367,34 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </div>
             </div>
 
-            {/* Select Vector Badge Icon */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Choose Badge Vector Icon</label>
-              <div className="flex flex-wrap gap-2.5">
-                {AVAILABLE_BADGE_ICONS.map((ic) => {
-                  const IconComp = getBadgeIconComponent(ic.name);
-                  const isSelected = editIcon === ic.name;
+            {/* Select Vector Badge Icon (Only for Event Badge or Regular Badge) */}
+            {(editPostCategory === 'claimable' || editPostCategory === 'regular') && (
+              <div className="space-y-2 animate-in fade-in duration-150">
+                <label className="text-xs font-black uppercase text-[#111111]">Choose Badge Vector Icon</label>
+                <div className="flex flex-wrap gap-2.5">
+                  {AVAILABLE_BADGE_ICONS.map((ic) => {
+                    const IconComp = getBadgeIconComponent(ic.name);
+                    const isSelected = editIcon === ic.name;
 
-                  return (
-                    <button
-                      key={ic.name}
-                      type="button"
-                      onClick={() => setEditIcon(ic.name)}
-                      className={`p-3 rounded-xl border-2 border-[#111111] flex items-center gap-2 font-black text-xs transition-all ${
-                        isSelected
-                          ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-105'
-                          : 'bg-white text-[#111111] opacity-75 hover:opacity-100'
-                      }`}
-                    >
-                      <IconComp className="w-4 h-4 stroke-[2.5]" />
-                      <span>{ic.label}</span>
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={ic.name}
+                        type="button"
+                        onClick={() => setEditIcon(ic.name)}
+                        className={`p-3 rounded-xl border-2 border-[#111111] flex items-center gap-2 font-black text-xs transition-all ${
+                          isSelected
+                            ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-105'
+                            : 'bg-white text-[#111111] opacity-75 hover:opacity-100'
+                        }`}
+                      >
+                        <IconComp className="w-4 h-4 stroke-[2.5]" />
+                        <span>{ic.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Preset & Custom Color Picker */}
             <div className="space-y-3">
@@ -525,7 +527,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     <Badge variant="default" className="text-[9px] font-black">NEWS</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
-                    Text/News post on Kyvo News board. (No claim button)
+                    Text/News post on Kyvo News board.
                   </p>
                 </button>
 
@@ -551,7 +553,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                     <Badge variant="green" className="text-[9px] font-black">PATCH NOTE</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
-                    System patch notes & update list on Kyvo News. (No claim button)
+                    System patch notes & update list on Kyvo News.
                   </p>
                 </button>
 
@@ -634,32 +636,34 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </div>
             </div>
 
-            {/* Select Vector Badge Icon */}
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Choose Badge Vector Icon</label>
-              <div className="flex flex-wrap gap-2.5">
-                {AVAILABLE_BADGE_ICONS.map((ic) => {
-                  const IconComp = getBadgeIconComponent(ic.name);
-                  const isSelected = icon === ic.name;
+            {/* Select Vector Badge Icon (Only for Event Badge or Regular Badge) */}
+            {(postCategory === 'claimable' || postCategory === 'regular') && (
+              <div className="space-y-2 animate-in fade-in duration-150">
+                <label className="text-xs font-black uppercase text-[#111111]">Choose Badge Vector Icon</label>
+                <div className="flex flex-wrap gap-2.5">
+                  {AVAILABLE_BADGE_ICONS.map((ic) => {
+                    const IconComp = getBadgeIconComponent(ic.name);
+                    const isSelected = icon === ic.name;
 
-                  return (
-                    <button
-                      key={ic.name}
-                      type="button"
-                      onClick={() => setIcon(ic.name)}
-                      className={`p-3 rounded-xl border-2 border-[#111111] flex items-center gap-2 font-black text-xs transition-all ${
-                        isSelected
-                          ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-105'
-                          : 'bg-white text-[#111111] opacity-75 hover:opacity-100'
-                      }`}
-                    >
-                      <IconComp className="w-4 h-4 stroke-[2.5]" />
-                      <span>{ic.label}</span>
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={ic.name}
+                        type="button"
+                        onClick={() => setIcon(ic.name)}
+                        className={`p-3 rounded-xl border-2 border-[#111111] flex items-center gap-2 font-black text-xs transition-all ${
+                          isSelected
+                            ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-105'
+                            : 'bg-white text-[#111111] opacity-75 hover:opacity-100'
+                        }`}
+                      >
+                        <IconComp className="w-4 h-4 stroke-[2.5]" />
+                        <span>{ic.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Preset & Custom Color Picker */}
             <div className="space-y-3">
