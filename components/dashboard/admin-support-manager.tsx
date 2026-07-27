@@ -11,9 +11,7 @@ import {
   Bot, 
   RefreshCw,
   Search,
-  ChevronDown,
-  MessageSquare,
-  Sparkles
+  ChevronDown
 } from 'lucide-react';
 import { SupportTicket, SupportMessage } from '@/types';
 import { getAllTicketsForAdmin, getTicketMessages, sendSupportMessage, updateTicketStatus } from '@/actions/support';
@@ -21,17 +19,23 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
 interface AdminSupportManagerProps {
   initialTickets: SupportTicket[];
 }
 
-const QUICK_REPLY_TEMPLATES = [
-  { label: '👋 Greeting', text: 'Hello! How can we assist you today?' },
-  { label: '🔎 Ask Details', text: 'Could you please provide more details or a screenshot regarding your issue?' },
-  { label: '⏳ Investigating', text: 'We are currently investigating your request. Please hold on!' },
-  { label: '✅ Resolved', text: 'Your issue has been resolved. Please let us know if you need any further help!' },
+const QUICK_CHAT_TEMPLATES = [
+  { label: 'Greeting', text: 'Hello! How can we assist you today?' },
+  { label: 'Ask Details', text: 'Could you please provide more details regarding your issue?' },
+  { label: 'Investigating', text: 'We are currently investigating your request. Please hold on!' },
+  { label: 'Resolved', text: 'Your issue has been resolved. Please let us know if you need any further help!' },
 ];
 
 export function AdminSupportManager({ initialTickets }: AdminSupportManagerProps) {
@@ -310,22 +314,37 @@ export function AdminSupportManager({ initialTickets }: AdminSupportManagerProps
                       </div>
                     </div>
 
-                    {/* Responsive Status Dropdown Selector */}
+                    {/* Neobrutalism Dropdown Menu Status Selector */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-xs font-black uppercase text-[#111111]/70">STATUS:</span>
-                      <div className="relative">
-                        <select
-                          value={activeTicket.status}
-                          disabled={isUpdatingStatus}
-                          onChange={(e) => handleStatusChange(e.target.value as any)}
-                          className="appearance-none font-black text-xs bg-[#FFD43B] border-2 border-[#111111] rounded-xl px-3 py-2 pr-8 shadow-[2px_2px_0px_0px_#111111] cursor-pointer outline-none max-w-[170px] sm:max-w-none"
-                        >
-                          <option value="open">🟡 Open</option>
-                          <option value="in_progress">🔵 In Progress</option>
-                          <option value="resolved">🟢 Resolved</option>
-                        </select>
-                        <ChevronDown className="w-4 h-4 absolute right-2.5 top-2.5 pointer-events-none stroke-[3]" />
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            disabled={isUpdatingStatus}
+                            className="font-black text-xs bg-[#FFD43B] border-2 border-[#111111] rounded-xl px-3 py-2 shadow-[2px_2px_0px_0px_#111111] cursor-pointer outline-none flex items-center gap-1.5 hover:bg-white transition-colors"
+                          >
+                            <span>
+                              {activeTicket.status === 'in_progress'
+                                ? 'In Progress'
+                                : activeTicket.status === 'resolved'
+                                ? 'Resolved'
+                                : 'Open'}
+                            </span>
+                            <ChevronDown className="w-4 h-4 stroke-[3]" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleStatusChange('open')}>
+                            Open
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange('in_progress')}>
+                            In Progress
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange('resolved')}>
+                            Resolved
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
@@ -379,12 +398,12 @@ export function AdminSupportManager({ initialTickets }: AdminSupportManagerProps
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Quick Response Templates */}
+                  {/* Quick Chat Templates */}
                   <div className="pt-3 flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-black uppercase text-[#111111]/60 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-[#A855F7]" /> Quick Templates:
+                    <span className="text-[10px] font-black uppercase text-[#111111]/70">
+                      QUICK CHAT:
                     </span>
-                    {QUICK_REPLY_TEMPLATES.map((tmpl, idx) => (
+                    {QUICK_CHAT_TEMPLATES.map((tmpl, idx) => (
                       <button
                         key={idx}
                         type="button"
