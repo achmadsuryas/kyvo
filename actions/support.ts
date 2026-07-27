@@ -6,9 +6,9 @@ import { SupportTicket, SupportMessage } from '@/types';
 
 /**
  * Get active support ticket for current logged in user.
- * Creates one if none exists.
+ * Only creates a ticket if autoCreate is explicitly true (defaults to false).
  */
-export async function getUserActiveTicket(): Promise<{ success: boolean; ticket?: SupportTicket; message?: string }> {
+export async function getUserActiveTicket(autoCreate = false): Promise<{ success: boolean; ticket?: SupportTicket; message?: string }> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -18,7 +18,7 @@ export async function getUserActiveTicket(): Promise<{ success: boolean; ticket?
     }
 
     // Check for existing active ticket
-    const { data: existingTicket, error: fetchErr } = await supabase
+    const { data: existingTicket } = await supabase
       .from('support_tickets')
       .select('*')
       .eq('user_id', user.id)
@@ -30,7 +30,11 @@ export async function getUserActiveTicket(): Promise<{ success: boolean; ticket?
       return { success: true, ticket: existingTicket as SupportTicket };
     }
 
-    // Create new ticket
+    if (!autoCreate) {
+      return { success: true, ticket: undefined };
+    }
+
+    // Create new ticket on demand
     const { data: newTicket, error: createErr } = await (supabase.from('support_tickets') as any)
       .insert({
         user_id: user.id,
@@ -80,9 +84,13 @@ export async function getTicketMessages(ticketId: string): Promise<SupportMessag
 }
 
 /**
- * Send a message in a support ticket
+ * Send a message in a support ticket.
+ * Automatically creates ticket if ticketId is null, and appends an automated bot reply on 1st message.
  */
-export async function sendSupportMessage(ticketId: string, messageText: string): Promise<{ success: boolean; message?: SupportMessage; error?: string }> {
+export async function sendSupportMessage(
+  ticketIdInput: string | null,
+  messageText: string
+): Promise<{ success: boolean; message?: SupportMessage; ticket?: SupportTicket; error?: string }> {
   if (!messageText.trim()) {
     return { success: false, error: 'Message cannot be empty.' };
   }
@@ -95,6 +103,19 @@ export async function sendSupportMessage(ticketId: string, messageText: string):
       return { success: false, error: 'You must be logged in.' };
     }
 
+    let targetTicketId = ticketIdInput;
+    let targetTicket: SupportTicket | undefined;
+
+    // If no ticket ID provided, find or create active ticket
+    if (!targetTicketId) {
+      const res = await getUserActiveTicket(true);
+      if (!res.success || !res.ticket) {
+        return { success: false, error: res.message || 'Failed to initialize support ticket.' };
+      }
+      targetTicketId = res.ticket.id;
+      targetTicket = res.ticket;
+    }
+
     // Get user profile to check role
     const { data: profile } = await supabase
       .from('profiles')
@@ -104,9 +125,17 @@ export async function sendSupportMessage(ticketId: string, messageText: string):
 
     const senderRole = profile?.role === 'admin' ? 'admin' : 'user';
 
+    // Count current messages before inserting to check if this is the first user message
+    const { count } = await supabase
+      .from('support_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('ticket_id', targetTicketId);
+
+    const isFirstMessage = (count || 0) === 0;
+
     const { data: newMessage, error: insertErr } = await (supabase.from('support_messages') as any)
       .insert({
-        ticket_id: ticketId,
+        ticket_id: targetTicketId,
         sender_id: user.id,
         sender_role: senderRole,
         message: messageText.trim(),
@@ -114,36 +143,29 @@ export async function sendSupportMessage(ticketId: string, messageText: string):
       .select('*, sender:profiles!support_messages_sender_id_fkey(*)')
       .single();
 
-    if (insertErr) {
-      // Try fallback insert if join selection had issues
-      const { data: fallbackMsg, error: fbErr } = await (supabase.from('support_messages') as any)
-        .insert({
-          ticket_id: ticketId,
-          sender_id: user.id,
-          sender_role: senderRole,
-          message: messageText.trim(),
-        })
-        .select()
-        .single();
+    if (insertErr || !newMessage) {
+      return { success: false, error: insertErr?.message || 'Failed to send message.' };
+    }
 
-      if (fbErr || !fallbackMsg) {
-        return { success: false, error: fbErr?.message || insertErr.message };
-      }
+    // If this is the user's first message, insert an automated bot initial response
+    if (isFirstMessage && senderRole === 'user') {
+      const autoReplyText =
+        'Hello! 👋 Thank you for reaching out to Kyvo Support. This is an automated message. Our support team has been notified and will assist you shortly. Please wait a moment!';
 
-      // Touch ticket updated_at timestamp
-      await (supabase.from('support_tickets') as any)
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', ticketId);
-
-      return { success: true, message: fallbackMsg as SupportMessage };
+      await (supabase.from('support_messages') as any).insert({
+        ticket_id: targetTicketId,
+        sender_id: user.id,
+        sender_role: 'admin',
+        message: autoReplyText,
+      });
     }
 
     // Touch ticket updated_at
     await (supabase.from('support_tickets') as any)
       .update({ updated_at: new Date().toISOString() })
-      .eq('id', ticketId);
+      .eq('id', targetTicketId);
 
-    return { success: true, message: newMessage as SupportMessage };
+    return { success: true, message: newMessage as SupportMessage, ticket: targetTicket };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to send message.';
     return { success: false, error: msg };
@@ -230,7 +252,7 @@ export async function updateTicketStatus(
       }
 
       revalidatePath('/dashboard/admin');
-      return { success: true, message: `Ticket status updated to ${newStatus === 'in_progress' ? 'Proses' : 'Open'}!` };
+      return { success: true, message: `Ticket status updated to ${newStatus === 'in_progress' ? 'In Progress' : 'Open'}!` };
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update ticket status.';

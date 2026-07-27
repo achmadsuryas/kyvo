@@ -2,21 +2,19 @@
 
 import * as React from 'react';
 import { 
-  MessageSquare, 
   X, 
   Minus, 
   Send, 
   Loader2, 
   Headphones, 
-  CheckCircle2, 
   Clock, 
   Bot,
-  User as UserIcon,
-  Sparkles
+  User as UserIcon
 } from 'lucide-react';
 import { Profile, SupportTicket, SupportMessage } from '@/types';
 import { getUserActiveTicket, getTicketMessages, sendSupportMessage } from '@/actions/support';
 import { createClient } from '@/lib/supabase/client';
+import { KyvoLogo } from '@/components/shared/kyvo-logo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -40,14 +38,17 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Fetch or create ticket on widget load/open
+  // Fetch active ticket if any (without creating blank ticket)
   const loadTicketAndMessages = React.useCallback(async () => {
     setIsLoading(true);
-    const res = await getUserActiveTicket();
+    const res = await getUserActiveTicket(false);
     if (res.success && res.ticket) {
       setTicket(res.ticket);
       const msgs = await getTicketMessages(res.ticket.id);
       setMessages(msgs);
+    } else {
+      setTicket(null);
+      setMessages([]);
     }
     setIsLoading(false);
   }, []);
@@ -88,7 +89,7 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
           if (newMsg.sender_role === 'admin') {
             if (!isOpen) {
               setHasUnread(true);
-              toast.info('📩 Administrator membalas pesan support Anda!');
+              toast.info('📩 Support team replied to your message!');
             }
           }
         }
@@ -117,7 +118,7 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
         () => {
           setTicket(null);
           setMessages([]);
-          toast.success('Tiket support Anda telah diselesaikan oleh Admin.');
+          toast.success('Your support ticket has been resolved and closed.');
           loadTicketAndMessages();
         }
       )
@@ -133,33 +134,38 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
-    let activeTicketId = ticket?.id;
-    if (!activeTicketId) {
-      const res = await getUserActiveTicket();
-      if (res.success && res.ticket) {
-        setTicket(res.ticket);
-        activeTicketId = res.ticket.id;
-      } else {
-        toast.error('Gagal membuat tiket support.');
-        return;
-      }
-    }
-
     const textToSend = inputMessage.trim();
     setInputMessage('');
     setIsSending(true);
 
-    const res = await sendSupportMessage(activeTicketId, textToSend);
+    const res = await sendSupportMessage(ticket?.id || null, textToSend);
     setIsSending(false);
 
     if (res.success && res.message) {
+      if (res.ticket) {
+        setTicket(res.ticket);
+      }
       setMessages((prev) => {
         if (prev.some((m) => m.id === res.message!.id)) return prev;
         return [...prev, res.message!];
       });
-      setTimeout(scrollToBottom, 100);
+
+      // Reload messages to catch automated bot initial response if added
+      if (ticket?.id) {
+        const updatedMsgs = await getTicketMessages(ticket.id);
+        setMessages(updatedMsgs);
+      } else {
+        const freshTicketRes = await getUserActiveTicket(false);
+        if (freshTicketRes.ticket) {
+          setTicket(freshTicketRes.ticket);
+          const msgs = await getTicketMessages(freshTicketRes.ticket.id);
+          setMessages(msgs);
+        }
+      }
+
+      setTimeout(scrollToBottom, 150);
     } else {
-      toast.error(res.error || 'Gagal mengirim pesan.');
+      toast.error(res.error || 'Failed to send message.');
       setInputMessage(textToSend);
     }
   };
@@ -182,7 +188,7 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
                 <div className="flex items-center gap-1 text-[11px] font-extrabold text-[#111111]/80">
                   {ticket?.status === 'in_progress' ? (
                     <Badge variant="default" className="bg-[#3B82F6] text-white text-[9px] py-0 px-1.5 font-black border border-[#111111]">
-                      <Clock className="w-2.5 h-2.5 mr-0.5 animate-spin" /> PROSES
+                      <Clock className="w-2.5 h-2.5 mr-0.5 animate-spin" /> IN PROGRESS
                     </Badge>
                   ) : ticket?.status === 'open' ? (
                     <Badge variant="secondary" className="bg-[#FF922B] text-white text-[9px] py-0 px-1.5 font-black border border-[#111111]">
@@ -217,11 +223,13 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
 
           {/* Messages Area */}
           <div className="flex-1 p-4 overflow-y-auto bg-[#F8F9FA] space-y-3">
-            <div className="rounded-xl border-2 border-dashed border-[#111111]/30 p-3 bg-white text-center space-y-1">
-              <Sparkles className="w-5 h-5 text-[#A855F7] mx-auto" />
-              <p className="text-xs font-black text-[#111111]">Halo, {profile.display_name || profile.username}!</p>
+            <div className="rounded-2xl border-2 border-dashed border-[#111111]/30 p-3 bg-white text-center space-y-1.5 shadow-[2px_2px_0px_0px_#111111]/10">
+              <div className="flex justify-center">
+                <KyvoLogo size="sm" showText={true} />
+              </div>
+              <p className="text-xs font-black text-[#111111]">Welcome to Kyvo Support, {profile.display_name || profile.username}!</p>
               <p className="text-[11px] font-bold text-[#111111]/60">
-                Ada kendala atau pertanyaan? Tuliskan pesan Anda di bawah, Admin Kyvo akan membalas secara langsung.
+                Need assistance or have questions? Send us a message and our support team will respond shortly.
               </p>
             </div>
 
@@ -231,7 +239,7 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
               </div>
             ) : messages.length === 0 ? (
               <div className="text-center text-xs font-bold text-[#111111]/50 py-4">
-                Belum ada pesan. Mulai kirim pesan untuk membuka tiket.
+                No messages yet. Send a message to start!
               </div>
             ) : (
               messages.map((msg) => {
@@ -284,7 +292,7 @@ export function SupportChatWidget({ profile }: SupportChatWidgetProps) {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Tulis pesan support..."
+              placeholder="Type your message..."
               className="flex-1 rounded-xl border-2 border-[#111111] p-2.5 text-xs font-bold text-[#111111] outline-none shadow-[2px_2px_0px_0px_#111111]"
             />
             <Button

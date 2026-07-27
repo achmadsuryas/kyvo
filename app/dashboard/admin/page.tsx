@@ -1,14 +1,12 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ShieldCheck, ArrowLeft, Users, Award, BarChart3, Headphones } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Users, Award, Headphones } from 'lucide-react';
 import { getCurrentUserProfile } from '@/services/profile';
 import { getAllBadges } from '@/actions/badges';
 import { getAllUsersForAdmin } from '@/actions/admin';
 import { getAllTicketsForAdmin } from '@/actions/support';
 import { Sidebar } from '@/components/layout/sidebar';
-import { BadgeManager } from '@/components/dashboard/badge-manager';
-import { UserManagementTable } from '@/components/dashboard/user-management-table';
-import { AdminSupportManager } from '@/components/dashboard/admin-support-manager';
+import { AdminDashboardClient } from '@/components/dashboard/admin-dashboard-client';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
@@ -78,7 +76,7 @@ export default async function AdminDashboardPage() {
               <Headphones className="w-5 h-5 text-[#A855F7] stroke-[2.5]" />
             </div>
             <p className="text-3xl font-black text-[#111111]">{supportTickets.length}</p>
-            <p className="text-xs font-bold text-[#3B82F6]">Live Help Center Requests</p>
+            <p className="text-xs font-bold text-[#3B82F6]">Live Help Requests</p>
           </Card>
 
           <Card className="bg-white border-[3px] border-[#111111] shadow-[4px_4px_0px_0px_#111111] p-5 space-y-2">
@@ -91,20 +89,13 @@ export default async function AdminDashboardPage() {
           </Card>
         </div>
 
-        {/* Live Support Management Center */}
-        <div className="w-full">
-          <AdminSupportManager initialTickets={supportTickets} />
-        </div>
-
-        {/* User Directory & Admin Management Table */}
-        <div className="w-full">
-          <UserManagementTable initialUsers={users} availableBadges={badges} />
-        </div>
-
-        {/* Dedicated Admin Badge & Event Manager */}
-        <div className="w-full">
-          <BadgeManager badges={badges} />
-        </div>
+        {/* Tabbed Admin Control Client */}
+        <AdminDashboardClient
+          profile={profile}
+          users={users}
+          badges={badges}
+          supportTickets={supportTickets}
+        />
       </main>
     </div>
   );
