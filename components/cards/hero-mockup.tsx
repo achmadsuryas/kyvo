@@ -39,7 +39,7 @@ export function HeroMockup() {
       >
         {/* Top Header Row matching Public Profile Page */}
         <div className="flex items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/15 pb-3">
-          <KyvoLogo href="/" size="xs" />
+          <KyvoLogo href="/" size="sm" />
           <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
             <Sparkles className="w-3 h-3 text-[#FF4D6D] fill-[#FF4D6D]" />
             <span>Create Your Own</span>
