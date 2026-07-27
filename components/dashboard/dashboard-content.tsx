@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Award, Ban, Palette, Share2, Send } from 'lucide-react';
+import { ExternalLink, User, Mail, AtSign, CheckCircle2, Edit3, Check, X, Loader2, AlignLeft, ShieldCheck, Upload, Trash2, Camera, Home, QrCode, BarChart3, Link as LinkIcon, AlertTriangle, Music, Disc, Sparkles, Award, Ban, Palette, Share2, Send, Globe } from 'lucide-react';
 import { Profile, LinkItem, BadgeItem, UserBadgeItem } from '@/types';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { getMusicSignedUploadUrl, uploadProfileMusic } from '@/actions/upload-mu
 import { signOut } from '@/actions/auth';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { TwitterIcon, InstagramIcon, TiktokIcon, YoutubeIcon, SpotifyIcon, GithubIcon, LinkedinIcon, DiscordIcon, WhatsappIcon, Globe } from '@/components/shared/social-icons';
+import { TwitterIcon, InstagramIcon, TiktokIcon, YoutubeIcon, SpotifyIcon, GithubIcon, LinkedinIcon, DiscordIcon, WhatsappIcon } from '@/components/shared/social-icons';
 
 /**
  * Client-Side Instant Image Compressor (Resizes photos to ultra-lightweight ~100KB WebP)
