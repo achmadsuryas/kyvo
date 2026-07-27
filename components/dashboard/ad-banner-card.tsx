@@ -72,9 +72,9 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                 <Badge variant="purple" className="text-[10px] font-black uppercase">
                   KYVO NEWS
                 </Badge>
-                <h4 className="text-xl font-black text-[#111111]">No New News Posts</h4>
+                <h4 className="text-xl font-black text-[#111111]">No Recent Announcements</h4>
                 <p className="text-xs font-bold text-[#111111]/70 leading-relaxed max-w-xs mx-auto pt-1">
-                  Everything is up to date! Check back regularly for upcoming patch notes, creator news, and events.
+                  Everything is up to date! Check back regularly for upcoming platform updates, patch notes, and creator news.
                 </p>
               </div>
             </div>
