@@ -208,12 +208,12 @@ export function PublicProfileContainer({
             
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                <h1 className={`text-xl sm:text-2xl font-black ${isDarkBg ? 'text-white' : 'text-[#111111]'}`}>
+                <h1 className={`text-2xl sm:text-3xl font-black ${isDarkBg ? 'text-white' : 'text-[#111111]'}`}>
                   {profile.display_name || profile.username}
                 </h1>
                 {isVerifiedByAdmin && (
                   <span title="Verified Creator">
-                    <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
                   </span>
                 )}
                 {profile.status === 'warned' && (
@@ -223,7 +223,7 @@ export function PublicProfileContainer({
                   </span>
                 )}
               </div>
-              <p className="text-xs font-black text-[#3B82F6] tracking-wide">
+              <p className="text-sm sm:text-base font-black text-[#3B82F6] tracking-wide">
                 @{profile.username}
               </p>
 
@@ -236,10 +236,10 @@ export function PublicProfileContainer({
                     return (
                       <span
                         key={b.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border border-[#111111] font-black text-[10px] uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#111111] font-black text-xs uppercase shadow-[1.5px_1.5px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 cursor-default"
                         style={{ backgroundColor: b.bg_color || '#FFD43B', color: b.color || '#111111' }}
                       >
-                        <BadgeIcon className="w-3 h-3 stroke-[2.5]" />
+                        <BadgeIcon className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>{b.name}</span>
                       </span>
                     );
@@ -249,14 +249,14 @@ export function PublicProfileContainer({
             </div>
 
             {profile.bio && (
-              <p className={`text-xs sm:text-sm font-extrabold max-w-xs leading-relaxed pt-0.5 ${isDarkBg ? 'text-white/90' : 'text-[#111111]/80'}`}>
+              <p className={`text-sm sm:text-base font-extrabold max-w-xs sm:max-w-sm leading-relaxed pt-0.5 ${isDarkBg ? 'text-white/90' : 'text-[#111111]/80'}`}>
                 {profile.bio}
               </p>
             )}
 
             {/* SOCIAL MEDIA ICONS ROW BELOW BIO */}
             {profile.social_links && Object.keys(profile.social_links).some((key) => Boolean(profile.social_links?.[key])) && (
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
                 {Object.entries(profile.social_links).map(([platform, val]) => {
                   if (!val || !val.trim()) return null;
                   const finalUrl = formatSocialUrl(platform, val);
@@ -269,9 +269,9 @@ export function PublicProfileContainer({
                       target="_blank"
                       rel="noopener noreferrer"
                       title={platform}
-                      className={`p-2 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center`}
+                      className={`p-2.5 sm:p-3 rounded-xl border-2 border-[#111111] bg-white text-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] hover:bg-[#FFD43B] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center`}
                     >
-                      <IconComponent className="w-4 h-4 stroke-[2.5]" />
+                      <IconComponent className="w-5 h-5 stroke-[2.5]" />
                     </a>
                   );
                 })}

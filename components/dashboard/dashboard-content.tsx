@@ -14,8 +14,9 @@ import { LinkManager } from '@/components/dashboard/link-manager';
 import { AdBannerCard } from '@/components/dashboard/ad-banner-card';
 import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
+import { SocialIconManager } from '@/components/dashboard/social-icon-manager';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
-import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic, updateUserSocialLinks } from '@/actions/profile';
+import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
 import { getMusicSignedUploadUrl, uploadProfileMusic } from '@/actions/upload-music';
 import { signOut } from '@/actions/auth';
 import { createClient } from '@/lib/supabase/client';
@@ -117,22 +118,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   const [isSaving, setIsSaving] = React.useState(false);
   const [isCompressing, setIsCompressing] = React.useState(false);
   const [isAudioProcessing, setIsAudioProcessing] = React.useState(false);
-
-  // Social Media Icons state
-  const [socialInputs, setSocialInputs] = React.useState<Record<string, string>>((profile as any)?.social_links || {});
-  const [isSavingSocials, setIsSavingSocials] = React.useState(false);
-
-  const handleSaveSocialLinks = async () => {
-    setIsSavingSocials(true);
-    const res = await updateUserSocialLinks(socialInputs);
-    setIsSavingSocials(false);
-
-    if (res.success) {
-      toast.success(res.message);
-    } else {
-      toast.error(res.message);
-    }
-  };
 
   // Theme Cards & Custom Outer Background state
   const [selectedTheme, setSelectedTheme] = React.useState<string>(profile?.theme || 'neobrutalism');
@@ -893,65 +878,9 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                     </div>
                   )}
 
-                  {/* SOCIAL MEDIA ICONS (BELOW BIO) MANAGER WIDGET */}
+                  {/* SOCIAL MEDIA ICONS MANAGER WIDGET */}
                   {!isEditingDetails && (
-                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-4 shadow-[4px_4px_0px_0px_#111111] space-y-4 w-full min-w-0">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/20 pb-3">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Share2 className="w-5 h-5 text-[#FF4D6D] stroke-[2.5]" />
-                            <h4 className="text-sm font-black text-[#111111]">Social Media Icons (Below Bio)</h4>
-                          </div>
-                          <p className="text-xs font-bold text-[#111111]/70">
-                            Add social media links displayed in a horizontal icon row right below your bio
-                          </p>
-                        </div>
-
-                        <Button
-                          onClick={handleSaveSocialLinks}
-                          disabled={isSavingSocials}
-                          variant="yellow"
-                          size="sm"
-                          className="font-black text-xs gap-1 shadow-[2px_2px_0px_0px_#111111] shrink-0"
-                        >
-                          {isSavingSocials ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                          <span>Save Social Icons</span>
-                        </Button>
-                      </div>
-
-                      {/* Social Platform Inputs Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        {[
-                          { id: 'instagram', label: 'Instagram', placeholder: 'username or instagram.com/username', icon: InstagramIcon },
-                          { id: 'twitter', label: 'Twitter / X', placeholder: 'username or x.com/username', icon: TwitterIcon },
-                          { id: 'tiktok', label: 'TikTok', placeholder: '@username or tiktok.com/@username', icon: TiktokIcon },
-                          { id: 'youtube', label: 'YouTube', placeholder: '@channel or youtube.com/@channel', icon: YoutubeIcon },
-                          { id: 'spotify', label: 'Spotify', placeholder: 'Artist URL or Spotify link', icon: SpotifyIcon },
-                          { id: 'github', label: 'GitHub', placeholder: 'username or github.com/username', icon: GithubIcon },
-                          { id: 'linkedin', label: 'LinkedIn', placeholder: 'username or linkedin.com/in/username', icon: LinkedinIcon },
-                          { id: 'discord', label: 'Discord', placeholder: 'Discord server link or handle', icon: DiscordIcon },
-                          { id: 'telegram', label: 'Telegram', placeholder: 'username or t.me/username', icon: Send },
-                          { id: 'website', label: 'Website / Portfolio', placeholder: 'https://yourwebsite.com', icon: Globe },
-                        ].map((item) => {
-                          const ItemIcon = item.icon;
-                          return (
-                            <div key={item.id} className="space-y-1">
-                              <label className="text-xs font-black uppercase text-[#111111]/80 flex items-center gap-1.5">
-                                <ItemIcon className="w-3.5 h-3.5 text-[#3B82F6]" />
-                                <span>{item.label}</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={socialInputs[item.id] || ''}
-                                onChange={(e) => setSocialInputs({ ...socialInputs, [item.id]: e.target.value })}
-                                placeholder={item.placeholder}
-                                className="w-full rounded-xl border-2 border-[#111111] bg-[#F8F9FA] px-3 py-1.5 font-bold text-xs outline-none focus:bg-white focus:border-[#3B82F6]"
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    <SocialIconManager initialSocialLinks={profile?.social_links} />
                   )}
 
                   {/* PUBLIC PROFILE BACKGROUND COLOR SELECTOR WIDGET */}

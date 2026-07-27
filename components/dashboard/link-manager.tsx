@@ -385,7 +385,8 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
         ) : (
           <div className="space-y-4">
             {links.map((link, index) => {
-              const IconComp = getIconComponent(link.icon || 'Globe');
+              const hasIcon = Boolean(link.icon && link.icon !== 'none' && link.icon !== 'None' && link.icon !== '');
+              const IconComp = hasIcon ? getIconComponent(link.icon!) : null;
               const isEditing = editingId === link.id;
               const linkBgColor = link.bg_color || '#FFD43B';
 
@@ -499,15 +500,21 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
                         </div>
 
                         {/* Graphical SVG Icon Badge */}
-                        <div
-                          className="w-12 h-12 rounded-xl border-2 border-[#111111] shrink-0 aspect-square flex items-center justify-center shadow-[2px_2px_0px_0px_#111111]"
-                          style={{
-                            backgroundColor: linkBgColor,
-                            color: getContrastColor(linkBgColor),
-                          }}
-                        >
-                          <IconComp className="w-6 h-6 shrink-0 aspect-square" />
-                        </div>
+                        {hasIcon && IconComp ? (
+                          <div
+                            className="w-12 h-12 rounded-xl border-2 border-[#111111] shrink-0 aspect-square flex items-center justify-center shadow-[2px_2px_0px_0px_#111111]"
+                            style={{
+                              backgroundColor: linkBgColor,
+                              color: getContrastColor(linkBgColor),
+                            }}
+                          >
+                            <IconComp className="w-6 h-6 shrink-0 aspect-square" />
+                          </div>
+                        ) : (
+                          <div className="px-2.5 py-1.5 rounded-lg border-2 border-dashed border-[#111111]/30 bg-[#F8F9FA] text-[10px] font-black text-[#111111]/60 shrink-0 uppercase">
+                            NO ICON
+                          </div>
+                        )}
                         <div className="overflow-hidden">
                           <div className="flex items-center gap-2">
                             <h4 className="text-base font-black text-[#111111] truncate">
