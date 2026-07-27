@@ -909,8 +909,8 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         </Button>
                       </div>
 
-                      {/* 3 Theme Selection Cards Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* 3 Theme Selection Cards Grid (Compact & Space-Efficient) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {THEME_CARDS.map((item) => {
                           const isSelected = selectedTheme === item.id;
                           return (
@@ -921,41 +921,40 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                                 setSelectedTheme(item.id);
                                 setCustomBgColor(item.defaultOuterBg);
                               }}
-                              className={`rounded-xl border-2 p-3 text-left transition-all cursor-pointer relative flex flex-col justify-between space-y-3 ${item.previewCardBg} ${
+                              className={`rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer relative flex flex-col justify-between space-y-2 ${item.previewCardBg} ${
                                 isSelected
-                                  ? 'border-[3px] border-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.02]'
-                                  : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'
+                                  ? 'border-[3px] border-[#111111] shadow-[2.5px_2.5px_0px_0px_#111111] scale-[1.01]'
+                                  : 'opacity-80 hover:opacity-100'
                               }`}
                             >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md border border-[#111111] bg-white text-[#111111] shadow-[1px_1px_0px_0px_#111111]">
+                              <div className="flex items-center justify-between gap-1.5">
+                                <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-[#111111] bg-white text-[#111111] shadow-[1px_1px_0px_0px_#111111]">
                                   {item.badgeText}
                                 </span>
                                 {isSelected && (
-                                  <span className="w-5 h-5 rounded-full bg-[#51CF66] border border-[#111111] text-[#111111] flex items-center justify-center shadow-[1px_1px_0px_0px_#111111]">
-                                    <Check className="w-3 h-3 stroke-[3]" />
+                                  <span className="w-4 h-4 rounded-full bg-[#51CF66] border border-[#111111] text-[#111111] flex items-center justify-center shadow-[1px_1px_0px_0px_#111111]">
+                                    <Check className="w-2.5 h-2.5 stroke-[3]" />
                                   </span>
                                 )}
                               </div>
 
                               <div>
-                                <h5 className="text-xs font-black">{item.name}</h5>
-                                <p className="text-[10px] font-bold opacity-75">{item.description}</p>
+                                <h5 className="text-xs font-black leading-tight">{item.name}</h5>
                               </div>
 
-                              {/* Mini Color Swatch */}
+                              {/* Compact Swatch */}
                               <div className="flex items-center gap-1.5 pt-1 border-t border-current/20">
                                 <span
-                                  className="w-4 h-4 rounded-full border border-[#111111]"
+                                  className="w-3.5 h-3.5 rounded-full border border-[#111111]"
                                   style={{ backgroundColor: item.accentBg }}
                                   title="Accent Color"
                                 />
                                 <span
-                                  className="w-4 h-4 rounded-full border border-[#111111]"
+                                  className="w-3.5 h-3.5 rounded-full border border-[#111111]"
                                   style={{ backgroundColor: item.defaultOuterBg }}
                                   title="Outer BG Color"
                                 />
-                                <span className="text-[9px] font-extrabold opacity-60">Preview</span>
+                                <span className="text-[9px] font-bold opacity-60">Theme Color</span>
                               </div>
                             </button>
                           );

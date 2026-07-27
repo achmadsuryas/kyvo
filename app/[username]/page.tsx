@@ -73,7 +73,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
     >
       {/* Top Header Bar with Custom Favicon Logo */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-1.5">
-        <KyvoLogo href="/" size="sm" />
+        <KyvoLogo href="/" size="sm" textColor={isDarkTheme ? "text-white" : "text-[#111111]"} />
 
         <Link href="/login">
           <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]">
@@ -151,9 +151,9 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
       {/* Footer Branding with Official KyvoLogo */}
       <footer className="w-full max-w-sm sm:max-w-md text-center py-2">
-        <div className="flex items-center justify-center gap-1.5 text-xs font-black text-[#111111]/70">
+        <div className={`flex items-center justify-center gap-1.5 text-xs font-black ${isDarkTheme ? "text-white/80" : "text-[#111111]/70"}`}>
           <span>Powered by</span>
-          <KyvoLogo href="/" size="sm" />
+          <KyvoLogo href="/" size="sm" textColor={isDarkTheme ? "text-white" : "text-[#111111]"} />
         </div>
       </footer>
     </div>

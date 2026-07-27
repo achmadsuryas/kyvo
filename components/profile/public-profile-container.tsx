@@ -182,7 +182,7 @@ export function PublicProfileContainer({
               
               <div className="space-y-1">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-black text-[#111111]">
+                  <h1 className={`text-xl sm:text-2xl font-black ${isDarkTheme ? 'text-white' : 'text-[#111111]'}`}>
                     {profile.display_name || profile.username}
                   </h1>
                   {isVerifiedByAdmin && (
@@ -223,7 +223,7 @@ export function PublicProfileContainer({
               </div>
 
               {profile.bio && (
-                <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs leading-relaxed pt-0.5">
+                <p className={`text-xs sm:text-sm font-extrabold max-w-xs leading-relaxed pt-0.5 ${isDarkTheme ? 'text-white/90' : 'text-[#111111]/80'}`}>
                   {profile.bio}
                 </p>
               )}
@@ -231,16 +231,22 @@ export function PublicProfileContainer({
 
             {/* ANIMATED SPINNING PERFECT VINYL RECORD DISK & MUTE CONTROLLER */}
             {hasMusic && (
-              <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#FFD43B]/30 p-3 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between gap-3">
+              <div className={`rounded-2xl border-[2.5px] p-3 flex items-center justify-between gap-3 ${
+                isDarkTheme
+                  ? 'bg-[#27272A] border-[#A855F7] text-white shadow-[3px_3px_0px_0px_#A855F7]'
+                  : isFeminineTheme
+                  ? 'bg-[#FFD6E8] border-[#FF4D6D] text-[#111111] shadow-[3px_3px_0px_0px_#FF4D6D]'
+                  : 'bg-[#FFD43B]/25 border-[#111111] text-[#111111] shadow-[3px_3px_0px_0px_#111111]'
+              }`}>
                 {/* Left: Perfectly Round Pure Vector Vinyl Disk */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <VinylRecordDisk size="sm" isSpinning={isPlaying} />
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-black uppercase text-[#111111]/60 tracking-wider">
+                    <p className={`text-[10px] font-black uppercase tracking-wider ${isDarkTheme ? 'text-white/70' : 'text-[#111111]/60'}`}>
                       Background Music
                     </p>
-                    <p className="text-xs font-black text-[#111111] truncate">
+                    <p className={`text-xs font-black truncate ${isDarkTheme ? 'text-white' : 'text-[#111111]'}`}>
                       {profile.music_title || 'Audio Track'}
                     </p>
                   </div>
@@ -281,7 +287,7 @@ export function PublicProfileContainer({
             </div>
 
             {/* Share Profile & QR Code Action */}
-            <ProfileShareButton username={profile.username} displayName={profile.display_name || profile.username} />
+            <ProfileShareButton username={profile.username} displayName={profile.display_name || profile.username} isDarkTheme={isDarkTheme} />
           </div>
         </main>
       )}

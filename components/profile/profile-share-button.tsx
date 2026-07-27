@@ -7,16 +7,19 @@ import { QRCodeModal } from '@/components/shared/qr-code-modal';
 interface ProfileShareButtonProps {
   username: string;
   displayName: string;
+  isDarkTheme?: boolean;
 }
 
-export function ProfileShareButton({ username, displayName }: ProfileShareButtonProps) {
+export function ProfileShareButton({ username, displayName, isDarkTheme }: ProfileShareButtonProps) {
   const [qrOpen, setQrOpen] = React.useState(false);
 
   return (
     <>
       <button
         onClick={() => setQrOpen(true)}
-        className="w-full pt-4 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-center text-xs font-black text-[#111111] hover:text-[#3B82F6] transition-colors cursor-pointer gap-2"
+        className={`w-full pt-4 border-t-2 border-dashed ${
+          isDarkTheme ? 'border-white/20 text-white hover:text-[#A855F7]' : 'border-[#111111]/20 text-[#111111] hover:text-[#3B82F6]'
+        } flex items-center justify-center text-xs font-black transition-colors cursor-pointer gap-2`}
       >
         <Share2 className="w-4 h-4 text-[#FF4D6D]" />
         <span>Share Profile & Scan QR Code</span>

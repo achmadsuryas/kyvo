@@ -9,6 +9,7 @@ interface KyvoLogoProps {
   showText?: boolean;
   href?: string;
   className?: string;
+  textColor?: string;
 }
 
 export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }) {
@@ -48,7 +49,7 @@ export function KyvoLogoIcon({ size = 'md', className }: { size?: 'sm' | 'md' | 
   );
 }
 
-export function KyvoLogo({ size = 'md', showText = true, href, className }: KyvoLogoProps) {
+export function KyvoLogo({ size = 'md', showText = true, href, className, textColor }: KyvoLogoProps) {
   const textSizes = {
     sm: 'text-lg sm:text-xl',
     md: 'text-2xl sm:text-3xl',
@@ -63,7 +64,8 @@ export function KyvoLogo({ size = 'md', showText = true, href, className }: Kyvo
       {showText && (
         <span
           className={cn(
-            "font-black tracking-tight text-[#111111] group-hover:scale-105 transition-transform",
+            "font-black tracking-tight group-hover:scale-105 transition-transform",
+            textColor || "text-[#111111]",
             textSizes[size] || textSizes.md
           )}
           style={{ fontFamily: 'var(--font-bricolage), "Arial Black", Impact, sans-serif' }}
