@@ -437,6 +437,19 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
   };
 
   // Direct Quick Remove Music Handler
+  const handleRemoveMusicDirect = async () => {
+    setIsDeletingMusic(true);
+    const res = await deleteProfileMusic();
+    setIsDeletingMusic(false);
+
+    if (res.success) {
+      toast.success(res.message);
+      setMusicUrl(null);
+      setMusicTitle('');
+    } else {
+      toast.error(res.message);
+    }
+  };
 
   // Permanently Delete User Account & Free Up Username
   const handleConfirmDeleteAccount = async () => {
@@ -878,73 +891,71 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                   </div>
 
                   {/* CLEAN DEDICATED PROFILE BACKGROUND MUSIC WIDGET */}
-                  {!isEditingDetails && (
-                    <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#A855F7]/15 p-3.5 sm:p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3 w-full min-w-0 overflow-hidden">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full min-w-0">
-                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full sm:w-auto">
-                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 border-[#111111] bg-[#A855F7] text-white flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] shrink-0">
-                            {musicUrl ? <Disc className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Music className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <h4 className="text-xs sm:text-sm font-black text-[#111111] break-words">Profile Background Music</h4>
-                            </div>
-                            <p className="text-[11px] sm:text-xs font-bold text-[#111111]/70 break-words">
-                              {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded (Max 4.5 MB)'}
-                            </p>
-                          </div>
+                  <div className="rounded-2xl border-[2.5px] border-[#111111] bg-[#A855F7]/15 p-3.5 sm:p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3 w-full min-w-0 overflow-hidden">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full min-w-0">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 w-full sm:w-auto">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 border-[#111111] bg-[#A855F7] text-white flex items-center justify-center shadow-[2px_2px_0px_0px_#111111] shrink-0">
+                          {musicUrl ? <Disc className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Music className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />}
                         </div>
-
-                        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                          <label className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] hover:text-[#111111] transition-colors w-full sm:w-auto ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
-                            {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
-                            <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV)'}</span>
-                            <input
-                              type="file"
-                              accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
-                              onChange={handleAudioFileChange}
-                              disabled={isAudioProcessing}
-                              className="hidden"
-                            />
-                          </label>
-
-                          {musicUrl && (
-                            <button
-                              onClick={handleRemoveMusicDirect}
-                              disabled={isDeletingMusic}
-                              className="p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform shrink-0"
-                              title="Remove Song & Clean Storage"
-                            >
-                              {isDeletingMusic ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />}
-                            </button>
-                          )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="text-xs sm:text-sm font-black text-[#111111] break-words">Profile Background Music</h4>
+                          </div>
+                          <p className="text-[11px] sm:text-xs font-bold text-[#111111]/70 break-words">
+                            {musicUrl ? `Track: "${musicTitle || 'Custom Audio'}"` : 'No background music uploaded (Max 4.5 MB)'}
+                          </p>
                         </div>
                       </div>
 
-                      {musicUrl && (
-                        <div className="pt-2 border-t border-black/15 space-y-2 w-full">
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
-                            <input
-                              type="text"
-                              value={musicTitle}
-                              onChange={(e) => setMusicTitle(e.target.value)}
-                              placeholder="Type Song Title (e.g. My Favorite Beat)"
-                              className="flex-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-1.5 font-black text-xs text-[#111111] outline-none shadow-[1.5px_1.5px_0px_0px_#111111] w-full"
-                            />
-                            <button
-                              onClick={handleSaveSongTitle}
-                              disabled={isSavingTitle}
-                              className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] font-black text-xs shadow-[1.5px_1.5px_0px_0px_#111111] flex items-center justify-center gap-1 shrink-0 w-full sm:w-auto"
-                            >
-                              {isSavingTitle ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                              <span>Save Title</span>
-                            </button>
-                          </div>
-                          <audio controls src={musicUrl} className="w-full h-8 pt-0.5" />
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                        <label className={`cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] hover:text-[#111111] transition-colors w-full sm:w-auto ${isAudioProcessing ? 'opacity-50 pointer-events-none' : ''}`}>
+                          {isAudioProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                          <span>{musicUrl ? 'Change Track' : 'Upload Track (.MP3 / .WAV)'}</span>
+                          <input
+                            type="file"
+                            accept="audio/mp3, audio/mpeg, audio/wav, audio/x-wav"
+                            onChange={handleAudioFileChange}
+                            disabled={isAudioProcessing}
+                            className="hidden"
+                          />
+                        </label>
+
+                        {musicUrl && (
+                          <button
+                            onClick={handleRemoveMusicDirect}
+                            disabled={isDeletingMusic}
+                            className="p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform shrink-0"
+                            title="Remove Song & Clean Storage"
+                          >
+                            {isDeletingMusic ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  )}
+
+                    {musicUrl && (
+                      <div className="pt-2 border-t border-black/15 space-y-2 w-full">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                          <input
+                            type="text"
+                            value={musicTitle}
+                            onChange={(e) => setMusicTitle(e.target.value)}
+                            placeholder="Type Song Title (e.g. My Favorite Beat)"
+                            className="flex-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-1.5 font-black text-xs text-[#111111] outline-none shadow-[1.5px_1.5px_0px_0px_#111111] w-full"
+                          />
+                          <button
+                            onClick={handleSaveSongTitle}
+                            disabled={isSavingTitle}
+                            className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] font-black text-xs shadow-[1.5px_1.5px_0px_0px_#111111] flex items-center justify-center gap-1 shrink-0 w-full sm:w-auto"
+                          >
+                            {isSavingTitle ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            <span>Save Title</span>
+                          </button>
+                        </div>
+                        <audio controls src={musicUrl} className="w-full h-8 pt-0.5" />
+                      </div>
+                    )}
+                  </div>
 
                   {/* DANGER ZONE: DELETE ACCOUNT BUTTON */}
                   <div className="pt-3 border-t-2 border-dashed border-[#111111]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
