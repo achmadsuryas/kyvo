@@ -14,8 +14,9 @@ import { Profile, LinkItem, BadgeItem } from '@/types';
 import { getBadgeIconComponent } from '@/components/shared/badge-icons';
 import { Button } from '@/components/ui/button';
 import { ProfileShareButton } from '@/components/profile/profile-share-button';
-import { PublicProfileTracker, TrackedLinkItem } from '@/components/profile/public-profile-tracker';
+import { TrackedLinkItem } from '@/components/profile/public-profile-tracker';
 import { InteractiveAvatar } from '@/components/profile/interactive-avatar';
+import { recordProfileView } from '@/actions/analytics';
 
 /**
  * Pure Vector SVG Vinyl Record Disk (Mathematically 100% Perfect Circle!)
@@ -81,6 +82,13 @@ export function PublicProfileContainer({
   const [isMuted, setIsMuted] = React.useState(false);
   
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  // Record profile view analytics silently on mount / enter
+  React.useEffect(() => {
+    if (hasTriggered && profile.id) {
+      recordProfileView(profile.id);
+    }
+  }, [hasTriggered, profile.id]);
 
   // Initialize audio when user has music
   React.useEffect(() => {
@@ -154,22 +162,11 @@ export function PublicProfileContainer({
         </div>
       )}
 
-      {/* 2. MAIN PUBLIC CREATOR PROFILE (SEAMLESS CLEAN PROFILE WITHOUT OUTER CARD BORDER) */}
+      {/* 2. MAIN PUBLIC CREATOR PROFILE (MINIMAL & ULTRA-CLEAN DESIGN) */}
       {hasTriggered && (
         <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6 animate-in fade-in duration-300 space-y-5">
-          {/* Header Decorative Banner */}
-          <div className="h-16 sm:h-20 w-full rounded-2xl border-[2.5px] border-[#111111] bg-[#3B82F6] relative overflow-hidden p-3 flex items-start justify-between shadow-[3px_3px_0px_0px_#111111]">
-            <PublicProfileTracker profileId={profile.id} initialViews={profile.views_count || 0} />
-            
-            <div className="flex gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FF4D6D]" />
-              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#FFD43B]" />
-              <span className="w-2.5 h-2.5 rounded-full border border-[#111111] bg-[#51CF66]" />
-            </div>
-          </div>
-
           {/* User Info Section */}
-          <div className="flex flex-col items-center text-center -mt-12 sm:-mt-14 relative z-10 space-y-2">
+          <div className="flex flex-col items-center text-center pt-2 space-y-2">
             <InteractiveAvatar
               src={profile.avatar_url}
               fallback={profile.display_name || profile.username}
