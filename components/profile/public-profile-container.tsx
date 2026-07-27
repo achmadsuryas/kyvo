@@ -125,10 +125,10 @@ export function PublicProfileContainer({
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-start pt-1 sm:pt-2">
+    <div className="w-full flex-1 flex flex-col items-center justify-center my-auto">
       {/* 1. INITIAL INTERACTIVE MUSIC ENTER TRIGGER OVERLAY (Only if profile HAS music) */}
       {!hasTriggered && hasMusic && (
-        <div className="w-full max-w-sm sm:max-w-md mt-2 sm:mt-4 mb-4 animate-in zoom-in-95 duration-300">
+        <div className="w-full max-w-sm sm:max-w-md my-auto animate-in zoom-in-95 duration-300">
           <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#111111] text-center flex flex-col items-center justify-center space-y-6">
             {/* Perfectly Round Pure Vector Spinning Vinyl Preview Record */}
             <div className="relative w-28 h-28 mx-auto flex items-center justify-center shrink-0">
@@ -164,7 +164,7 @@ export function PublicProfileContainer({
 
       {/* 2. MAIN PUBLIC CREATOR PROFILE (MINIMAL & ULTRA-CLEAN DESIGN) */}
       {hasTriggered && (
-        <main className="w-full max-w-sm sm:max-w-md mt-1 sm:mt-2 mb-4 animate-in fade-in duration-300 space-y-5">
+        <main className="w-full max-w-sm sm:max-w-md my-auto py-2 animate-in fade-in duration-300 space-y-5">
           {/* User Info Section */}
           <div className="flex flex-col items-center text-center pt-2 space-y-2">
             <InteractiveAvatar
