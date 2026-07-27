@@ -176,3 +176,36 @@ export async function toggleLinkActive(id: string, currentStatus: boolean): Prom
     return { success: false, message: msg };
   }
 }
+
+export async function reorderLinks(orderedLinkIds: string[]): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: 'You must be logged in.' };
+    }
+
+    // Update each link's sort_order based on its position in orderedLinkIds array
+    const updates = orderedLinkIds.map((id, index) =>
+      (supabase.from('links') as any)
+        .update({ sort_order: index + 1 })
+        .eq('id', id)
+        .eq('profile_id', user.id)
+    );
+
+    const results = await Promise.all(updates);
+    const hasError = results.some((r) => r.error);
+
+    if (hasError) {
+      return { success: false, message: 'Failed to update link positions.' };
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/[username]');
+    return { success: true, message: 'Link order saved!' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to reorder links.';
+    return { success: false, message: msg };
+  }
+}

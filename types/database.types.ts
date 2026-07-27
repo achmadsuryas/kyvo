@@ -36,7 +36,8 @@ export interface LinkItem {
   bg_color?: string | null;
   is_active: boolean;
   clicks_count?: number;
-  position: number;
+  position?: number;
+  sort_order?: number;
   created_at: string;
   updated_at: string;
 }

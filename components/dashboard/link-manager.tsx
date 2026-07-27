@@ -12,9 +12,13 @@ import {
   Loader2, 
   Link as LinkIcon, 
   Sparkles,
+  ChevronUp,
+  ChevronDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { LinkItem } from '@/types';
-import { createLink, updateLink, deleteLink, toggleLinkActive } from '@/actions/links';
+import { createLink, updateLink, deleteLink, toggleLinkActive, reorderLinks } from '@/actions/links';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { IconPicker } from '@/components/dashboard/icon-picker';
 import { Button } from '@/components/ui/button';
@@ -241,6 +245,29 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
     }
   };
 
+  // Handle Reorder / Swap Link Position
+  const handleMoveLink = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= links.length) return;
+
+    const currentLinks = [...links];
+    const newLinks = [...links];
+    const [movedLink] = newLinks.splice(index, 1);
+    newLinks.splice(targetIndex, 0, movedLink);
+
+    // Optimistic UI update
+    setLinks(newLinks);
+
+    const res = await reorderLinks(newLinks.map((l) => l.id));
+    if (!res.success) {
+      toast.error(res.message);
+      // Revert if failed
+      setLinks(currentLinks);
+    } else {
+      toast.success(`Position updated (${direction === 'up' ? 'Moved Up' : 'Moved Down'})`);
+    }
+  };
+
   return (
     <Card className="bg-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-6 md:p-8 space-y-6">
       <CardHeader className="px-0 pt-0 pb-6 border-b-2 border-dashed border-[#111111]/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -357,7 +384,7 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            {links.map((link) => {
+            {links.map((link, index) => {
               const IconComp = getIconComponent(link.icon || 'Globe');
               const isEditing = editingId === link.id;
               const linkBgColor = link.bg_color || '#FFD43B';
@@ -440,7 +467,37 @@ export function LinkManager({ initialLinks }: LinkManagerProps) {
                   ) : (
                     /* Display Link Item */
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5 overflow-hidden">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        {/* Position Badge & Move Up/Down Controls */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <div
+                            className="flex items-center justify-center w-7 h-7 rounded-lg border-2 border-[#111111] bg-[#FFD43B] text-xs font-black shadow-[1.5px_1.5px_0px_0px_#111111]"
+                            title={`Position #${index + 1}`}
+                          >
+                            #{index + 1}
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveLink(index, 'up')}
+                              disabled={index === 0}
+                              className="p-1 rounded-md border-2 border-[#111111] bg-white hover:bg-[#FFD43B] text-[#111111] disabled:opacity-25 disabled:hover:bg-white shadow-[1px_1px_0px_0px_#111111] transition-transform active:scale-90 cursor-pointer disabled:cursor-not-allowed"
+                              title="Tuker ke atas (Move Up)"
+                            >
+                              <ChevronUp className="w-3.5 h-3.5 stroke-[3]" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveLink(index, 'down')}
+                              disabled={index === links.length - 1}
+                              className="p-1 rounded-md border-2 border-[#111111] bg-white hover:bg-[#FFD43B] text-[#111111] disabled:opacity-25 disabled:hover:bg-white shadow-[1px_1px_0px_0px_#111111] transition-transform active:scale-90 cursor-pointer disabled:cursor-not-allowed"
+                              title="Tuker ke bawah (Move Down)"
+                            >
+                              <ChevronDown className="w-3.5 h-3.5 stroke-[3]" />
+                            </button>
+                          </div>
+                        </div>
+
                         {/* Graphical SVG Icon Badge */}
                         <div
                           className="w-12 h-12 rounded-xl border-2 border-[#111111] shrink-0 aspect-square flex items-center justify-center shadow-[2px_2px_0px_0px_#111111]"
