@@ -16,7 +16,7 @@ import { UserBadgeShowcase } from '@/components/dashboard/user-badge-showcase';
 import { AnalyticsSection } from '@/components/dashboard/analytics-section';
 import { SocialIconManager } from '@/components/dashboard/social-icon-manager';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
-import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
+import { updateUserUsername, checkUsernameAvailable, updateUserProfileDetails, updateUserSocialLinks, deleteOwnAccount, deleteProfileMusic } from '@/actions/profile';
 import { getMusicSignedUploadUrl, uploadProfileMusic } from '@/actions/upload-music';
 import { signOut } from '@/actions/auth';
 import { createClient } from '@/lib/supabase/client';
