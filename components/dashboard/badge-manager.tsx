@@ -34,20 +34,20 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
   // Form states
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [icon, setIcon] = React.useState('Gift');
+  const [icon, setIcon] = React.useState('Megaphone');
   const [color, setColor] = React.useState('#111111');
-  const [bgColor, setBgColor] = React.useState('#FF4D6D');
-  const [badgeType, setBadgeType] = React.useState<'event' | 'regular'>('event');
+  const [bgColor, setBgColor] = React.useState('#FFD43B');
+  const [postCategory, setPostCategory] = React.useState<'claimable' | 'announcement' | 'patch_note' | 'regular'>('announcement');
   const [isCreating, setIsCreating] = React.useState(false);
 
   // Edit states
   const [editingBadge, setEditingBadge] = React.useState<BadgeItem | null>(null);
   const [editName, setEditName] = React.useState('');
   const [editDescription, setEditDescription] = React.useState('');
-  const [editIcon, setEditIcon] = React.useState('Gift');
+  const [editIcon, setEditIcon] = React.useState('Megaphone');
   const [editColor, setEditColor] = React.useState('#111111');
-  const [editBgColor, setEditBgColor] = React.useState('#FF4D6D');
-  const [editBadgeType, setEditBadgeType] = React.useState<'event' | 'regular'>('event');
+  const [editBgColor, setEditBgColor] = React.useState('#FFD43B');
+  const [editPostCategory, setEditPostCategory] = React.useState<'claimable' | 'announcement' | 'patch_note' | 'regular'>('announcement');
   const [isUpdating, setIsUpdating] = React.useState(false);
 
   const [loadingBadgeId, setLoadingBadgeId] = React.useState<string | null>(null);
@@ -65,7 +65,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast.error('Badge name is required');
+      toast.error('Title is required');
       return;
     }
 
@@ -76,7 +76,8 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
       icon,
       color,
       bg_color: bgColor,
-      is_event: badgeType === 'event',
+      is_event: postCategory !== 'regular',
+      event_custom_title: postCategory,
       is_active: true,
     });
     setIsCreating(false);
@@ -100,7 +101,8 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
     setEditIcon(b.icon);
     setEditColor(b.color || '#111111');
     setEditBgColor(b.bg_color || '#FFD43B');
-    setEditBadgeType(b.is_event ? 'event' : 'regular');
+    const cat = (!b.is_event ? 'regular' : (b.event_custom_title as any) || (b.name.toLowerCase().includes('patch') ? 'patch_note' : 'announcement'));
+    setEditPostCategory(cat);
   };
 
   // Submit Update Badge Form
@@ -115,7 +117,8 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
       icon: editIcon,
       color: editColor,
       bg_color: editBgColor,
-      is_event: editBadgeType === 'event',
+      is_event: editPostCategory !== 'regular',
+      event_custom_title: editPostCategory,
     });
     setIsUpdating(false);
 
@@ -131,7 +134,8 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                 icon: editIcon,
                 color: editColor,
                 bg_color: editBgColor,
-                is_event: editBadgeType === 'event',
+                is_event: editPostCategory !== 'regular',
+                event_custom_title: editPostCategory,
               }
             : b
         )
@@ -226,67 +230,137 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </button>
             </div>
 
-            {/* Select Badge Type */}
+            {/* Select Post / Badge Category */}
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Badge Category / Purpose</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="text-xs font-black uppercase text-[#111111]">Post Category & Type</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setEditBadgeType('event')}
-                  className={`p-4 rounded-xl border-[3px] border-[#111111] text-left transition-all ${
-                    editBadgeType === 'event'
-                      ? 'bg-[#FF4D6D] text-white shadow-[4px_4px_0px_0px_#111111] scale-[1.02]'
+                  onClick={() => {
+                    setEditPostCategory('announcement');
+                    setEditIcon('Megaphone');
+                    setEditBgColor('#FFD43B');
+                    setEditColor('#111111');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    editPostCategory === 'announcement'
+                      ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
                       : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-base flex items-center gap-2">
-                      <Gift className="w-5 h-5" />
-                      <span>Event Badge (Free Claim)</span>
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Megaphone className="w-4 h-4 text-[#111111]" />
+                      <span>Text Announcement / News</span>
                     </span>
-                    <Badge variant="default" className="text-[10px] font-black text-[#111111]">EVENT</Badge>
+                    <Badge variant="yellow" className="text-[9px] font-black">NEWS</Badge>
                   </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
+                    Text/News post on Kyvo News board. (No claim button)
+                  </p>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setEditBadgeType('regular')}
-                  className={`p-4 rounded-xl border-[3px] border-[#111111] text-left transition-all ${
-                    editBadgeType === 'regular'
-                      ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111] scale-[1.02]'
+                  onClick={() => {
+                    setEditPostCategory('patch_note');
+                    setEditIcon('FileText');
+                    setEditBgColor('#51CF66');
+                    setEditColor('#111111');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    editPostCategory === 'patch_note'
+                      ? 'bg-[#51CF66] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
                       : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-base flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-[#A855F7]" />
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-[#111111]" />
+                      <span>System Patch Note</span>
+                    </span>
+                    <Badge variant="green" className="text-[9px] font-black">PATCH NOTE</Badge>
+                  </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
+                    System patch notes & update list on Kyvo News. (No claim button)
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditPostCategory('claimable');
+                    setEditIcon('Rocket');
+                    setEditBgColor('#FF4D6D');
+                    setEditColor('#FFFFFF');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    editPostCategory === 'claimable'
+                      ? 'bg-[#FF4D6D] text-white shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
+                      : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Gift className="w-4 h-4" />
+                      <span>Event Badge (Free Claim)</span>
+                    </span>
+                    <Badge variant="default" className="text-[9px] font-black text-[#111111]">EVENT</Badge>
+                  </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-90 leading-tight">
+                    Promo event badge. Users can click "Claim Free Event Badge".
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditPostCategory('regular');
+                    setEditIcon('Crown');
+                    setEditBgColor('#A855F7');
+                    setEditColor('#FFFFFF');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    editPostCategory === 'regular'
+                      ? 'bg-[#A855F7] text-white shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
+                      : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Crown className="w-4 h-4 text-white" />
                       <span>Regular Badge (Admin Only)</span>
                     </span>
-                    <Badge variant="purple" className="text-[10px] font-black">REGULAR</Badge>
+                    <Badge variant="purple" className="text-[9px] font-black">REGULAR</Badge>
                   </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-90 leading-tight">
+                    Special creator badge assigned manually by Admin.
+                  </p>
                 </button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-5 space-y-1">
-                <label className="text-xs font-black uppercase text-[#111111]">Badge Name</label>
+                <label className="text-xs font-black uppercase text-[#111111]">Title / Heading</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  placeholder="e.g. UPDATE PATCH 1.1 or EVENT KYVO 2026"
                   className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
                   required
                 />
               </div>
 
               <div className="md:col-span-7 space-y-1">
-                <label className="text-xs font-black uppercase text-[#111111]">Description</label>
-                <input
-                  type="text"
+                <label className="text-xs font-black uppercase text-[#111111]">Description / Content Text</label>
+                <textarea
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
+                  rows={3}
+                  placeholder="e.g. - Added new feature\n- Performance improvements"
+                  className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-xs outline-none resize-y"
                 />
               </div>
             </div>
@@ -423,59 +497,111 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
               </button>
             </div>
 
-            {/* Select Badge Type */}
+            {/* Select Post / Badge Category */}
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase text-[#111111]">Badge Category / Purpose</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="text-xs font-black uppercase text-[#111111]">Post Category & Type</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
                   type="button"
                   onClick={() => {
-                    setBadgeType('event');
-                    setIcon('Gift');
-                    setBgColor('#FF4D6D');
-                    setColor('#FFFFFF');
+                    setPostCategory('announcement');
+                    setIcon('Megaphone');
+                    setBgColor('#FFD43B');
+                    setColor('#111111');
                   }}
-                  className={`p-4 rounded-xl border-[3px] border-[#111111] text-left transition-all ${
-                    badgeType === 'event'
-                      ? 'bg-[#FF4D6D] text-white shadow-[4px_4px_0px_0px_#111111] scale-[1.02]'
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    postCategory === 'announcement'
+                      ? 'bg-[#FFD43B] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
                       : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-base flex items-center gap-2">
-                      <Gift className="w-5 h-5" />
-                      <span>Event Badge (Free Claim)</span>
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Megaphone className="w-4 h-4 text-[#111111]" />
+                      <span>Text Announcement / News</span>
                     </span>
-                    <Badge variant="default" className="text-[10px] font-black text-[#111111]">EVENT</Badge>
+                    <Badge variant="yellow" className="text-[9px] font-black">NEWS</Badge>
                   </div>
-                  <p className="text-xs font-extrabold mt-1 opacity-90">
-                    Appears in user dashboard promo banner. Any user can claim it for free!
+                  <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
+                    Text/News post on Kyvo News board. (No claim button)
                   </p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setBadgeType('regular');
-                    setIcon('Sparkles');
-                    setBgColor('#FFD43B');
+                    setPostCategory('patch_note');
+                    setIcon('FileText');
+                    setBgColor('#51CF66');
                     setColor('#111111');
                   }}
-                  className={`p-4 rounded-xl border-[3px] border-[#111111] text-left transition-all ${
-                    badgeType === 'regular'
-                      ? 'bg-[#FFD43B] text-[#111111] shadow-[4px_4px_0px_0px_#111111] scale-[1.02]'
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    postCategory === 'patch_note'
+                      ? 'bg-[#51CF66] text-[#111111] shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
                       : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-black text-base flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-[#A855F7]" />
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-[#111111]" />
+                      <span>System Patch Note</span>
+                    </span>
+                    <Badge variant="green" className="text-[9px] font-black">PATCH NOTE</Badge>
+                  </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
+                    System patch notes & update list on Kyvo News. (No claim button)
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPostCategory('claimable');
+                    setIcon('Rocket');
+                    setBgColor('#FF4D6D');
+                    setColor('#FFFFFF');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    postCategory === 'claimable'
+                      ? 'bg-[#FF4D6D] text-white shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
+                      : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Gift className="w-4 h-4" />
+                      <span>Event Badge (Free Claim)</span>
+                    </span>
+                    <Badge variant="default" className="text-[9px] font-black text-[#111111]">EVENT</Badge>
+                  </div>
+                  <p className="text-[11px] font-bold mt-1 opacity-90 leading-tight">
+                    Promo event badge. Users can click "Claim Free Event Badge".
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPostCategory('regular');
+                    setIcon('Crown');
+                    setBgColor('#A855F7');
+                    setColor('#FFFFFF');
+                  }}
+                  className={`p-3 rounded-xl border-[2.5px] border-[#111111] text-left transition-all ${
+                    postCategory === 'regular'
+                      ? 'bg-[#A855F7] text-white shadow-[3px_3px_0px_0px_#111111] scale-[1.01]'
+                      : 'bg-white text-[#111111] opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-xs flex items-center gap-1.5">
+                      <Crown className="w-4 h-4 text-white" />
                       <span>Regular Badge (Admin Only)</span>
                     </span>
-                    <Badge variant="purple" className="text-[10px] font-black">REGULAR</Badge>
+                    <Badge variant="purple" className="text-[9px] font-black">REGULAR</Badge>
                   </div>
-                  <p className="text-xs font-extrabold mt-1 opacity-90">
-                    Special creator badge (Verified, VIP) granted exclusively by Admin.
+                  <p className="text-[11px] font-bold mt-1 opacity-90 leading-tight">
+                    Special creator badge assigned manually by Admin.
                   </p>
                 </button>
               </div>
@@ -483,25 +609,25 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-5 space-y-1">
-                <label className="text-xs font-black uppercase text-[#111111]">Badge Name</label>
+                <label className="text-xs font-black uppercase text-[#111111]">Title / Heading</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={badgeType === 'event' ? "e.g. Early Adopter / Summer Fest" : "e.g. Verified Creator / VIP"}
+                  placeholder={postCategory === 'patch_note' ? "e.g. UPDATE PATCH 1.1" : postCategory === 'announcement' ? "e.g. EVENT KYVO 2026 AKAN BERLANGSUNG" : "e.g. Early Adopter"}
                   className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
                   required
                 />
               </div>
 
               <div className="md:col-span-7 space-y-1">
-                <label className="text-xs font-black uppercase text-[#111111]">Description</label>
-                <input
-                  type="text"
+                <label className="text-xs font-black uppercase text-[#111111]">Description / Content Text</label>
+                <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Special badge awarded to early Kyvo creators!"
-                  className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
+                  rows={3}
+                  placeholder={postCategory === 'patch_note' ? "e.g. - Added dark mode\n- Fixed performance issue" : "e.g. Join the official Kyvo Creator Event!"}
+                  className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-xs outline-none resize-y"
                 />
               </div>
             </div>

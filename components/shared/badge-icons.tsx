@@ -10,6 +10,9 @@ import {
   Award, 
   Heart, 
   Star,
+  Megaphone,
+  Bell,
+  FileText,
   LucideProps,
 } from 'lucide-react';
 
@@ -24,9 +27,13 @@ export const BADGE_ICONS_MAP: Record<string, React.ComponentType<LucideProps>> =
   Award,
   Heart,
   Star,
+  Megaphone,
+  Bell,
+  FileText,
 };
 
 export const AVAILABLE_BADGE_ICONS = [
+  { name: 'Megaphone', label: 'Megaphone (Toa 📢)' },
   { name: 'Rocket', label: 'Rocket' },
   { name: 'Sparkles', label: 'Sparkles' },
   { name: 'Crown', label: 'Crown' },
@@ -34,6 +41,8 @@ export const AVAILABLE_BADGE_ICONS = [
   { name: 'ShieldCheck', label: 'Shield' },
   { name: 'Flame', label: 'Flame' },
   { name: 'Zap', label: 'Zap' },
+  { name: 'FileText', label: 'Patch Note' },
+  { name: 'Bell', label: 'Notice Bell' },
   { name: 'Award', label: 'Award' },
   { name: 'Heart', label: 'Heart' },
   { name: 'Star', label: 'Star' },

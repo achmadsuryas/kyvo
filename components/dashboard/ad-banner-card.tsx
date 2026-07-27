@@ -21,7 +21,7 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
   const [claimingId, setClaimingId] = React.useState<string | null>(null);
   const [recentlyClaimedIds, setRecentlyClaimedIds] = React.useState<string[]>([]);
 
-  // Filter ONLY active bulletin posts and event banners
+  // Filter ONLY active bulletin posts, news, patch notes, and event banners
   const activeEventBadges = availableEvents.filter((b) => b.is_event && b.is_active !== false);
 
   const handleClaim = async (badgeId: string) => {
@@ -45,15 +45,15 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
   return (
     <Card className="bg-[#3B82F6] text-white border-[3px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-5 md:p-8 space-y-6 h-full flex flex-col justify-between relative overflow-hidden">
       <div className="space-y-6 relative z-10">
-        {/* Top Bulletin Header Tag */}
+        {/* Top Header Tag: KYVO NEWS */}
         <div className="flex items-center justify-between">
           <Badge variant="default" className="text-xs font-black text-[#111111] gap-1.5 bg-[#FFD43B]">
             <Megaphone className="w-3.5 h-3.5 text-[#111111]" />
-            <span>KYVO BULLETIN & PATCH NOTES</span>
+            <span>KYVO NEWS</span>
           </Badge>
         </div>
 
-        {/* Section Title */}
+        {/* Section Title & Subtitle */}
         <div className="space-y-1.5 animate-in fade-in duration-200">
           <h3 className="text-2xl md:text-3xl font-black leading-tight break-words">
             Notice Board 📌
@@ -63,21 +63,21 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
           </p>
         </div>
 
-        {/* LIST OF BULLETIN POSTS / EVENT CARDS */}
+        {/* LIST OF NEWS POSTS, PATCH NOTES & EVENT CARDS */}
         <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
           {!hasActiveEvents ? (
-            /* CLEAN COMING SOON BULLETIN TEMPLATE */
+            /* CLEAN COMING SOON NEWS TEMPLATE */
             <div className="rounded-3xl border-[3px] border-[#111111] bg-white text-[#111111] p-6 md:p-8 shadow-[6px_6px_0px_0px_#111111] text-center space-y-4 my-auto">
               <div className="w-16 h-16 rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] mx-auto flex items-center justify-center shadow-[3px_3px_0px_0px_#111111]">
                 <CalendarCheck className="w-8 h-8 text-[#111111] stroke-[2.5]" />
               </div>
               <div className="space-y-2">
                 <Badge variant="purple" className="text-[10px] font-black uppercase">
-                  BULLETIN BOARD
+                  KYVO NEWS
                 </Badge>
-                <h4 className="text-xl font-black text-[#111111]">No New Notices</h4>
+                <h4 className="text-xl font-black text-[#111111]">No New News Posts</h4>
                 <p className="text-xs font-bold text-[#111111]/70 leading-relaxed max-w-xs mx-auto pt-1">
-                  Everything is up to date! Check back later for new platform updates, patch notes, and creator events.
+                  Everything is up to date! Check back regularly for upcoming patch notes, creator news, and events.
                 </p>
               </div>
             </div>
@@ -91,7 +91,12 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
               const isClaimedFinal = isAlreadyClaimed || recentlyClaimedIds.includes(event.id);
               const isClaimingThis = claimingId === event.id;
 
-              const isPatchNote = event.name.toLowerCase().includes('patch') || event.name.toLowerCase().includes('update');
+              // Check if post is Text Announcement / Patch Note vs Claimable Badge
+              const isPatchNote = event.event_custom_title === 'patch_note' || event.name.toLowerCase().includes('patch') || event.name.toLowerCase().includes('update');
+              const isAnnouncement = event.event_custom_title === 'announcement' || event.name.toLowerCase().includes('announcement') || event.name.toLowerCase().includes('news') || event.icon === 'Megaphone';
+              
+              // Claimable Badge post type (only if explicit or created as event badge)
+              const isClaimableBadge = event.event_custom_title === 'claimable' || (!isPatchNote && !isAnnouncement);
 
               return (
                 <div
@@ -99,55 +104,57 @@ export function AdBannerCard({ currentUsername, availableEvents = [], userBadgeI
                   className="rounded-2xl border-[3px] border-[#111111] bg-white text-[#111111] p-4 shadow-[4px_4px_0px_0px_#111111] space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
                       {/* Icon Container */}
                       <div
-                        className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0"
+                        className="p-2.5 rounded-xl border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] shrink-0 mt-0.5"
                         style={{ backgroundColor: event.bg_color || '#FFD43B', color: event.color || '#111111' }}
                       >
-                        <BadgeIconComp className="w-6 h-6 stroke-[2.5]" />
+                        <BadgeIconComp className="w-5 h-5 stroke-[2.5]" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <h4 className="text-base font-black leading-tight break-words">{event.name}</h4>
                         </div>
-                        <p className="text-xs font-bold text-[#111111]/80 leading-relaxed pt-1 break-words">
-                          {event.description || 'Kyvo platform notice and creator news.'}
-                        </p>
+                        <div className="text-xs font-bold text-[#111111]/80 leading-relaxed pt-1 break-words whitespace-pre-line">
+                          {event.description || 'Kyvo platform news and updates.'}
+                        </div>
                       </div>
                     </div>
 
                     <Badge
-                      variant={isPatchNote ? "green" : "purple"}
+                      variant={isPatchNote ? "green" : isAnnouncement ? "yellow" : "purple"}
                       className="text-[10px] font-black uppercase shrink-0"
                     >
-                      {isPatchNote ? 'Patch Note' : 'Event'}
+                      {isPatchNote ? 'Patch Note' : isAnnouncement ? 'News' : 'Event'}
                     </Badge>
                   </div>
 
-                  {/* Claim Button for Event Badges */}
-                  <Button
-                    onClick={() => handleClaim(event.id)}
-                    disabled={isClaimingThis || isClaimedFinal}
-                    variant={isClaimedFinal ? "green" : "purple"}
-                    size="sm"
-                    className={`w-full justify-center font-black gap-2 text-xs shadow-[2px_2px_0px_0px_#111111] ${
-                      isClaimedFinal ? 'opacity-90 cursor-not-allowed bg-[#51CF66] text-[#111111]' : ''
-                    }`}
-                  >
-                    {isClaimingThis ? (
-                      <span className="animate-spin">⏳</span>
-                    ) : isClaimedFinal ? (
-                      <CheckCircle2 className="w-4 h-4 stroke-[3]" />
-                    ) : (
-                      <Sparkles className="w-4 h-4 fill-[#FFD43B]" />
-                    )}
-                    <span>
-                      {isClaimedFinal
-                        ? 'Badge Claimed ✓'
-                        : 'Claim Free Event Badge'}
-                    </span>
-                  </Button>
+                  {/* ONLY Show Claim Button if it's a Claimable Event Badge! */}
+                  {isClaimableBadge && (
+                    <Button
+                      onClick={() => handleClaim(event.id)}
+                      disabled={isClaimingThis || isClaimedFinal}
+                      variant={isClaimedFinal ? "green" : "purple"}
+                      size="sm"
+                      className={`w-full justify-center font-black gap-2 text-xs shadow-[2px_2px_0px_0px_#111111] ${
+                        isClaimedFinal ? 'opacity-90 cursor-not-allowed bg-[#51CF66] text-[#111111]' : ''
+                      }`}
+                    >
+                      {isClaimingThis ? (
+                        <span className="animate-spin">⏳</span>
+                      ) : isClaimedFinal ? (
+                        <CheckCircle2 className="w-4 h-4 stroke-[3]" />
+                      ) : (
+                        <Sparkles className="w-4 h-4 fill-[#FFD43B]" />
+                      )}
+                      <span>
+                        {isClaimedFinal
+                          ? 'Badge Claimed ✓'
+                          : 'Claim Free Event Badge'}
+                      </span>
+                    </Button>
+                  )}
                 </div>
               );
             })
