@@ -692,15 +692,17 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                       )}
                       <Button
                         onClick={handleSaveAllSettings}
-                        disabled={isSaving || isCompressing}
+                        disabled={!hasUnsavedChanges || isSaving || isCompressing}
                         variant="green"
                         size="sm"
-                        className={`gap-2 font-black text-sm px-5 py-2.5 shadow-[3.5px_3.5px_0px_0px_#111111] hover:scale-105 transition-transform cursor-pointer ${
-                          hasUnsavedChanges ? 'bg-[#51CF66] text-[#111111] animate-bounce' : 'bg-[#51CF66] text-[#111111]'
+                        className={`font-black text-sm px-5 py-2.5 shadow-[3.5px_3.5px_0px_0px_#111111] transition-all ${
+                          hasUnsavedChanges 
+                            ? 'bg-[#51CF66] text-[#111111] hover:scale-105 cursor-pointer opacity-100' 
+                            : 'bg-[#51CF66]/50 text-[#111111]/50 cursor-not-allowed border-[#111111]/30 shadow-none opacity-60'
                         }`}
                       >
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
-                        <span>{hasUnsavedChanges ? 'Save All Settings' : 'All Settings Saved'}</span>
+                        {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-1.5" />}
+                        <span>Save All</span>
                       </Button>
                     </div>
                   </div>
@@ -1083,14 +1085,14 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
       {/* FLOATING STICKY UNSAVED CHANGES ALERT BAR */}
       {hasUnsavedChanges && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] p-3.5 shadow-[6px_6px_0px_0px_#111111] flex items-center justify-between gap-3 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl rounded-2xl border-[3px] border-[#111111] bg-[#FFD43B] p-3 sm:p-3.5 shadow-[6px_6px_0px_0px_#111111] flex items-center justify-between gap-2 sm:gap-3 animate-in slide-in-from-bottom-5 duration-300">
           <div className="flex items-center gap-2 min-w-0">
-            <AlertTriangle className="w-5 h-5 text-[#111111] shrink-0 stroke-[2.5]" />
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-[#111111] shrink-0 stroke-[2.5]" />
             <span className="text-xs sm:text-sm font-black text-[#111111] truncate">
-              Unsaved changes detected!
+              Unsaved changes!
             </span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handleDiscardAllChanges}
               className="px-2.5 py-1.5 rounded-xl border-2 border-[#111111] bg-white text-[#111111] text-xs font-black shadow-[1.5px_1.5px_0px_0px_#111111] cursor-pointer hover:bg-gray-100"
@@ -1102,7 +1104,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
               disabled={isSaving}
               className="px-3.5 py-1.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] text-xs font-black shadow-[2px_2px_0px_0px_#111111] hover:scale-105 transition-transform flex items-center gap-1.5 cursor-pointer"
             >
-              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+              {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>Save All</span>
             </button>
           </div>
