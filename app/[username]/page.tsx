@@ -77,7 +77,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
 
   return (
     <div
-      className="min-h-screen flex flex-col justify-between items-center p-3 sm:p-6 font-sans selection:bg-[#FFD43B] transition-colors duration-300"
+      className="min-h-screen flex flex-col justify-start items-center p-3 sm:p-5 gap-2 sm:gap-3 font-sans selection:bg-[#FFD43B] transition-colors duration-300"
       style={{ backgroundColor: outerBgColor }}
     >
       {/* Top Header Bar with Custom Favicon Logo */}

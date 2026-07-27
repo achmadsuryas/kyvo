@@ -125,26 +125,26 @@ export function PublicProfileContainer({
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-start pt-1 sm:pt-2">
       {/* 1. INITIAL INTERACTIVE MUSIC ENTER TRIGGER OVERLAY (Only if profile HAS music) */}
       {!hasTriggered && hasMusic && (
-        <div className="w-full max-w-sm sm:max-w-md my-auto animate-in zoom-in-95 duration-300">
-          <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#111111] text-center space-y-6">
+        <div className="w-full max-w-sm sm:max-w-md mt-2 sm:mt-4 mb-4 animate-in zoom-in-95 duration-300">
+          <div className="rounded-3xl border-[4px] border-[#111111] bg-[#FFD43B] p-6 sm:p-8 shadow-[8px_8px_0px_0px_#111111] text-center flex flex-col items-center justify-center space-y-6">
             {/* Perfectly Round Pure Vector Spinning Vinyl Preview Record */}
             <div className="relative w-28 h-28 mx-auto flex items-center justify-center shrink-0">
               <VinylRecordDisk size="lg" isSpinning={true} />
 
               {/* Floating Music Notes */}
-              <div className="absolute -top-2 -right-2 p-2 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white font-black shadow-[2px_2px_0px_0px_#111111]">
-                <Music className="w-4 h-4" />
+              <div className="absolute top-0 right-0 p-1.5 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+                <Music className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-[#111111] leading-tight">
+            <div className="space-y-2 text-center w-full">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#111111] leading-tight break-words">
                 {profile.display_name || profile.username}
               </h2>
-              <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs mx-auto">
+              <p className="text-xs sm:text-sm font-extrabold text-[#111111]/80 max-w-xs mx-auto break-words">
                 {profile.music_title ? `Track: "${profile.music_title}"` : 'Click below to enter profile & listen music!'}
               </p>
             </div>
@@ -164,7 +164,7 @@ export function PublicProfileContainer({
 
       {/* 2. MAIN PUBLIC CREATOR PROFILE (MINIMAL & ULTRA-CLEAN DESIGN) */}
       {hasTriggered && (
-        <main className="w-full max-w-sm sm:max-w-md my-4 sm:my-6 animate-in fade-in duration-300 space-y-5">
+        <main className="w-full max-w-sm sm:max-w-md mt-1 sm:mt-2 mb-4 animate-in fade-in duration-300 space-y-5">
           {/* User Info Section */}
           <div className="flex flex-col items-center text-center pt-2 space-y-2">
             <InteractiveAvatar
