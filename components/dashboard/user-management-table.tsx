@@ -419,8 +419,12 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                       {/* Assigned Badges List */}
                       <td className="p-4">
                         <div className="flex flex-wrap items-center gap-1.5 max-w-xs">
-                          {user.badges.length > 0 ? (
-                            user.badges.map((b) => {
+                          {(() => {
+                            const displayBadges = user.badges.filter((b) => !b.name.toLowerCase().includes('verified'));
+                            if (displayBadges.length === 0) {
+                              return <span className="text-xs font-bold text-[#111111]/40 italic">No badges assigned</span>;
+                            }
+                            return displayBadges.map((b) => {
                               const IconComp = getBadgeIconComponent(b.icon);
                               return (
                                 <span
@@ -432,10 +436,8 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                                   <span className="break-words">{b.name}</span>
                                 </span>
                               );
-                            })
-                          ) : (
-                            <span className="text-xs font-bold text-[#111111]/40 italic">No badges assigned</span>
-                          )}
+                            });
+                          })()}
                         </div>
                       </td>
 
@@ -705,8 +707,12 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
             <div className="space-y-2">
               <h4 className="text-xs font-black uppercase text-[#111111]">Currently Assigned Badges</h4>
               <div className="flex flex-wrap gap-2 p-3 rounded-2xl border-2 border-[#111111] bg-[#F8F9FA]">
-                {selectedUserForBadge.badges.length > 0 ? (
-                  selectedUserForBadge.badges.map((b) => {
+                {(() => {
+                  const modalDisplayBadges = selectedUserForBadge.badges.filter((b) => !b.name.toLowerCase().includes('verified'));
+                  if (modalDisplayBadges.length === 0) {
+                    return <span className="text-xs font-bold text-[#111111]/50 italic">No badges assigned yet.</span>;
+                  }
+                  return modalDisplayBadges.map((b) => {
                     const IconComp = getBadgeIconComponent(b.icon);
                     return (
                       <span
@@ -725,10 +731,8 @@ export function UserManagementTable({ initialUsers, availableBadges }: UserManag
                         </button>
                       </span>
                     );
-                  })
-                ) : (
-                  <span className="text-xs font-bold text-[#111111]/50 italic">No badges assigned yet.</span>
-                )}
+                  });
+                })()}
               </div>
             </div>
 
