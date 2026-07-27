@@ -273,7 +273,7 @@ export function PublicProfileContainer({
               if (!hasLinks) return null;
 
               return (
-                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
                   {Object.entries(parsedSocialLinks).map(([platform, val]) => {
                     if (!val || typeof val !== 'string' || !val.trim()) return null;
                     const finalUrl = formatSocialUrl(platform, val);
@@ -286,7 +286,7 @@ export function PublicProfileContainer({
                         target="_blank"
                         rel="noopener noreferrer"
                         title={platform}
-                        className="p-2 transition-transform hover:scale-125 cursor-pointer flex items-center justify-center hover:opacity-80"
+                        className="p-1 cursor-pointer flex items-center justify-center transition-opacity hover:opacity-70"
                         style={{ color: isDarkBg ? '#FFFFFF' : '#111111' }}
                       >
                         <IconComponent className="w-5 h-5 stroke-[2.5]" />
