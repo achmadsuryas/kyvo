@@ -255,7 +255,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                       <Megaphone className="w-4 h-4 text-[#111111]" />
                       <span>Text Announcement / News</span>
                     </span>
-                    <Badge variant="yellow" className="text-[9px] font-black">NEWS</Badge>
+                    <Badge variant="default" className="text-[9px] font-black">NEWS</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
                     Text/News post on Kyvo News board. (No claim button)
@@ -522,7 +522,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
                       <Megaphone className="w-4 h-4 text-[#111111]" />
                       <span>Text Announcement / News</span>
                     </span>
-                    <Badge variant="yellow" className="text-[9px] font-black">NEWS</Badge>
+                    <Badge variant="default" className="text-[9px] font-black">NEWS</Badge>
                   </div>
                   <p className="text-[11px] font-bold mt-1 opacity-80 leading-tight">
                     Text/News post on Kyvo News board. (No claim button)
