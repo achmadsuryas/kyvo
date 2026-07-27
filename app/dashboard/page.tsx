@@ -4,6 +4,7 @@ import { getUserLinks } from '@/actions/links';
 import { getAllBadges, getUserBadgeItemsWithStatus } from '@/actions/badges';
 import { Sidebar } from '@/components/layout/sidebar';
 import { DashboardContent } from '@/components/dashboard/dashboard-content';
+import { SupportChatWidget } from '@/components/dashboard/support-chat-widget';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,9 @@ export default async function DashboardPage() {
           userBadgeItems={userBadgeItems}
         />
       </main>
+
+      {/* Floating Live Support Chat Widget */}
+      <SupportChatWidget profile={profile} />
     </div>
   );
 }

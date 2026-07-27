@@ -142,3 +142,65 @@ CREATE POLICY "Public Storage Access" ON storage.objects FOR SELECT USING (true)
 CREATE POLICY "Public Storage Insert" ON storage.objects FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public Storage Update" ON storage.objects FOR UPDATE USING (true);
 CREATE POLICY "Public Storage Delete" ON storage.objects FOR DELETE USING (true);
+
+-- ====================================================
+-- 16. LIVE SUPPORT TICKETS & MESSAGES SCHEMA
+-- ====================================================
+
+-- Create support_tickets table
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'open',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create support_messages table
+CREATE TABLE IF NOT EXISTS public.support_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id UUID NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  sender_role TEXT NOT NULL DEFAULT 'user',
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.support_messages ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for support_tickets
+DROP POLICY IF EXISTS "Support Tickets Access Policy" ON public.support_tickets;
+CREATE POLICY "Support Tickets Access Policy" ON public.support_tickets
+  FOR ALL USING (
+    auth.uid() = user_id OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- RLS Policies for support_messages
+DROP POLICY IF EXISTS "Support Messages Access Policy" ON public.support_messages;
+CREATE POLICY "Support Messages Access Policy" ON public.support_messages
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.support_tickets st 
+      WHERE st.id = ticket_id AND (st.user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'))
+    )
+  );
+
+-- Enable Supabase Realtime publication on support_messages & support_tickets
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'support_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.support_messages;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'support_tickets'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;
+  END IF;
+END $$;

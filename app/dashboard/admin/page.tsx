@@ -1,12 +1,14 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ShieldCheck, ArrowLeft, Users, Award, BarChart3 } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Users, Award, BarChart3, Headphones } from 'lucide-react';
 import { getCurrentUserProfile } from '@/services/profile';
 import { getAllBadges } from '@/actions/badges';
 import { getAllUsersForAdmin } from '@/actions/admin';
+import { getAllTicketsForAdmin } from '@/actions/support';
 import { Sidebar } from '@/components/layout/sidebar';
 import { BadgeManager } from '@/components/dashboard/badge-manager';
 import { UserManagementTable } from '@/components/dashboard/user-management-table';
+import { AdminSupportManager } from '@/components/dashboard/admin-support-manager';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
@@ -22,6 +24,7 @@ export default async function AdminDashboardPage() {
 
   const badges = await getAllBadges();
   const users = await getAllUsersForAdmin();
+  const supportTickets = await getAllTicketsForAdmin();
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] selection:bg-[#FFD43B]">
@@ -71,21 +74,26 @@ export default async function AdminDashboardPage() {
 
           <Card className="bg-white border-[3px] border-[#111111] shadow-[4px_4px_0px_0px_#111111] p-5 space-y-2">
             <div className="flex items-center justify-between text-xs font-black uppercase text-[#111111]/70">
-              <span>Total System Badges</span>
-              <Award className="w-5 h-5 text-[#FF4D6D] stroke-[2.5]" />
+              <span>Active Support Tickets</span>
+              <Headphones className="w-5 h-5 text-[#A855F7] stroke-[2.5]" />
             </div>
-            <p className="text-3xl font-black text-[#111111]">{badges.length}</p>
-            <p className="text-xs font-bold text-[#3B82F6]">Event & Creator Badges</p>
+            <p className="text-3xl font-black text-[#111111]">{supportTickets.length}</p>
+            <p className="text-xs font-bold text-[#3B82F6]">Live Help Center Requests</p>
           </Card>
 
           <Card className="bg-white border-[3px] border-[#111111] shadow-[4px_4px_0px_0px_#111111] p-5 space-y-2">
             <div className="flex items-center justify-between text-xs font-black uppercase text-[#111111]/70">
-              <span>Platform Domain</span>
-              <BarChart3 className="w-5 h-5 text-[#51CF66] stroke-[2.5]" />
+              <span>Total System Badges</span>
+              <Award className="w-5 h-5 text-[#FF4D6D] stroke-[2.5]" />
             </div>
-            <p className="text-3xl font-black text-[#111111]">kyvo.fun</p>
-            <p className="text-xs font-bold text-[#111111]/70">One Link. Everywhere.</p>
+            <p className="text-3xl font-black text-[#111111]">{badges.length}</p>
+            <p className="text-xs font-bold text-[#51CF66]">Event & Creator Badges</p>
           </Card>
+        </div>
+
+        {/* Live Support Management Center */}
+        <div className="w-full">
+          <AdminSupportManager initialTickets={supportTickets} />
         </div>
 
         {/* User Directory & Admin Management Table */}

@@ -75,3 +75,22 @@ export interface SystemSettings {
   ad_banner_bg_color: string;
   updated_at: string;
 }
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  status: 'open' | 'in_progress' | 'resolved';
+  created_at: string;
+  updated_at: string;
+  user?: Profile;
+}
+
+export interface SupportMessage {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  sender_role: 'user' | 'admin';
+  message: string;
+  created_at: string;
+  sender?: Profile;
+}
