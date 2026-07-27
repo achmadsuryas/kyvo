@@ -188,7 +188,7 @@ export function SocialIconManager({ socialLinks, onChangeSocialLinks }: SocialIc
           </p>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-2.5 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 w-full">
           {activePlatforms.map(([platformId, val]) => {
             const platformObj = SOCIAL_PLATFORMS.find((p) => p.id === platformId);
             if (!platformObj) return null;
@@ -197,32 +197,36 @@ export function SocialIconManager({ socialLinks, onChangeSocialLinks }: SocialIc
             return (
               <div
                 key={platformId}
-                className="group relative inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] shadow-[2px_2px_0px_0px_#111111] transition-transform hover:-translate-y-0.5"
+                className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] shadow-[2px_2px_0px_0px_#111111] transition-transform hover:-translate-y-0.5 w-full min-w-0"
               >
-                <IconComp className="w-4 h-4 text-[#111111] stroke-[2.5]" />
-                <span className="text-xs font-black text-[#111111]">{platformObj.label}</span>
+                <div className="flex items-center gap-2 min-w-0 truncate">
+                  <IconComp className="w-4 h-4 text-[#111111] stroke-[2.5] shrink-0" />
+                  <span className="text-xs font-black text-[#111111] truncate">{platformObj.label}</span>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedPlatform(platformId);
-                    setInputValue(val);
-                    setIsAddOpen(true);
-                  }}
-                  className="p-1 rounded-md text-[#111111]/70 hover:text-[#3B82F6] transition-colors cursor-pointer"
-                  title="Edit link"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPlatform(platformId);
+                      setInputValue(val);
+                      setIsAddOpen(true);
+                    }}
+                    className="p-1 rounded-md text-[#111111]/70 hover:text-[#3B82F6] hover:bg-black/5 transition-colors cursor-pointer"
+                    title="Edit link"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => handleRemove(platformId)}
-                  className="p-1 rounded-md text-[#FF4D6D] hover:bg-[#FF4D6D] hover:text-white transition-colors cursor-pointer"
-                  title="Remove icon"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(platformId)}
+                    className="p-1 rounded-md text-[#FF4D6D] hover:bg-[#FF4D6D] hover:text-white transition-colors cursor-pointer"
+                    title="Remove icon"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             );
           })}

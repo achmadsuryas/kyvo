@@ -151,18 +151,6 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     return false;
   }, [editName, displayName, newUsername, currentUsername, editBio, bio, editAvatarUrl, avatarUrl, editBgColor, customBgColor, draftSocialLinks, socialLinks]);
 
-  // Window beforeunload listener when unsaved changes exist
-  React.useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
   // Unified Save All Settings Handler
   const handleSaveAllSettings = async () => {
     if (!editName.trim()) {
