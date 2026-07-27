@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Globe, ExternalLink, CheckCircle2, QrCode, Share2, Sparkles } from 'lucide-react';
+import { Globe, ExternalLink, CheckCircle2, QrCode, Share2, Sparkles, Crown } from 'lucide-react';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
@@ -50,18 +50,24 @@ export function HeroMockup() {
         <div className="flex flex-col items-center text-center space-y-2 pt-1">
           {/* Avatar with Double Yellow Ring */}
           <div className="w-20 h-20 rounded-full border-[3px] border-[#111111] bg-[#FFD43B] text-[#111111] font-black text-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_#111111] ring-4 ring-[#FFD43B]/60">
-            AS
+            KC
           </div>
 
           {/* Name & Blue Checkmark */}
           <div className="space-y-0.5 pt-1">
             <div className="flex items-center justify-center gap-1.5">
-              <h3 className="text-xl font-black text-[#111111] tracking-tight">Achmad Surya</h3>
+              <h3 className="text-xl font-black text-[#111111] tracking-tight">Kyvo Creator</h3>
               <CheckCircle2 className="w-5 h-5 text-[#3B82F6] fill-[#3B82F6] stroke-white" />
             </div>
             <p className="text-xs font-black text-[#3B82F6]">
-              @achmadsuryas
+              @kyvocreator
             </p>
+          </div>
+
+          {/* Granted Badge Showcase Pill */}
+          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#111111] bg-[#A855F7] text-white text-[9px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
+            <Crown className="w-3 h-3 text-white stroke-[2.5]" />
+            <span>KYVO VIP</span>
           </div>
 
           {/* Bio Text */}
@@ -77,31 +83,37 @@ export function HeroMockup() {
           </div>
         </div>
 
-        {/* Links List matching Actual Profile Layout (Header, Dark Link, Featured Yellow Link) */}
+        {/* Links List (All buttons have icons & clean styling) */}
         <div className="space-y-2.5 pt-1">
-          {/* Category Header Link */}
-          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#333333] text-white p-2.5 text-center font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_#111111]">
-            PORTFOLIO
-          </div>
-
-          {/* Standard Link */}
-          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#111111] text-white p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1 rounded-md border border-white bg-white text-[#111111]">
-                <GithubIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-              </div>
-              <span className="font-black text-xs uppercase">GITHUB</span>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 stroke-[3] text-white/80" />
-          </div>
-
-          {/* Featured Link */}
+          {/* Featured Kyvo Website Link */}
           <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#FFD43B] text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
             <div className="flex items-center gap-2.5">
               <div className="p-1 rounded-md border border-[#111111] bg-white text-[#111111]">
                 <Globe className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
               <span className="font-black text-xs uppercase">KYVO WEBSITE</span>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 stroke-[3]" />
+          </div>
+
+          {/* Dark GitHub Link */}
+          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#111111] text-white p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1 rounded-md border border-white bg-white text-[#111111]">
+                <GithubIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span className="font-black text-xs uppercase">GITHUB REPOSITORY</span>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 stroke-[3] text-white/80" />
+          </div>
+
+          {/* White Twitter/X Link */}
+          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-white text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1 rounded-md border border-[#111111] bg-[#FFD43B] text-[#111111]">
+                <TwitterIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span className="font-black text-xs uppercase">TWITTER / X COMMUNITY</span>
             </div>
             <ExternalLink className="w-3.5 h-3.5 stroke-[3]" />
           </div>
