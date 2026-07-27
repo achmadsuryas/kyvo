@@ -64,10 +64,10 @@ export function TrackedLinkItem({ link, bgClass }: TrackedLinkItemProps) {
       rel="noopener noreferrer"
       onClick={handleClick}
       style={customBg ? { backgroundColor: customBg } : undefined}
-      className={`group w-full rounded-xl border-[2.5px] border-[#111111] ${customBg ? textColor : bgClass} p-2.5 sm:p-3 shadow-[3px_3px_0px_0px_#111111] hover:shadow-[4.5px_4.5px_0px_0px_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-between font-extrabold text-xs sm:text-sm cursor-pointer`}
+      className={`group w-full rounded-none border-[2.5px] border-[#111111] ${customBg ? textColor : bgClass} p-2.5 sm:p-3 shadow-[3.5px_3.5px_0px_0px_#111111] hover:shadow-[4.5px_4.5px_0px_0px_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-between font-extrabold text-xs sm:text-sm cursor-pointer`}
     >
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="p-1.5 rounded-lg border-2 border-[#111111] bg-white text-[#111111] shrink-0">
+        <div className="p-1.5 rounded-none border-2 border-[#111111] bg-white text-[#111111] shrink-0">
           <IconComponent className="w-4 h-4" />
         </div>
         <span className="truncate">{link.title}</span>

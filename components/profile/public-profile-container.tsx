@@ -190,7 +190,7 @@ export function PublicProfileContainer({
                   </span>
                 )}
               </div>
-              <p className="text-xs font-black text-[#3B82F6] uppercase tracking-wide">
+              <p className="text-xs font-black text-[#3B82F6] tracking-wide">
                 @{profile.username}
               </p>
 
@@ -222,9 +222,9 @@ export function PublicProfileContainer({
             )}
           </div>
 
-          {/* ANIMATED SPINNING VINYL RECORD DISK & CONTROLLER */}
+          {/* ANIMATED SPINNING VINYL RECORD DISK & CONTROLLER (SHARP BORDERS NO ROUNDED) */}
           {hasMusic && (
-            <div className="rounded-2xl border-[2.5px] border-[#111111] bg-white p-3 flex items-center justify-between gap-3 shadow-[3px_3px_0px_0px_#111111] text-[#111111]">
+            <div className="rounded-none border-[2.5px] border-[#111111] bg-white p-3 flex items-center justify-between gap-3 shadow-[3px_3px_0px_0px_#111111] text-[#111111]">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <VinylRecordDisk size="sm" isSpinning={isPlaying} />
 
@@ -241,7 +241,7 @@ export function PublicProfileContainer({
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={toggleMute}
-                  className="px-3 py-1.5 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] text-[#111111] font-black text-xs shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-none border-2 border-[#111111] bg-[#F8F9FA] text-[#111111] font-black text-xs shadow-[2px_2px_0px_0px_#111111] hover:bg-[#FFD43B] transition-colors flex items-center gap-1.5 cursor-pointer"
                   title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
                 >
                   {isMuted ? (
