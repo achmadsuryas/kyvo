@@ -165,7 +165,7 @@ export function SocialIconManager({ initialSocialLinks }: SocialIconManagerProps
 
           <div className="space-y-1 pt-1">
             <label className="text-xs font-black uppercase text-[#111111]/70">
-              {currentPlatformObj.label} Handle / URL
+              URL
             </label>
             <input
               type="text"

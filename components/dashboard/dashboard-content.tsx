@@ -403,7 +403,7 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     }
   };
 
-  // Update Profile Details Handler
+  // Unified Update Profile Details & Username Handler
   const handleUpdateDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editName.trim()) {
@@ -411,7 +411,33 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
       return;
     }
 
+    const cleanUser = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (!cleanUser || cleanUser.length < 2) {
+      toast.error('Username must be at least 2 characters long.');
+      return;
+    }
+
     setIsSaving(true);
+
+    // 1. If username changed, update username first
+    if (cleanUser !== currentUsername) {
+      const availability = await checkUsernameAvailable(cleanUser);
+      if (!availability.available) {
+        toast.error(availability.message);
+        setIsSaving(false);
+        return;
+      }
+
+      const userRes = await updateUserUsername(cleanUser);
+      if (!userRes.success) {
+        toast.error(userRes.message);
+        setIsSaving(false);
+        return;
+      }
+      setCurrentUsername(cleanUser);
+    }
+
+    // 2. Update profile details (Name, Bio, Avatar)
     const res = await updateUserProfileDetails({
       display_name: editName,
       bio: editBio,
@@ -420,11 +446,12 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
     setIsSaving(false);
 
     if (res.success) {
-      toast.success(res.message);
+      toast.success('Profile changes saved successfully!');
       setDisplayName(editName);
       setBio(editBio);
       setAvatarUrl(editAvatarUrl);
       setIsEditingDetails(false);
+      router.refresh();
     } else {
       toast.error(res.message);
     }
@@ -662,19 +689,38 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                           setEditName(displayName);
                           setEditBio(bio);
                           setEditAvatarUrl(avatarUrl);
+                          setNewUsername(currentUsername);
                           setIsEditingDetails(true);
                         }}
                         variant="yellow"
                         size="sm"
-                        className="gap-1.5 font-black text-xs shadow-[2px_2px_0px_0px_#111111] shrink-0 self-start sm:self-center"
+                        className="gap-2 font-black text-sm px-4 py-2 shadow-[3px_3px_0px_0px_#111111] hover:scale-105 transition-transform shrink-0 self-start sm:self-center cursor-pointer"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-4 h-4 stroke-[2.5]" />
                         <span>Edit Profile</span>
                       </Button>
                     ) : (
-                      <Badge variant="purple" className="text-xs font-black shrink-0 self-start sm:self-center">
-                        EDITING
-                      </Badge>
+                      <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditingDetails(false)}
+                          className="font-black text-xs cursor-pointer"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleUpdateDetails}
+                          disabled={isSaving || isCompressing}
+                          variant="green"
+                          size="sm"
+                          className="gap-2 font-black text-sm px-4 py-2 shadow-[3px_3px_0px_0px_#111111] hover:scale-105 transition-transform cursor-pointer"
+                        >
+                          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
+                          <span>Save Profile Changes</span>
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardHeader>
@@ -682,7 +728,25 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                 <CardContent className="px-0 pt-5 space-y-5">
                   {/* Avatar & Display Name Header */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-5 min-w-0">
-                    <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="sm:w-16 sm:h-16 shrink-0" />
+                    <div className="relative group shrink-0">
+                      <Avatar src={avatarUrl} fallback={displayName || currentUsername} size="lg" className="sm:w-16 sm:h-16 shrink-0" />
+                      {!isEditingDetails && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditName(displayName);
+                            setEditBio(bio);
+                            setEditAvatarUrl(avatarUrl);
+                            setNewUsername(currentUsername);
+                            setIsEditingDetails(true);
+                          }}
+                          className="absolute -bottom-1 -right-1 p-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] shadow-[1px_1px_0px_0px_#111111] hover:scale-110 transition-transform cursor-pointer"
+                          title="Edit Profile Photo"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                     <div className="space-y-1 min-w-0 flex-1 w-full">
                       <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                         <h3 className="text-lg sm:text-2xl font-black text-[#111111] break-words">{displayName}</h3>
@@ -748,23 +812,45 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="text-xs font-black uppercase text-[#111111]">
-                          Display Name
-                        </label>
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
-                          placeholder="Your Display Name"
-                          required
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                            <User className="w-4 h-4 text-[#3B82F6]" />
+                            <span>Display Name</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full rounded-xl border-2 border-[#111111] bg-white p-3 font-bold text-sm outline-none"
+                            placeholder="Your Display Name"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                            <AtSign className="w-4 h-4 text-[#FF4D6D]" />
+                            <span>Username</span>
+                          </label>
+                          <div className="flex items-center gap-1 rounded-xl border-2 border-[#111111] bg-white px-3 py-2">
+                            <span className="text-sm font-black text-[#111111]/60">@</span>
+                            <input
+                              type="text"
+                              value={newUsername}
+                              onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                              className="w-full font-black text-sm text-[#111111] outline-none bg-transparent"
+                              placeholder="username"
+                              maxLength={20}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs font-black uppercase text-[#111111]">
-                          Profile Bio
+                        <label className="text-xs font-black uppercase text-[#111111] flex items-center gap-1.5">
+                          <AlignLeft className="w-4 h-4 text-[#A855F7]" />
+                          <span>Profile Bio</span>
                         </label>
                         <textarea
                           value={editBio}
@@ -774,35 +860,31 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                           placeholder="Tell the world about yourself..."
                         />
                       </div>
-
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsEditingDetails(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          variant="green"
-                          size="sm"
-                          disabled={isSaving || isCompressing}
-                          className="gap-1 font-black"
-                        >
-                          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
-                          <span>Save Profile Changes</span>
-                        </Button>
-                      </div>
                     </form>
                   ) : (
                     /* Profile Info Display Grid */
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                       <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5 overflow-hidden">
-                        <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                          <User className="w-4 h-4 text-[#3B82F6] stroke-[2.5]" />
-                          <span>Display Name</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
+                            <User className="w-4 h-4 text-[#3B82F6] stroke-[2.5]" />
+                            <span>Display Name</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditName(displayName);
+                              setEditBio(bio);
+                              setEditAvatarUrl(avatarUrl);
+                              setNewUsername(currentUsername);
+                              setIsEditingDetails(true);
+                            }}
+                            className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
+                            title="Edit Display Name"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit</span>
+                          </button>
                         </div>
                         <p className="text-sm sm:text-base font-extrabold text-[#111111] break-words">{displayName}</p>
                       </div>
@@ -813,49 +895,23 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
                             <AtSign className="w-4 h-4 text-[#FF4D6D] stroke-[2.5]" />
                             <span>Username</span>
                           </div>
-                          {!isEditingUsername && (
-                            <button
-                              onClick={() => setIsEditingUsername(true)}
-                              className="text-xs font-black underline text-[#3B82F6] flex items-center gap-1 hover:text-[#111111]"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Change</span>
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditName(displayName);
+                              setEditBio(bio);
+                              setEditAvatarUrl(avatarUrl);
+                              setNewUsername(currentUsername);
+                              setIsEditingDetails(true);
+                            }}
+                            className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
+                            title="Change Username"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Change</span>
+                          </button>
                         </div>
-
-                        {isEditingUsername ? (
-                          <form onSubmit={handleUpdateUsername} className="flex items-center gap-2 pt-1">
-                            <span className="text-sm font-black text-[#111111]/60">@</span>
-                            <input
-                              type="text"
-                              value={newUsername}
-                              onChange={(e) => setNewUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                              className="w-full rounded-lg border-2 border-[#111111] bg-white px-2 py-1 text-sm font-black text-[#111111] outline-none"
-                              maxLength={20}
-                              autoFocus
-                            />
-                            <button
-                              type="submit"
-                              disabled={isSaving}
-                              className="p-1.5 rounded-lg border-2 border-[#111111] bg-[#51CF66] text-[#111111] shadow-[2px_2px_0px_0px_#111111]"
-                            >
-                              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsEditingUsername(false);
-                                setNewUsername(currentUsername);
-                              }}
-                              className="p-1.5 rounded-lg border-2 border-[#111111] bg-[#FF4D6D] text-white shadow-[2px_2px_0px_0px_#111111]"
-                            >
-                              <X className="w-4 h-4 stroke-[3]" />
-                            </button>
-                          </form>
-                        ) : (
-                          <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all sm:break-words">@{currentUsername}</p>
-                        )}
+                        <p className="text-sm sm:text-base font-extrabold text-[#111111] break-all sm:break-words">@{currentUsername}</p>
                       </div>
 
                       <div className="md:col-span-2 rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5 overflow-hidden">
@@ -870,9 +926,26 @@ export function DashboardContent({ profile, initialLinks, availableBadges, userB
 
                   {!isEditingDetails && (
                     <div className="rounded-xl border-2 border-[#111111] bg-[#F8F9FA] p-3.5 space-y-0.5">
-                      <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
-                        <AlignLeft className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
-                        <span>Profile Bio</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs font-black uppercase text-[#111111]/70">
+                          <AlignLeft className="w-4 h-4 text-[#A855F7] stroke-[2.5]" />
+                          <span>Profile Bio</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditName(displayName);
+                            setEditBio(bio);
+                            setEditAvatarUrl(avatarUrl);
+                            setNewUsername(currentUsername);
+                            setIsEditingDetails(true);
+                          }}
+                          className="text-xs font-black text-[#3B82F6] flex items-center gap-1 hover:underline cursor-pointer"
+                          title="Edit Bio"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
                       </div>
                       <p className="text-xs sm:text-sm font-bold text-[#111111] bio-text break-words">{bio}</p>
                     </div>
