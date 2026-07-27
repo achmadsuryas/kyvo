@@ -182,7 +182,7 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
   };
 
   const eventBadges = badges.filter((b) => b.is_event);
-  const regularBadges = badges.filter((b) => !b.is_event);
+  const regularBadges = badges.filter((b) => !b.is_event && !b.name.toLowerCase().includes('verified'));
 
   return (
     <Card className="bg-white border-[3.5px] border-[#111111] shadow-[6px_6px_0px_0px_#111111] p-6 md:p-8 space-y-6 w-full">
@@ -835,48 +835,54 @@ export function BadgeManager({ initialBadges, badges: rawBadges }: BadgeManagerP
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {regularBadges.map((badge) => {
-                const BadgeIconComp = getBadgeIconComponent(badge.icon);
+              {regularBadges.length === 0 ? (
+                <div className="sm:col-span-2 rounded-2xl border-2 border-dashed border-[#111111]/30 p-6 text-center text-xs font-bold text-[#111111]/60">
+                  No Regular / System Badges created yet.
+                </div>
+              ) : (
+                regularBadges.map((badge) => {
+                  const BadgeIconComp = getBadgeIconComponent(badge.icon);
 
-                return (
-                  <div
-                    key={badge.id}
-                    className="rounded-2xl border-[3px] border-[#111111] p-3.5 shadow-[3px_3px_0px_0px_#111111] space-y-2.5 flex flex-col justify-between"
-                    style={{ backgroundColor: badge.bg_color || '#FFD43B', color: badge.color || '#111111' }}
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1.5 font-black text-base truncate">
-                        <BadgeIconComp className="w-4 h-4 stroke-[2.5] flex-shrink-0" />
-                        <span className="truncate">{badge.name}</span>
+                  return (
+                    <div
+                      key={badge.id}
+                      className="rounded-2xl border-[3px] border-[#111111] p-3.5 shadow-[3px_3px_0px_0px_#111111] space-y-2.5 flex flex-col justify-between"
+                      style={{ backgroundColor: badge.bg_color || '#FFD43B', color: badge.color || '#111111' }}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 font-black text-base truncate">
+                          <BadgeIconComp className="w-4 h-4 stroke-[2.5] flex-shrink-0" />
+                          <span className="truncate">{badge.name}</span>
+                        </div>
+                        <Badge variant="purple" className="text-[9px] font-black uppercase px-2 py-0.5 flex-shrink-0">
+                          Admin Only
+                        </Badge>
                       </div>
-                      <Badge variant="purple" className="text-[9px] font-black uppercase px-2 py-0.5 flex-shrink-0">
-                        Admin Only
-                      </Badge>
-                    </div>
 
-                    <p className="text-xs font-bold opacity-90 line-clamp-2 leading-relaxed">{badge.description}</p>
+                      <p className="text-xs font-bold opacity-90 line-clamp-2 leading-relaxed">{badge.description}</p>
 
-                    <div className="pt-2 flex items-center justify-end text-[10px] font-black border-t border-black/20 gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(badge)}
-                        className="p-1 rounded-lg border border-[#111111] bg-white text-[#111111] hover:bg-[#FFD43B] transition-colors"
-                        title="Edit Badge"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(badge.id)}
-                        className="p-1 rounded-lg border border-[#111111] bg-[#FF4D6D] text-white hover:bg-red-700 transition-colors"
-                        title="Delete Badge"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </button>
+                      <div className="pt-2 flex items-center justify-end text-[10px] font-black border-t border-black/20 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(badge)}
+                          className="p-1 rounded-lg border border-[#111111] bg-white text-[#111111] hover:bg-[#FFD43B] transition-colors"
+                          title="Edit Badge"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(badge.id)}
+                          className="p-1 rounded-lg border border-[#111111] bg-[#FF4D6D] text-white hover:bg-red-700 transition-colors"
+                          title="Delete Badge"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
