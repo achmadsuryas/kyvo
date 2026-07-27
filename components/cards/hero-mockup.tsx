@@ -113,11 +113,13 @@ export function HeroMockup() {
           </div>
         </div>
 
-        {/* Centered Share & Scan QR Code Line Footer */}
-        <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-center gap-1.5 text-[10px] font-black text-[#FF4D6D]">
-          <Share2 className="w-3 h-3 stroke-[2.5]" />
-          <span>Share Profile & Scan QR Code</span>
-          <QrCode className="w-3 h-3 text-[#3B82F6]" />
+        {/* Centered Share & Scan QR Code Line Footer matching target design */}
+        <div className="pt-2 border-t-2 border-dashed border-[#111111]/20 flex items-center justify-center gap-2 text-xs font-black">
+          <Share2 className="w-4 h-4 text-[#FF4D6D] stroke-[2.5]" />
+          <span className="text-[#111111] underline underline-offset-4 decoration-[2px] decoration-[#111111]">
+            Share Profile & Scan QR Code
+          </span>
+          <QrCode className="w-4 h-4 text-[#60A5FA] stroke-[2.5]" />
         </div>
       </div>
     </div>
