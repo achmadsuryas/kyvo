@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { Globe, ExternalLink, CheckCircle2, QrCode, Share2, Sparkles } from 'lucide-react';
 import { getIconComponent } from '@/components/shared/social-icons';
 import { KyvoLogo } from '@/components/shared/kyvo-logo';
@@ -40,10 +41,12 @@ export function HeroMockup() {
         {/* Top Header Row matching Public Profile Page */}
         <div className="flex items-center justify-between gap-2 border-b-2 border-dashed border-[#111111]/15 pb-3">
           <KyvoLogo href="/" size="sm" />
-          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111]">
-            <Sparkles className="w-3 h-3 text-[#FF4D6D] fill-[#FF4D6D]" />
-            <span>Create Your Own</span>
-          </div>
+          <Link href="/login">
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-none border-2 border-[#111111] bg-[#FFD43B] text-[#111111] text-[10px] font-black shadow-[1.5px_1.5px_0px_0px_#111111] hover:shadow-[3px_3px_0px_0px_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+              <Sparkles className="w-3 h-3 text-[#FF4D6D] fill-[#FF4D6D]" />
+              <span>Create Your Own</span>
+            </div>
+          </Link>
         </div>
 
         {/* Profile Avatar & Header Details */}
@@ -77,12 +80,12 @@ export function HeroMockup() {
           </div>
         </div>
 
-        {/* Links List (All buttons have icons & clean styling) */}
+        {/* Links List (All buttons have icons & clean styling matching Public Profile) */}
         <div className="space-y-2.5 pt-1">
           {/* Featured Kyvo Website Link */}
-          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#FFD43B] text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
+          <div className="w-full rounded-none border-[2.5px] border-[#111111] bg-[#FFD43B] text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="p-1 rounded-md border border-[#111111] bg-white text-[#111111]">
+              <div className="p-1 rounded-none border border-[#111111] bg-white text-[#111111]">
                 <Globe className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
               <span className="font-black text-xs uppercase">KYVO WEBSITE</span>
@@ -91,9 +94,9 @@ export function HeroMockup() {
           </div>
 
           {/* Dark GitHub Link */}
-          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-[#111111] text-white p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
+          <div className="w-full rounded-none border-[2.5px] border-[#111111] bg-[#111111] text-white p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="p-1 rounded-md border border-white bg-white text-[#111111]">
+              <div className="p-1 rounded-none border border-white bg-white text-[#111111]">
                 <GithubIcon className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
               <span className="font-black text-xs uppercase">GITHUB REPOSITORY</span>
@@ -102,9 +105,9 @@ export function HeroMockup() {
           </div>
 
           {/* White Twitter/X Link */}
-          <div className="w-full rounded-xl border-[2.5px] border-[#111111] bg-white text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
+          <div className="w-full rounded-none border-[2.5px] border-[#111111] bg-white text-[#111111] p-2.5 shadow-[3px_3px_0px_0px_#111111] flex items-center justify-between font-black text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="p-1 rounded-md border border-[#111111] bg-[#FFD43B] text-[#111111]">
+              <div className="p-1 rounded-none border border-[#111111] bg-[#FFD43B] text-[#111111]">
                 <TwitterIcon className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
               <span className="font-black text-xs uppercase">TWITTER / X COMMUNITY</span>

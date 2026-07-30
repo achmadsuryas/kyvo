@@ -85,7 +85,7 @@ export default async function PublicProfilePage({ params }: PublicProfileProps) 
         <KyvoLogo href="/" size="sm" textColor={isDarkBg ? "text-white" : "text-[#111111]"} />
 
         <Link href="/login">
-          <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111]">
+          <Button variant="yellow" size="sm" className="text-[11px] font-black h-7 px-2.5 gap-1 shadow-[1.5px_1.5px_0px_0px_#111111] rounded-none">
             <Sparkles className="w-3 h-3 text-[#FF4D6D]" />
             <span>Create Your Own</span>
           </Button>
