@@ -18,6 +18,52 @@ function getSupabaseAdmin() {
 }
 
 /**
+ * Smart Ticket Lookup & Auto-Linker for Discord Threads
+ */
+async function findActiveTicketForDiscord(supabase: any, channelId?: string, bodyChannelId?: string) {
+  const threadIdCandidate = channelId || bodyChannelId;
+  let targetTicketId: string | null = null;
+  let targetUserId: string | null = null;
+
+  // 1. Try matching ticket by exact discord_thread_id
+  if (threadIdCandidate) {
+    const { data: ticketByThread } = await supabase
+      .from('support_tickets')
+      .select('id, user_id')
+      .eq('discord_thread_id', threadIdCandidate)
+      .maybeSingle();
+
+    if (ticketByThread) {
+      return { targetTicketId: ticketByThread.id, targetUserId: ticketByThread.user_id };
+    }
+  }
+
+  // 2. Fallback: Find latest active ticket (open or in_progress)
+  const { data: latestActive } = await supabase
+    .from('support_tickets')
+    .select('id, user_id, discord_thread_id')
+    .in('status', ['open', 'in_progress'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latestActive) {
+    targetTicketId = latestActive.id;
+    targetUserId = latestActive.user_id;
+
+    // Auto-link missing discord_thread_id so future replies match perfectly
+    if (!latestActive.discord_thread_id && threadIdCandidate) {
+      await supabase
+        .from('support_tickets')
+        .update({ discord_thread_id: threadIdCandidate })
+        .eq('id', latestActive.id);
+    }
+  }
+
+  return { targetTicketId, targetUserId };
+}
+
+/**
  * Handle HTTP OPTIONS Preflight for Discord Webhook Verification
  */
 export async function OPTIONS() {
@@ -145,43 +191,16 @@ export async function POST(req: Request) {
           });
         }
 
-        // Find active ticket by discord_thread_id OR active open ticket
-        let targetTicketId: string | null = null;
-        let targetUserId: string | null = null;
-
-        if (channelId) {
-          const { data: ticketByThread } = await supabase
-            .from('support_tickets')
-            .select('id, user_id')
-            .eq('discord_thread_id', channelId)
-            .maybeSingle();
-
-          if (ticketByThread) {
-            targetTicketId = ticketByThread.id;
-            targetUserId = ticketByThread.user_id;
-          }
-        }
-
-        // Fallback: find latest active ticket in_progress or open
-        if (!targetTicketId) {
-          const { data: latestActive } = await supabase
-            .from('support_tickets')
-            .select('id, user_id')
-            .in('status', ['open', 'in_progress'])
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (latestActive) {
-            targetTicketId = latestActive.id;
-            targetUserId = latestActive.user_id;
-          }
-        }
+        const { targetTicketId, targetUserId } = await findActiveTicketForDiscord(
+          supabase,
+          channelId,
+          body.channel?.id
+        );
 
         if (!targetTicketId || !targetUserId) {
           return NextResponse.json({
             type: 4,
-            data: { content: '❌ Could not find an active support ticket matching this thread/channel.' },
+            data: { content: '❌ Could not find an active open support ticket. Make sure there is an open ticket on the website.' },
           });
         }
 
@@ -224,38 +243,16 @@ export async function POST(req: Request) {
           });
         }
 
-        let targetTicketId: string | null = null;
-
-        if (channelId) {
-          const { data: ticketByThread } = await supabase
-            .from('support_tickets')
-            .select('id')
-            .eq('discord_thread_id', channelId)
-            .maybeSingle();
-
-          if (ticketByThread) {
-            targetTicketId = ticketByThread.id;
-          }
-        }
-
-        if (!targetTicketId) {
-          const { data: latestActive } = await supabase
-            .from('support_tickets')
-            .select('id')
-            .in('status', ['open', 'in_progress'])
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (latestActive) {
-            targetTicketId = latestActive.id;
-          }
-        }
+        const { targetTicketId } = await findActiveTicketForDiscord(
+          supabase,
+          channelId,
+          body.channel?.id
+        );
 
         if (!targetTicketId) {
           return NextResponse.json({
             type: 4,
-            data: { content: '❌ No active support ticket found for this channel.' },
+            data: { content: '❌ No active support ticket found to update status.' },
           });
         }
 
