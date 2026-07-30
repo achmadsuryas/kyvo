@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { TwitterIcon, GithubIcon, LinkedinIcon, YoutubeIcon } from '@/components/shared/social-icons';
+import { DiscordIcon } from '@/components/shared/social-icons';
 import { APP_CONFIG } from '@/constants';
 import { KyvoLogo } from '@/components/shared/kyvo-logo';
 
@@ -40,40 +40,13 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-3 pt-2">
             <a
-              href="https://twitter.com"
+              href="https://discord.gg/yrUHcVr2q8"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#FFD43B] shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
-              aria-label="Twitter"
+              className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#5865F2] text-white shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
+              aria-label="Discord"
             >
-              <TwitterIcon className="w-5 h-5 text-[#111111]" />
-            </a>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#3B82F6] text-white shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
-              aria-label="GitHub"
-            >
-              <GithubIcon className="w-5 h-5" />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#51CF66] text-[#111111] shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
-              aria-label="LinkedIn"
-            >
-              <LinkedinIcon className="w-5 h-5" />
-            </a>
-            <a
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#FF4D6D] text-white shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
-              aria-label="YouTube"
-            >
-              <YoutubeIcon className="w-5 h-5" />
+              <DiscordIcon className="w-5 h-5 text-white" />
             </a>
           </div>
         </div>
