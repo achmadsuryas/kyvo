@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { SupportTicket, SupportMessage } from '@/types';
-import { sendDiscordTicketWebhook, sendDiscordAuditWebhook, closeDiscordThread } from '@/lib/discord/webhook';
+import { sendDiscordTicketWebhook, sendDiscordAuditWebhook, closeDiscordThread, deleteDiscordThread } from '@/lib/discord/webhook';
 
 /**
  * Get active support ticket for current logged in user.
@@ -296,10 +296,10 @@ export async function updateTicketStatus(
         return { success: false, message: error.message };
       }
 
-      // Auto-archive and lock the Discord Thread for this ticket
+      // Delete the Discord Thread for this ticket so the support channel stays clean
       if ((targetTicket as any)?.discord_thread_id) {
-        await closeDiscordThread((targetTicket as any).discord_thread_id).catch((err) =>
-          console.error('Discord Thread Auto-Close Error:', err)
+        await deleteDiscordThread((targetTicket as any).discord_thread_id).catch((err) =>
+          console.error('Discord Thread Auto-Delete Error:', err)
         );
       }
 
@@ -308,7 +308,7 @@ export async function updateTicketStatus(
         actionType: 'TICKET_RESOLVED',
         targetUsername: targetUser,
         adminUsername: adminUser,
-        reason: `Support Ticket #${ticketId.substring(0, 8)} has been marked as RESOLVED & CLOSED! ✅`,
+        reason: `Support Ticket #${ticketId.substring(0, 8)} has been RESOLVED & CLOSED! ✅`,
       }).catch((err) => console.error('Discord Audit Webhook Error:', err));
 
       revalidatePath('/dashboard/admin');
@@ -326,7 +326,7 @@ export async function updateTicketStatus(
       }
 
       if (newStatus === 'in_progress') {
-        // Send notification to #support-tickets channel that ticket is IN PROGRESS
+        // Send notification INSIDE the existing Discord Thread
         await sendDiscordTicketWebhook({
           ticketId,
           username: targetUser,
@@ -334,7 +334,16 @@ export async function updateTicketStatus(
           message: `Admin @${adminUser} has marked Ticket #${ticketId.substring(0, 8)} as IN PROGRESS. Active support in progress.`,
           status: 'in_progress',
           isReply: true,
+          threadId: (targetTicket as any)?.discord_thread_id || null,
         }).catch((err) => console.error('Discord Ticket Webhook Error:', err));
+
+        // Send Audit Log notification for IN PROGRESS status change
+        await sendDiscordAuditWebhook({
+          actionType: 'WARN',
+          targetUsername: targetUser,
+          adminUsername: adminUser,
+          reason: `Support Ticket #${ticketId.substring(0, 8)} status set to IN PROGRESS ⏳`,
+        }).catch((err) => console.error('Discord Audit Webhook Error:', err));
       }
 
       revalidatePath('/dashboard/admin');

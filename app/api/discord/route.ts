@@ -6,7 +6,8 @@ import {
   sendDiscordSignupWebhook, 
   sendDiscordAuditWebhook, 
   sendDiscordMilestoneWebhook,
-  closeDiscordThread 
+  closeDiscordThread,
+  deleteDiscordThread 
 } from '@/lib/discord/webhook';
 import { updateTicketStatus } from '@/actions/support';
 
@@ -249,12 +250,12 @@ export async function POST(req: Request) {
           });
         }
 
-        // If status resolved, send audit log & auto-archive the Discord Thread
+        // If status resolved, send audit log & DELETE the Discord Thread to keep channel clean
         if (newStatus === 'resolved') {
           const threadToClose = channelId || body.channel?.id;
           if (threadToClose) {
-            await closeDiscordThread(threadToClose).catch((err) =>
-              console.error('Error closing thread via bot /status:', err)
+            await deleteDiscordThread(threadToClose).catch((err) =>
+              console.error('Error deleting thread via bot /status:', err)
             );
           }
 
@@ -263,12 +264,19 @@ export async function POST(req: Request) {
             targetUsername: body.member?.user?.username || 'Discord Admin',
             reason: `Ticket #${targetTicketId.substring(0, 8)} resolved & closed via Discord /status command.`,
           }).catch((err) => console.error('Discord audit error:', err));
+        } else if (newStatus === 'in_progress') {
+          // Send Audit Log for IN_PROGRESS status
+          await sendDiscordAuditWebhook({
+            actionType: 'WARN',
+            targetUsername: body.member?.user?.username || 'Discord Admin',
+            reason: `Ticket #${targetTicketId.substring(0, 8)} status set to IN PROGRESS ⏳ via Discord /status command.`,
+          }).catch((err) => console.error('Discord audit error:', err));
         }
 
         return NextResponse.json({
           type: 4,
           data: {
-            content: `⚙️ **Ticket Status Updated**: Ticket status set to **${newStatus.toUpperCase()}**!${newStatus === 'resolved' ? ' Thread has been archived and closed. ✅' : ''}`,
+            content: `⚙️ **Ticket Status Updated**: Ticket status set to **${newStatus.toUpperCase()}**!${newStatus === 'resolved' ? ' Thread deleted and ticket closed. ✅' : ''}`,
           },
         });
       }

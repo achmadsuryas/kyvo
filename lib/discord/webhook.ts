@@ -207,6 +207,27 @@ export async function closeDiscordThread(threadId: string): Promise<boolean> {
 }
 
 /**
+ * Delete a Discord Thread completely when ticket is resolved
+ */
+export async function deleteDiscordThread(threadId: string): Promise<boolean> {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (!botToken || !threadId) return false;
+
+  try {
+    const res = await fetch(`https://discord.com/api/v10/channels/${threadId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bot ${botToken}`,
+      },
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Error auto-deleting Discord thread:', err);
+    return false;
+  }
+}
+
+/**
  * 2. New User Signup Notification (Growth Log)
  */
 export async function sendDiscordSignupWebhook(data: {
