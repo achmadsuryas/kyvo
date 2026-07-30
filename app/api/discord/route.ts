@@ -17,15 +17,75 @@ function getSupabaseAdmin() {
 }
 
 /**
+ * Verify Discord HTTP Interaction Ed25519 Signatures
+ */
+async function verifyDiscordSignature(
+  rawBody: string,
+  signature: string | null,
+  timestamp: string | null,
+  publicKeyHex: string
+): Promise<boolean> {
+  if (!signature || !timestamp || !publicKeyHex) return false;
+
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(timestamp + rawBody);
+
+    const hexToBytes = (hex: string) =>
+      new Uint8Array(hex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []);
+
+    const keyBytes = hexToBytes(publicKeyHex);
+    const sigBytes = hexToBytes(signature);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      { name: 'Ed25519', namedCurve: 'Ed25519' },
+      false,
+      ['verify']
+    );
+
+    return await crypto.subtle.verify('Ed25519', cryptoKey, sigBytes, data);
+  } catch (err) {
+    console.error('Discord signature verification error:', err);
+    return false;
+  }
+}
+
+/**
  * Discord Bot Interaction Endpoint & Test Route
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+    const signature = req.headers.get('X-Signature-Ed25519');
+    const timestamp = req.headers.get('X-Signature-Timestamp');
+    const publicKey = process.env.DISCORD_PUBLIC_KEY;
 
-    // 1. Handle Discord PING Interaction (Type 1)
+    let body: any = {};
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      body = {};
+    }
+
+    // 1. Handle Discord PING Interaction (Type 1) for Developer Portal Endpoint Validation
     if (body.type === 1) {
+      if (publicKey && signature && timestamp) {
+        const isValid = await verifyDiscordSignature(rawBody, signature, timestamp, publicKey);
+        if (!isValid) {
+          return new Response('Invalid request signature', { status: 401 });
+        }
+      }
       return NextResponse.json({ type: 1 });
+    }
+
+    // Verify signature for Slash Commands
+    if (publicKey && signature && timestamp) {
+      const isValid = await verifyDiscordSignature(rawBody, signature, timestamp, publicKey);
+      if (!isValid) {
+        return new Response('Invalid request signature', { status: 401 });
+      }
     }
 
     // 2. Handle Manual Test Request from Admin / Dev

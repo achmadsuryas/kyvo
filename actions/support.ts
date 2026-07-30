@@ -198,6 +198,15 @@ export async function sendSupportMessage(
         .eq('id', targetTicketId);
     }
 
+    // If first message on new ticket, send log to Audit Log channel as well
+    if (isFirstMessage) {
+      await sendDiscordAuditWebhook({
+        actionType: 'TICKET_OPENED',
+        targetUsername: senderName,
+        reason: `New Support Ticket #${targetTicketId?.substring(0, 8)} opened: "${messageText.trim().substring(0, 80)}"`,
+      }).catch((err) => console.error('Discord Ticket Opened Audit Error:', err));
+    }
+
     return { success: true, message: newMessage as SupportMessage, ticket: targetTicket };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to send message.';
