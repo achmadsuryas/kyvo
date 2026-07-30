@@ -40,7 +40,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-3 pt-2">
             <a
-              href="https://discord.gg/yrUHcVr2q8"
+              href="https://discord.gg/zecqK7SJeF"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-xl border-2 border-[#111111] bg-[#5865F2] text-white shadow-[3px_3px_0px_0px_#111111] hover:-translate-y-1 transition-transform cursor-pointer"
