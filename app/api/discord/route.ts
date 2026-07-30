@@ -5,7 +5,8 @@ import {
   sendDiscordTicketWebhook, 
   sendDiscordSignupWebhook, 
   sendDiscordAuditWebhook, 
-  sendDiscordMilestoneWebhook 
+  sendDiscordMilestoneWebhook,
+  closeDiscordThread 
 } from '@/lib/discord/webhook';
 import { updateTicketStatus } from '@/actions/support';
 
@@ -235,14 +236,39 @@ export async function POST(req: Request) {
           });
         }
 
-        const res = await updateTicketStatus(targetTicketId, newStatus as any);
+        // Call RPC function to update status bypassing RLS
+        const { error: statusErr } = await supabase.rpc('discord_bot_update_ticket_status', {
+          target_ticket_id: targetTicketId,
+          new_status: newStatus,
+        });
+
+        if (statusErr) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: `❌ Error updating status: ${statusErr.message}` },
+          });
+        }
+
+        // If status resolved, send audit log & auto-archive the Discord Thread
+        if (newStatus === 'resolved') {
+          const threadToClose = channelId || body.channel?.id;
+          if (threadToClose) {
+            await closeDiscordThread(threadToClose).catch((err) =>
+              console.error('Error closing thread via bot /status:', err)
+            );
+          }
+
+          await sendDiscordAuditWebhook({
+            actionType: 'TICKET_RESOLVED',
+            targetUsername: body.member?.user?.username || 'Discord Admin',
+            reason: `Ticket #${targetTicketId.substring(0, 8)} resolved & closed via Discord /status command.`,
+          }).catch((err) => console.error('Discord audit error:', err));
+        }
 
         return NextResponse.json({
           type: 4,
           data: {
-            content: res.success 
-              ? `⚙️ **Ticket Status Updated**: Ticket status set to **${newStatus.toUpperCase()}**!` 
-              : `❌ ${res.message}`,
+            content: `⚙️ **Ticket Status Updated**: Ticket status set to **${newStatus.toUpperCase()}**!${newStatus === 'resolved' ? ' Thread has been archived and closed. ✅' : ''}`,
           },
         });
       }

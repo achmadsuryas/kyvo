@@ -267,3 +267,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION public.discord_bot_get_active_tickets() TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.discord_bot_reply_ticket(UUID, TEXT) TO anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.discord_bot_update_ticket_status(
+  target_ticket_id UUID,
+  new_status TEXT
+)
+RETURNS void AS $$
+BEGIN
+  IF new_status = 'resolved' THEN
+    DELETE FROM public.support_tickets WHERE id = target_ticket_id;
+  ELSE
+    UPDATE public.support_tickets
+    SET status = new_status, updated_at = NOW()
+    WHERE id = target_ticket_id;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.discord_bot_update_ticket_status(UUID, TEXT) TO anon, authenticated, service_role;
