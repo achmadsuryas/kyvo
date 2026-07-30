@@ -442,3 +442,28 @@ export async function syncDiscordUserRole(data: {
     return { success: false, message: 'Error communicating with Discord API' };
   }
 }
+
+/**
+ * Automatically assign Creator Role (1532394574067011694) to any Discord member
+ */
+export async function autoAssignCreatorRole(discordUserId: string): Promise<boolean> {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  const guildId = process.env.DISCORD_GUILD_ID || '1532353083554922499';
+  const memberRoleId = process.env.DISCORD_MEMBER_ROLE_ID || '1532394574067011694';
+
+  if (!botToken || !guildId || !discordUserId) return false;
+
+  try {
+    const res = await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/members/${discordUserId}/roles/${memberRoleId}`,
+      {
+        method: 'PUT',
+        headers: { Authorization: `Bot ${botToken}` },
+      }
+    );
+    return res.ok || res.status === 204;
+  } catch (err) {
+    console.error('Error auto-assigning Creator Role:', err);
+    return false;
+  }
+}

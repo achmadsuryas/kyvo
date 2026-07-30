@@ -7,7 +7,8 @@ import {
   sendDiscordAuditWebhook, 
   sendDiscordMilestoneWebhook,
   closeDiscordThread,
-  deleteDiscordThread 
+  deleteDiscordThread,
+  autoAssignCreatorRole 
 } from '@/lib/discord/webhook';
 import { updateTicketStatus } from '@/actions/support';
 
@@ -113,7 +114,24 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Handle Manual Test Request from Admin / Dev
+    // Auto-assign Creator Role (1532394574067011694) to any Discord member interacting with the bot
+    const memberDiscordId = body.member?.user?.id || body.user?.id || body.event?.user?.id;
+    if (memberDiscordId) {
+      autoAssignCreatorRole(memberDiscordId).catch((err) =>
+        console.error('Auto assign Creator Role error:', err)
+      );
+    }
+
+    // 3. Handle Discord Member Join Event (GUILD_MEMBER_ADD) -> Auto Role Grant
+    if (body.type === 0 || body.event?.type === 'guild_member_add') {
+      const newMemberId = body.user?.id || body.member?.user?.id || body.event?.user?.id;
+      if (newMemberId) {
+        await autoAssignCreatorRole(newMemberId);
+      }
+      return NextResponse.json({ success: true, message: 'Creator Role auto-assigned to new member' });
+    }
+
+    // 4. Handle Manual Test Request from Admin / Dev
     if (body.type === 'test') {
       const channel = body.channel || 'tickets';
       let result;
@@ -160,7 +178,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, channel, result });
     }
 
-    // 4. Handle Discord Slash Commands & Interactive Replies (Type 2)
+    // 5. Handle Discord Slash Commands & Interactive Replies (Type 2)
     if (body.type === 2) {
       const commandName = body.data?.name;
       const options = body.data?.options || [];
