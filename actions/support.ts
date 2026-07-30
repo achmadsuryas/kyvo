@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { SupportTicket, SupportMessage } from '@/types';
+import { sendDiscordTicketWebhook } from '@/lib/discord/webhook';
 
 /**
  * Get active support ticket for current logged in user.
@@ -164,6 +165,18 @@ export async function sendSupportMessage(
     await (supabase.from('support_tickets') as any)
       .update({ updated_at: new Date().toISOString() })
       .eq('id', targetTicketId);
+
+    // Trigger Discord Webhook Notification for Admin Ticket Channel asynchronously
+    const senderName = (newMessage as any)?.sender?.display_name || (newMessage as any)?.sender?.username || user.email?.split('@')[0] || 'Kyvo User';
+    sendDiscordTicketWebhook({
+      ticketId: targetTicketId!,
+      username: senderName,
+      email: user.email,
+      subject: isFirstMessage ? 'New Support Ticket Request' : `Support Message (${senderRole.toUpperCase()})`,
+      message: messageText.trim(),
+      status: targetTicket?.status || 'open',
+      isReply: !isFirstMessage,
+    }).catch((err) => console.error('Discord Ticket Webhook error:', err));
 
     return { success: true, message: newMessage as SupportMessage, ticket: targetTicket };
   } catch (err: unknown) {

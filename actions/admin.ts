@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { AdminUserItem, BadgeItem } from '@/types';
+import { sendDiscordAuditWebhook } from '@/lib/discord/webhook';
 
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
@@ -164,6 +165,26 @@ async function setUserStatusInDatabase(profileId: string, status: string, reason
   return !updateErr;
 }
 
+async function getTargetUsername(profileId: string): Promise<{ username: string; adminUsername?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const { data: targetProf } = await supabase.from('profiles').select('username').eq('id', profileId).maybeSingle();
+    let adminUsername: string | undefined;
+    if (user) {
+      const { data: adminProf } = await supabase.from('profiles').select('username').eq('id', user.id).maybeSingle();
+      adminUsername = (adminProf as any)?.username || user.email?.split('@')[0];
+    }
+    return {
+      username: (targetProf as any)?.username || profileId.substring(0, 8),
+      adminUsername,
+    };
+  } catch {
+    return { username: profileId.substring(0, 8) };
+  }
+}
+
 export async function warnUserWithReason(profileId: string, reason: string): Promise<{ success: boolean; message: string }> {
   try {
     const statusReason = reason.trim() || 'Terms of service violation';
@@ -172,6 +193,14 @@ export async function warnUserWithReason(profileId: string, reason: string): Pro
     if (!success) {
       return { success: false, message: 'Failed to issue warning. Please check database RPC settings.' };
     }
+
+    const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
+    sendDiscordAuditWebhook({
+      actionType: 'WARN',
+      targetUsername: targetUser,
+      adminUsername,
+      reason: statusReason,
+    }).catch((err) => console.error('Discord audit error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');
@@ -190,6 +219,14 @@ export async function clearWarning(profileId: string): Promise<{ success: boolea
     if (!success) {
       return { success: false, message: 'Failed to clear warning.' };
     }
+
+    const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
+    sendDiscordAuditWebhook({
+      actionType: 'REINSTATE',
+      targetUsername: targetUser,
+      adminUsername,
+      reason: 'Warning cleared by admin',
+    }).catch((err) => console.error('Discord audit error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');
@@ -210,6 +247,14 @@ export async function banUserWithReason(profileId: string, reason: string): Prom
       return { success: false, message: 'Failed to ban user account.' };
     }
 
+    const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
+    sendDiscordAuditWebhook({
+      actionType: 'BAN',
+      targetUsername: targetUser,
+      adminUsername,
+      reason: statusReason,
+    }).catch((err) => console.error('Discord audit error:', err));
+
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');
     revalidatePath('/[username]');
@@ -227,6 +272,14 @@ export async function unbanUser(profileId: string): Promise<{ success: boolean; 
     if (!success) {
       return { success: false, message: 'Failed to unban user account.' };
     }
+
+    const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
+    sendDiscordAuditWebhook({
+      actionType: 'REINSTATE',
+      targetUsername: targetUser,
+      adminUsername,
+      reason: 'Account unbanned by admin',
+    }).catch((err) => console.error('Discord audit error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');
@@ -285,6 +338,14 @@ export async function toggleVerifiedBadge(profileId: string, currentIsVerified: 
       });
 
       if (error && error.code !== '23505') return { success: false, message: error.message };
+
+      const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
+      sendDiscordAuditWebhook({
+        actionType: 'BADGE_GRANT',
+        targetUsername: targetUser,
+        adminUsername,
+        badgeName: 'Verified Creator',
+      }).catch((err) => console.error('Discord audit error:', err));
 
       revalidatePath('/dashboard');
       revalidatePath('/dashboard/admin');

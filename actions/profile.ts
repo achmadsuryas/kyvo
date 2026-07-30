@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { sendDiscordSignupWebhook } from '@/lib/discord/webhook';
 
 export async function updateUserUsername(newUsername: string): Promise<{ success: boolean; message: string }> {
   const cleanUsername = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
@@ -316,6 +317,14 @@ export async function completeOnboarding(data: {
         return { success: false, message: error.message };
       }
     }
+
+    // Trigger Discord New Signup Webhook Notification asynchronously
+    sendDiscordSignupWebhook({
+      username: cleanUsername,
+      displayName: data.display_name.trim() || cleanUsername,
+      email: user.email,
+      avatarUrl: user.user_metadata?.avatar_url,
+    }).catch((err) => console.error('Discord Signup Webhook error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/[username]');
