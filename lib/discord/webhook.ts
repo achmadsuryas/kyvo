@@ -158,7 +158,7 @@ export async function sendDiscordSignupWebhook(data: {
  */
 export async function sendDiscordAuditWebhook(data: {
   adminUsername?: string;
-  actionType: 'WARN' | 'SUSPEND' | 'BAN' | 'REINSTATE' | 'BADGE_GRANT';
+  actionType: 'WARN' | 'SUSPEND' | 'BAN' | 'REINSTATE' | 'BADGE_GRANT' | 'TICKET_RESOLVED';
   targetUsername: string;
   reason?: string;
   badgeName?: string;
@@ -183,6 +183,10 @@ export async function sendDiscordAuditWebhook(data: {
     case 'BADGE_GRANT':
       color = BRAND_COLORS.blue;
       actionTitle = '⭐ Badge Granted to User';
+      break;
+    case 'TICKET_RESOLVED':
+      color = BRAND_COLORS.green;
+      actionTitle = '✅ Support Ticket Resolved & Closed';
       break;
   }
 
