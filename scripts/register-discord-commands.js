@@ -9,7 +9,8 @@ if (!DISCORD_BOT_TOKEN || !DISCORD_CLIENT_ID) {
 const COMMANDS = [
   {
     name: "reply",
-    description: "Reply to a support ticket from Discord (Syncs live to website)",
+    description: "[Admin Only] Reply to a support ticket from Discord (Syncs live to website)",
+    default_member_permissions: "8", // Administrator Only
     options: [
       {
         name: "message",
@@ -21,7 +22,8 @@ const COMMANDS = [
   },
   {
     name: "status",
-    description: "Update ticket status (in_progress or resolved)",
+    description: "[Admin Only] Update ticket status (in_progress or resolved)",
+    default_member_permissions: "8", // Administrator Only
     options: [
       {
         name: "status",
@@ -38,7 +40,8 @@ const COMMANDS = [
   },
   {
     name: "check-user",
-    description: "Check user profile, status, views, and badges on Kyvo",
+    description: "[Admin Only] Check user profile, status, views, and badges on Kyvo",
+    default_member_permissions: "8", // Administrator Only
     options: [
       {
         name: "username",
@@ -50,7 +53,8 @@ const COMMANDS = [
   },
   {
     name: "tickets",
-    description: "List all active open & in-progress support tickets",
+    description: "[Admin Only] List all active open & in-progress support tickets",
+    default_member_permissions: "8", // Administrator Only
   },
   {
     name: "stats",
@@ -59,7 +63,7 @@ const COMMANDS = [
 ];
 
 async function registerCommands() {
-  console.log("Registering Discord Slash Commands...");
+  console.log("Registering Discord Admin Restricted Slash Commands...");
   const res = await fetch(`https://discord.com/api/v10/applications/${DISCORD_CLIENT_ID}/commands`, {
     method: "PUT",
     headers: {
@@ -71,7 +75,7 @@ async function registerCommands() {
 
   if (res.ok) {
     const data = await res.json();
-    console.log("✅ Successfully registered Slash Commands:", data.map(c => "/" + c.name).join(", "));
+    console.log("✅ Successfully registered Admin-Restricted Slash Commands:", data.map(c => "/" + c.name).join(", "));
   } else {
     const err = await res.text();
     console.error("❌ Failed to register commands:", res.status, err);

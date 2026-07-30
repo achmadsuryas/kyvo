@@ -267,7 +267,7 @@ export async function POST(req: Request) {
         } else if (newStatus === 'in_progress') {
           // Send Audit Log for IN_PROGRESS status
           await sendDiscordAuditWebhook({
-            actionType: 'WARN',
+            actionType: 'TICKET_IN_PROGRESS',
             targetUsername: body.member?.user?.username || 'Discord Admin',
             reason: `Ticket #${targetTicketId.substring(0, 8)} status set to IN PROGRESS ⏳ via Discord /status command.`,
           }).catch((err) => console.error('Discord audit error:', err));

@@ -339,7 +339,7 @@ export async function updateTicketStatus(
 
         // Send Audit Log notification for IN PROGRESS status change
         await sendDiscordAuditWebhook({
-          actionType: 'WARN',
+          actionType: 'TICKET_IN_PROGRESS',
           targetUsername: targetUser,
           adminUsername: adminUser,
           reason: `Support Ticket #${ticketId.substring(0, 8)} status set to IN PROGRESS ⏳`,
