@@ -269,7 +269,7 @@ export async function sendDiscordSignupWebhook(data: {
  */
 export async function sendDiscordAuditWebhook(data: {
   adminUsername?: string;
-  actionType: 'WARN' | 'SUSPEND' | 'BAN' | 'REINSTATE' | 'BADGE_GRANT' | 'TICKET_RESOLVED' | 'TICKET_OPENED' | 'TICKET_IN_PROGRESS';
+  actionType: 'WARN' | 'SUSPEND' | 'BAN' | 'REINSTATE' | 'BADGE_GRANT' | 'TICKET_RESOLVED' | 'TICKET_OPENED' | 'TICKET_IN_PROGRESS' | 'USERNAME_CHANGE' | 'ACCOUNT_DELETED';
   targetUsername: string;
   reason?: string;
   badgeName?: string;
@@ -306,6 +306,14 @@ export async function sendDiscordAuditWebhook(data: {
     case 'TICKET_IN_PROGRESS':
       color = BRAND_COLORS.yellow;
       actionTitle = '⏳ Ticket Status: IN PROGRESS';
+      break;
+    case 'USERNAME_CHANGE':
+      color = BRAND_COLORS.blue;
+      actionTitle = '✏️ Username Changed';
+      break;
+    case 'ACCOUNT_DELETED':
+      color = BRAND_COLORS.pink;
+      actionTitle = '🗑️ Account Permanently Deleted';
       break;
   }
 

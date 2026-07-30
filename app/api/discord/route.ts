@@ -10,7 +10,6 @@ import {
   deleteDiscordThread,
   autoAssignCreatorRole 
 } from '@/lib/discord/webhook';
-import { updateTicketStatus } from '@/actions/support';
 
 export const dynamic = 'force-dynamic';
 

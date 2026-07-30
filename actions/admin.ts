@@ -134,6 +134,20 @@ export async function adminDeleteUserAccount(profileId: string): Promise<{ succe
       await adminClient.auth.admin.deleteUser(profileId);
     }
 
+    // Fetch target user's username & admin's username before deletion
+    const { data: delProfile } = await (supabase.from('profiles') as any)
+      .select('username')
+      .eq('id', profileId)
+      .maybeSingle();
+
+    const { data: adminProf } = await (supabase.from('profiles') as any)
+      .select('username')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const targetUsername = delProfile?.username || 'user';
+    const adminUser = adminProf?.username || user.email?.split('@')[0] || 'System Admin';
+
     // Delete profile (CASCADE will delete links and user_badges, freeing username)
     const { error } = await supabase
       .from('profiles')
@@ -143,6 +157,14 @@ export async function adminDeleteUserAccount(profileId: string): Promise<{ succe
     if (error) {
       return { success: false, message: error.message };
     }
+
+    // Send Audit Log for Admin Account Deletion
+    await sendDiscordAuditWebhook({
+      actionType: 'ACCOUNT_DELETED',
+      adminUsername: adminUser,
+      targetUsername: targetUsername,
+      reason: `Account @${targetUsername} was permanently deleted by Admin @${adminUser}.`,
+    }).catch((err) => console.error('Discord Audit Error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/admin');

@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { sendDiscordSignupWebhook, syncDiscordUserRole } from '@/lib/discord/webhook';
+import { sendDiscordSignupWebhook, syncDiscordUserRole, sendDiscordAuditWebhook } from '@/lib/discord/webhook';
 
 export async function updateUserUsername(newUsername: string): Promise<{ success: boolean; message: string }> {
   const cleanUsername = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
@@ -31,6 +31,14 @@ export async function updateUserUsername(newUsername: string): Promise<{ success
       return { success: false, message: 'Username is already taken by another creator.' };
     }
 
+    // Fetch old username before update
+    const { data: currentProfile } = await (supabase.from('profiles') as any)
+      .select('username')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const oldUsername = currentProfile?.username || 'user';
+
     const { error } = await (supabase.from('profiles') as any)
       .update({ username: cleanUsername, updated_at: new Date().toISOString() })
       .eq('id', user.id);
@@ -38,6 +46,13 @@ export async function updateUserUsername(newUsername: string): Promise<{ success
     if (error) {
       return { success: false, message: error.message };
     }
+
+    // Send Audit Log for Username Change
+    await sendDiscordAuditWebhook({
+      actionType: 'USERNAME_CHANGE',
+      targetUsername: cleanUsername,
+      reason: `User updated username from @${oldUsername} to @${cleanUsername}`,
+    }).catch((err) => console.error('Discord Audit Error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/[username]');
@@ -354,6 +369,21 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; message: s
     }
 
     const userId = user.id;
+
+    // Fetch username before deleting account
+    const { data: delProfile } = await (supabase.from('profiles') as any)
+      .select('username')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const targetUsername = delProfile?.username || 'user';
+
+    // Send Audit Log for Account Deletion
+    await sendDiscordAuditWebhook({
+      actionType: 'ACCOUNT_DELETED',
+      targetUsername: targetUsername,
+      reason: `User @${targetUsername} permanently deleted their own Kyvo account.`,
+    }).catch((err) => console.error('Discord Audit Error:', err));
 
     // 1. Try Postgres RPC SECURITY DEFINER function to delete from auth.users (Cascades to profiles, links, user_badges)
     const { error: rpcErr } = await (supabase as any).rpc('delete_current_user_account');
