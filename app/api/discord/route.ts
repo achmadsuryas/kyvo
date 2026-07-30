@@ -18,49 +18,35 @@ function getSupabaseAdmin() {
 }
 
 /**
- * Smart Ticket Lookup & Auto-Linker for Discord Threads
+ * Smart Ticket Lookup & Auto-Linker using RPC (Bypasses RLS safely)
  */
 async function findActiveTicketForDiscord(supabase: any, channelId?: string, bodyChannelId?: string) {
   const threadIdCandidate = channelId || bodyChannelId;
-  let targetTicketId: string | null = null;
-  let targetUserId: string | null = null;
+
+  const { data: activeTickets, error } = await supabase.rpc('discord_bot_get_active_tickets');
+
+  if (error || !activeTickets || activeTickets.length === 0) {
+    return { targetTicketId: null, targetUserId: null, activeTickets: [] };
+  }
 
   // 1. Try matching ticket by exact discord_thread_id
   if (threadIdCandidate) {
-    const { data: ticketByThread } = await supabase
+    const matched = activeTickets.find((t: any) => t.discord_thread_id === threadIdCandidate);
+    if (matched) {
+      return { targetTicketId: matched.ticket_id, targetUserId: matched.user_id, activeTickets };
+    }
+  }
+
+  // 2. Fallback: Take the latest active ticket and auto-link thread ID if missing
+  const latest = activeTickets[0];
+  if (latest && !latest.discord_thread_id && threadIdCandidate) {
+    await supabase
       .from('support_tickets')
-      .select('id, user_id')
-      .eq('discord_thread_id', threadIdCandidate)
-      .maybeSingle();
-
-    if (ticketByThread) {
-      return { targetTicketId: ticketByThread.id, targetUserId: ticketByThread.user_id };
-    }
+      .update({ discord_thread_id: threadIdCandidate })
+      .eq('id', latest.ticket_id);
   }
 
-  // 2. Fallback: Find latest active ticket (open or in_progress)
-  const { data: latestActive } = await supabase
-    .from('support_tickets')
-    .select('id, user_id, discord_thread_id')
-    .in('status', ['open', 'in_progress'])
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (latestActive) {
-    targetTicketId = latestActive.id;
-    targetUserId = latestActive.user_id;
-
-    // Auto-link missing discord_thread_id so future replies match perfectly
-    if (!latestActive.discord_thread_id && threadIdCandidate) {
-      await supabase
-        .from('support_tickets')
-        .update({ discord_thread_id: threadIdCandidate })
-        .eq('id', latestActive.id);
-    }
-  }
-
-  return { targetTicketId, targetUserId };
+  return { targetTicketId: latest ? latest.ticket_id : null, targetUserId: latest ? latest.user_id : null, activeTickets };
 }
 
 /**
@@ -191,38 +177,31 @@ export async function POST(req: Request) {
           });
         }
 
-        const { targetTicketId, targetUserId } = await findActiveTicketForDiscord(
+        const { targetTicketId } = await findActiveTicketForDiscord(
           supabase,
           channelId,
           body.channel?.id
         );
 
-        if (!targetTicketId || !targetUserId) {
+        if (!targetTicketId) {
           return NextResponse.json({
             type: 4,
-            data: { content: '❌ Could not find an active open support ticket. Make sure there is an open ticket on the website.' },
+            data: { content: '❌ Could not find an active open support ticket. Please make sure there is an open ticket on the website.' },
           });
         }
 
-        // Insert message into support_messages table so user sees it live on website!
-        const { error: insertErr } = await (supabase.from('support_messages') as any).insert({
-          ticket_id: targetTicketId,
-          sender_id: targetUserId,
-          sender_role: 'admin',
-          message: replyText.trim(),
+        // Insert message via RPC function to bypass RLS safely!
+        const { error: replyErr } = await supabase.rpc('discord_bot_reply_ticket', {
+          target_ticket_id: targetTicketId,
+          reply_text: replyText.trim(),
         });
 
-        if (insertErr) {
+        if (replyErr) {
           return NextResponse.json({
             type: 4,
-            data: { content: `❌ Error sending reply: ${insertErr.message}` },
+            data: { content: `❌ Error sending reply: ${replyErr.message}` },
           });
         }
-
-        // Touch ticket updated_at
-        await (supabase.from('support_tickets') as any)
-          .update({ updated_at: new Date().toISOString() })
-          .eq('id', targetTicketId);
 
         return NextResponse.json({
           type: 4,
@@ -317,13 +296,9 @@ export async function POST(req: Request) {
 
       // SLASH COMMAND: /tickets
       if (commandName === 'tickets') {
-        const { data: activeTickets } = await supabase
-          .from('support_tickets')
-          .select('*, user:profiles!support_tickets_user_id_fkey(*)')
-          .in('status', ['open', 'in_progress'])
-          .order('updated_at', { ascending: false });
+        const { data: activeTickets, error: ticketsErr } = await supabase.rpc('discord_bot_get_active_tickets');
 
-        if (!activeTickets || activeTickets.length === 0) {
+        if (ticketsErr || !activeTickets || activeTickets.length === 0) {
           return NextResponse.json({
             type: 4,
             data: { content: '🎉 No active open support tickets at the moment!' },
@@ -333,7 +308,7 @@ export async function POST(req: Request) {
         const ticketList = activeTickets
           .map(
             (t: any, idx: number) =>
-              `${idx + 1}. **Ticket #${t.id.substring(0, 8)}** — @${t.user?.username || 'user'} [Status: \`${t.status.toUpperCase()}\`]`
+              `${idx + 1}. **Ticket #${t.ticket_id.substring(0, 8)}** — @${t.username || t.display_name || 'user'} [Status: \`${t.status.toUpperCase()}\`]`
           )
           .join('\n');
 

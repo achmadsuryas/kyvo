@@ -208,3 +208,62 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.support_tickets;
   END IF;
 END $$;
+
+-- ====================================================
+-- 17. DISCORD BOT SECURITY DEFINER RPC FUNCTIONS (BYPASS RLS SAFELY)
+-- ====================================================
+
+CREATE OR REPLACE FUNCTION public.discord_bot_get_active_tickets()
+RETURNS TABLE (
+  ticket_id UUID,
+  user_id UUID,
+  username TEXT,
+  display_name TEXT,
+  status TEXT,
+  discord_thread_id TEXT,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    st.id AS ticket_id,
+    st.user_id,
+    p.username,
+    p.display_name,
+    st.status,
+    st.discord_thread_id,
+    st.created_at,
+    st.updated_at
+  FROM public.support_tickets st
+  LEFT JOIN public.profiles p ON p.id = st.user_id
+  WHERE st.status IN ('open', 'in_progress')
+  ORDER BY st.updated_at DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.discord_bot_reply_ticket(
+  target_ticket_id UUID,
+  reply_text TEXT
+)
+RETURNS void AS $$
+DECLARE
+  ticket_user_id UUID;
+BEGIN
+  SELECT user_id INTO ticket_user_id
+  FROM public.support_tickets
+  WHERE id = target_ticket_id;
+
+  IF ticket_user_id IS NOT NULL THEN
+    INSERT INTO public.support_messages (ticket_id, sender_id, sender_role, message)
+    VALUES (target_ticket_id, ticket_user_id, 'admin', reply_text);
+
+    UPDATE public.support_tickets
+    SET updated_at = NOW()
+    WHERE id = target_ticket_id;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.discord_bot_get_active_tickets() TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.discord_bot_reply_ticket(UUID, TEXT) TO anon, authenticated, service_role;
