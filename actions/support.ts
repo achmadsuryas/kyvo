@@ -115,6 +115,16 @@ export async function sendSupportMessage(
       }
       targetTicketId = res.ticket.id;
       targetTicket = res.ticket;
+    } else {
+      const { data: existingTicket } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .eq('id', targetTicketId)
+        .maybeSingle();
+
+      if (existingTicket) {
+        targetTicket = existingTicket as SupportTicket;
+      }
     }
 
     // Get user profile to check role
@@ -175,7 +185,7 @@ export async function sendSupportMessage(
       subject: isFirstMessage ? 'New Support Ticket Request' : `Support Message (${senderRole.toUpperCase()})`,
       message: messageText.trim(),
       status: targetTicket?.status || 'open',
-      isReply: !isFirstMessage,
+      isReply: !isFirstMessage || Boolean((targetTicket as any)?.discord_thread_id),
       threadId: (targetTicket as any)?.discord_thread_id || null,
     }).catch((err) => {
       console.error('Discord Ticket Webhook error:', err);

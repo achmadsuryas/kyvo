@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { 
   sendDiscordTicketWebhook, 
   sendDiscordSignupWebhook, 
   sendDiscordAuditWebhook, 
   sendDiscordMilestoneWebhook 
 } from '@/lib/discord/webhook';
+import { updateTicketStatus } from '@/actions/support';
 
 export const dynamic = 'force-dynamic';
+
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://csblgetxpymfmubyhijy.supabase.co';
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  return createAdminClient(supabaseUrl, anonKey);
+}
 
 /**
  * Discord Bot Interaction Endpoint & Test Route
@@ -67,10 +75,236 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, channel, result });
     }
 
-    // 3. Handle Discord Slash Commands (Type 2)
+    // 3. Handle Discord Slash Commands & Interactive Replies (Type 2)
     if (body.type === 2) {
       const commandName = body.data?.name;
+      const options = body.data?.options || [];
+      const channelId = body.channel_id;
 
+      const supabase = getSupabaseAdmin();
+
+      // SLASH COMMAND: /reply [message]
+      if (commandName === 'reply') {
+        const replyText = options.find((opt: any) => opt.name === 'message')?.value;
+
+        if (!replyText || !replyText.trim()) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '❌ Reply message cannot be empty.' },
+          });
+        }
+
+        // Find active ticket by discord_thread_id OR active open ticket
+        let targetTicketId: string | null = null;
+        let targetUserId: string | null = null;
+
+        if (channelId) {
+          const { data: ticketByThread } = await supabase
+            .from('support_tickets')
+            .select('id, user_id')
+            .eq('discord_thread_id', channelId)
+            .maybeSingle();
+
+          if (ticketByThread) {
+            targetTicketId = ticketByThread.id;
+            targetUserId = ticketByThread.user_id;
+          }
+        }
+
+        // Fallback: find latest active ticket in_progress or open
+        if (!targetTicketId) {
+          const { data: latestActive } = await supabase
+            .from('support_tickets')
+            .select('id, user_id')
+            .in('status', ['open', 'in_progress'])
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (latestActive) {
+            targetTicketId = latestActive.id;
+            targetUserId = latestActive.user_id;
+          }
+        }
+
+        if (!targetTicketId || !targetUserId) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '❌ Could not find an active support ticket matching this thread/channel.' },
+          });
+        }
+
+        // Insert message into support_messages table so user sees it live on website!
+        const { error: insertErr } = await (supabase.from('support_messages') as any).insert({
+          ticket_id: targetTicketId,
+          sender_id: targetUserId,
+          sender_role: 'admin',
+          message: replyText.trim(),
+        });
+
+        if (insertErr) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: `❌ Error sending reply: ${insertErr.message}` },
+          });
+        }
+
+        // Touch ticket updated_at
+        await (supabase.from('support_tickets') as any)
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', targetTicketId);
+
+        return NextResponse.json({
+          type: 4,
+          data: {
+            content: `💬 **Admin Reply Synced to Web Live!**\n> ${replyText.trim()}`,
+          },
+        });
+      }
+
+      // SLASH COMMAND: /status [status]
+      if (commandName === 'status') {
+        const newStatus = options.find((opt: any) => opt.name === 'status')?.value;
+
+        if (!newStatus) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '❌ Please select a status: `in_progress`, `resolved`, or `open`.' },
+          });
+        }
+
+        let targetTicketId: string | null = null;
+
+        if (channelId) {
+          const { data: ticketByThread } = await supabase
+            .from('support_tickets')
+            .select('id')
+            .eq('discord_thread_id', channelId)
+            .maybeSingle();
+
+          if (ticketByThread) {
+            targetTicketId = ticketByThread.id;
+          }
+        }
+
+        if (!targetTicketId) {
+          const { data: latestActive } = await supabase
+            .from('support_tickets')
+            .select('id')
+            .in('status', ['open', 'in_progress'])
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (latestActive) {
+            targetTicketId = latestActive.id;
+          }
+        }
+
+        if (!targetTicketId) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '❌ No active support ticket found for this channel.' },
+          });
+        }
+
+        const res = await updateTicketStatus(targetTicketId, newStatus as any);
+
+        return NextResponse.json({
+          type: 4,
+          data: {
+            content: res.success 
+              ? `⚙️ **Ticket Status Updated**: Ticket status set to **${newStatus.toUpperCase()}**!` 
+              : `❌ ${res.message}`,
+          },
+        });
+      }
+
+      // SLASH COMMAND: /check-user [username]
+      if (commandName === 'check-user') {
+        const username = options.find((opt: any) => opt.name === 'username')?.value;
+
+        if (!username) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '❌ Please provide a username.' },
+          });
+        }
+
+        const clean = username.trim().toLowerCase().replace(/^@/, '');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', clean)
+          .maybeSingle();
+
+        if (!profile) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: `❌ User **@${clean}** not found on Kyvo.` },
+          });
+        }
+
+        return NextResponse.json({
+          type: 4,
+          data: {
+            embeds: [
+              {
+                title: `👤 User Profile: @${profile.username}`,
+                url: `https://kyvo.fun/${profile.username}`,
+                color: 0x3B82F6,
+                fields: [
+                  { name: 'Display Name', value: profile.display_name || profile.username, inline: true },
+                  { name: 'Role', value: (profile.role || 'user').toUpperCase(), inline: true },
+                  { name: 'Status', value: (profile.status || 'active').toUpperCase(), inline: true },
+                  { name: 'Total Views', value: `${(profile.views_count || 0).toLocaleString()} views`, inline: true },
+                  { name: 'Profile URL', value: `https://kyvo.fun/${profile.username}`, inline: false },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          },
+        });
+      }
+
+      // SLASH COMMAND: /tickets
+      if (commandName === 'tickets') {
+        const { data: activeTickets } = await supabase
+          .from('support_tickets')
+          .select('*, user:profiles!support_tickets_user_id_fkey(*)')
+          .in('status', ['open', 'in_progress'])
+          .order('updated_at', { ascending: false });
+
+        if (!activeTickets || activeTickets.length === 0) {
+          return NextResponse.json({
+            type: 4,
+            data: { content: '🎉 No active open support tickets at the moment!' },
+          });
+        }
+
+        const ticketList = activeTickets
+          .map(
+            (t: any, idx: number) =>
+              `${idx + 1}. **Ticket #${t.id.substring(0, 8)}** — @${t.user?.username || 'user'} [Status: \`${t.status.toUpperCase()}\`]`
+          )
+          .join('\n');
+
+        return NextResponse.json({
+          type: 4,
+          data: {
+            embeds: [
+              {
+                title: `🎫 Active Support Tickets (${activeTickets.length})`,
+                description: ticketList,
+                color: 0xFFD43B,
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          },
+        });
+      }
+
+      // SLASH COMMAND: /stats
       if (commandName === 'stats') {
         return NextResponse.json({
           type: 4,
