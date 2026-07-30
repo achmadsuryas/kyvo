@@ -18,13 +18,28 @@ function getSupabaseAdmin() {
 }
 
 /**
+ * Handle HTTP OPTIONS Preflight for Discord Webhook Verification
+ */
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Allow': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Signature-Ed25519, X-Signature-Timestamp',
+    },
+  });
+}
+
+/**
  * Discord Bot Interaction Endpoint & Test Route
  */
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get('X-Signature-Ed25519');
-    const timestamp = req.headers.get('X-Signature-Timestamp');
+    const signature = req.headers.get('X-Signature-Ed25519') || req.headers.get('x-signature-ed25519');
+    const timestamp = req.headers.get('X-Signature-Timestamp') || req.headers.get('x-signature-timestamp');
     const publicKey = (process.env.DISCORD_PUBLIC_KEY || '7cd9064b605189952a03b52e1b6b572328901f4e2b7c610971e4166e871aff62').trim().replace(/^["']|["']$/g, '');
 
     let body: any = {};
@@ -34,17 +49,34 @@ export async function POST(req: Request) {
       body = {};
     }
 
-    // 1. Verify Discord Ed25519 Signature for Developer Portal Validation & Security
+    // 1. Handle Discord PING Interaction (Type 1) for Developer Portal Endpoint Validation
+    if (body.type === 1) {
+      if (signature && timestamp && publicKey) {
+        try {
+          const isValid = await verifyKey(rawBody, signature, timestamp, publicKey);
+          if (!isValid) {
+            console.error('Discord PING signature verification failed');
+            return new Response('Invalid request signature', { status: 401 });
+          }
+        } catch (err) {
+          console.error('Signature verification error during PING:', err);
+        }
+      }
+      return new Response(JSON.stringify({ type: 1 }), {
+        status: 200,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
+    // 2. Verify Discord Ed25519 Signature for Slash Commands & Security
     if (publicKey && signature && timestamp) {
       const isValid = await verifyKey(rawBody, signature, timestamp, publicKey);
       if (!isValid) {
         return new Response('Invalid request signature', { status: 401 });
       }
-    }
-
-    // 2. Handle Discord PING Interaction (Type 1) for Developer Portal Endpoint Validation
-    if (body.type === 1) {
-      return NextResponse.json({ type: 1 });
     }
 
     // 3. Handle Manual Test Request from Admin / Dev
