@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { sendDiscordSignupWebhook } from '@/lib/discord/webhook';
+import { sendDiscordSignupWebhook, syncDiscordUserRole } from '@/lib/discord/webhook';
 
 export async function updateUserUsername(newUsername: string): Promise<{ success: boolean; message: string }> {
   const cleanUsername = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
@@ -318,13 +318,19 @@ export async function completeOnboarding(data: {
       }
     }
 
-    // Trigger Discord New Signup Webhook Notification asynchronously
+    // Trigger Discord New Signup Webhook Notification
     await sendDiscordSignupWebhook({
       username: cleanUsername,
       displayName: data.display_name.trim() || cleanUsername,
       email: user.email,
       avatarUrl: user.user_metadata?.avatar_url,
     }).catch((err) => console.error('Discord Signup Webhook error:', err));
+
+    // Trigger Automatic Discord Role Assignment (Assign Creator Role)
+    await syncDiscordUserRole({
+      username: cleanUsername,
+      targetRole: 'user',
+    }).catch((err) => console.error('Discord Role Sync error:', err));
 
     revalidatePath('/dashboard');
     revalidatePath('/[username]');

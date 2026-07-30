@@ -369,3 +369,76 @@ export async function sendDiscordMilestoneWebhook(data: {
     embeds: [embed],
   });
 }
+
+/**
+ * 5. Sync User Role on Discord Server (Assign Admin / Member Role)
+ */
+export async function syncDiscordUserRole(data: {
+  username: string;
+  targetRole: 'admin' | 'user';
+  discordUserId?: string;
+}): Promise<{ success: boolean; message: string }> {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  const guildId = process.env.DISCORD_GUILD_ID || '1532353083554922499';
+  const adminRoleId = process.env.DISCORD_ADMIN_ROLE_ID || '1532393948121792696';
+  const memberRoleId = process.env.DISCORD_MEMBER_ROLE_ID || '1532394574067011694';
+
+  if (!botToken || !guildId) {
+    return { success: false, message: 'Discord Bot Credentials missing' };
+  }
+
+  try {
+    let targetDiscordId = data.discordUserId;
+
+    // Search member by username if targetDiscordId is not directly provided
+    if (!targetDiscordId) {
+      const searchRes = await fetch(
+        `https://discord.com/api/v10/guilds/${guildId}/members/search?query=${encodeURIComponent(data.username)}`,
+        {
+          headers: { Authorization: `Bot ${botToken}` },
+        }
+      );
+
+      if (searchRes.ok) {
+        const members = await searchRes.json();
+        if (members && members.length > 0) {
+          targetDiscordId = members[0].user?.id;
+        }
+      }
+    }
+
+    if (!targetDiscordId) {
+      return { success: false, message: `Discord member matching @${data.username} not found in server` };
+    }
+
+    const addRoleId = data.targetRole === 'admin' ? adminRoleId : memberRoleId;
+    const removeRoleId = data.targetRole === 'admin' ? memberRoleId : adminRoleId;
+
+    // 1. Remove opposite role
+    await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/members/${targetDiscordId}/roles/${removeRoleId}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bot ${botToken}` },
+      }
+    ).catch(() => null);
+
+    // 2. Add target role
+    const addRes = await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/members/${targetDiscordId}/roles/${addRoleId}`,
+      {
+        method: 'PUT',
+        headers: { Authorization: `Bot ${botToken}` },
+      }
+    );
+
+    if (addRes.ok || addRes.status === 204) {
+      return { success: true, message: `Successfully assigned Discord role to ${data.targetRole.toUpperCase()}` };
+    }
+
+    return { success: false, message: `Failed to assign Discord role (HTTP ${addRes.status})` };
+  } catch (err) {
+    console.error('Error syncing Discord user role:', err);
+    return { success: false, message: 'Error communicating with Discord API' };
+  }
+}

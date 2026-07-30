@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { AdminUserItem, BadgeItem } from '@/types';
-import { sendDiscordAuditWebhook } from '@/lib/discord/webhook';
+import { sendDiscordAuditWebhook, syncDiscordUserRole } from '@/lib/discord/webhook';
 
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
@@ -80,6 +80,19 @@ export async function toggleUserRole(profileId: string, currentRole: string): Pr
           message: 'Database RLS policy prevented updating user role. Please run the SQL migration script in Supabase.' 
         };
       }
+    }
+
+    // Trigger Automatic Discord Role Sync (Assign Admin Role / Creator Role)
+    const { data: targetProfile } = await (supabase.from('profiles') as any)
+      .select('username')
+      .eq('id', profileId)
+      .maybeSingle();
+
+    if (targetProfile?.username) {
+      await syncDiscordUserRole({
+        username: targetProfile.username,
+        targetRole: newRole as 'admin' | 'user',
+      }).catch((err) => console.error('Discord Role Sync error:', err));
     }
 
     revalidatePath('/dashboard');
