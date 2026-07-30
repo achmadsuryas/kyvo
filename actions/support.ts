@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { SupportTicket, SupportMessage } from '@/types';
-import { sendDiscordTicketWebhook, sendDiscordAuditWebhook } from '@/lib/discord/webhook';
+import { sendDiscordTicketWebhook, sendDiscordAuditWebhook, closeDiscordThread } from '@/lib/discord/webhook';
 
 /**
  * Get active support ticket for current logged in user.
@@ -294,6 +294,13 @@ export async function updateTicketStatus(
 
       if (error) {
         return { success: false, message: error.message };
+      }
+
+      // Auto-archive and lock the Discord Thread for this ticket
+      if ((targetTicket as any)?.discord_thread_id) {
+        await closeDiscordThread((targetTicket as any).discord_thread_id).catch((err) =>
+          console.error('Discord Thread Auto-Close Error:', err)
+        );
       }
 
       // Send Audit Log notification to #admin-audit-log channel that ticket is resolved

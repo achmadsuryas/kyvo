@@ -181,6 +181,32 @@ export async function sendDiscordTicketWebhook(data: {
 }
 
 /**
+ * Archive and lock a Discord Thread when ticket is resolved
+ */
+export async function closeDiscordThread(threadId: string): Promise<boolean> {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (!botToken || !threadId) return false;
+
+  try {
+    const res = await fetch(`https://discord.com/api/v10/channels/${threadId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bot ${botToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        archived: true,
+        locked: true,
+      }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Error auto-closing Discord thread:', err);
+    return false;
+  }
+}
+
+/**
  * 2. New User Signup Notification (Growth Log)
  */
 export async function sendDiscordSignupWebhook(data: {

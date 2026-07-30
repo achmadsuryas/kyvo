@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const signature = req.headers.get('X-Signature-Ed25519');
     const timestamp = req.headers.get('X-Signature-Timestamp');
-    const publicKey = process.env.DISCORD_PUBLIC_KEY;
+    const publicKey = (process.env.DISCORD_PUBLIC_KEY || '7cd9064b605189952a03b52e1b6b572328901f4e2b7c610971e4166e871aff62').trim().replace(/^["']|["']$/g, '');
 
     let body: any = {};
     try {
