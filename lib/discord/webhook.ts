@@ -89,7 +89,13 @@ export async function sendDiscordTicketWebhook(data: {
   message: string;
   status?: string;
   isReply?: boolean;
-}) {
+  threadId?: string | null;
+}): Promise<{ success: boolean; threadId?: string }> {
+  const webhookUrl = process.env.DISCORD_TICKETS_WEBHOOK_URL;
+  if (!webhookUrl || !webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+    return { success: false };
+  }
+
   const embed: DiscordEmbed = {
     title: data.isReply ? `💬 New Reply on Ticket #${data.ticketId.substring(0, 8)}` : `🎫 New Support Ticket Created!`,
     description: data.message,
@@ -110,10 +116,68 @@ export async function sendDiscordTicketWebhook(data: {
     embed.fields?.push({ name: 'User Email', value: data.email, inline: true });
   }
 
-  return executeWebhook('DISCORD_TICKETS_WEBHOOK_URL', {
-    username: 'Kyvo Support Bot',
-    embeds: [embed],
-  });
+  // Case 1: Posting a reply to an existing Discord Thread
+  if (data.threadId) {
+    try {
+      const targetUrl = `${webhookUrl}?thread_id=${data.threadId}`;
+      await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: 'Kyvo Support Bot',
+          embeds: [embed],
+        }),
+      });
+      return { success: true, threadId: data.threadId };
+    } catch (err) {
+      console.error('Error posting to existing Discord thread:', err);
+    }
+  }
+
+  // Case 2: New Ticket - Post message & create dedicated Thread
+  try {
+    const postRes = await fetch(`${webhookUrl}?wait=true`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'Kyvo Support Bot',
+        embeds: [embed],
+      }),
+    });
+
+    if (!postRes.ok) return { success: false };
+
+    const msgData = await postRes.json();
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+
+    // Create Thread on message using Discord Bot API if bot token is available
+    if (botToken && msgData?.id && msgData?.channel_id) {
+      const threadRes = await fetch(
+        `https://discord.com/api/v10/channels/${msgData.channel_id}/messages/${msgData.id}/threads`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bot ${botToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: `🎫 Ticket #${data.ticketId.substring(0, 8)} - @${data.username}`,
+            auto_archive_duration: 1440,
+          }),
+        }
+      );
+
+      if (threadRes.ok) {
+        const threadData = await threadRes.json();
+        return { success: true, threadId: threadData.id };
+      }
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error executing Discord Ticket Webhook:', err);
+    return { success: false };
+  }
 }
 
 /**

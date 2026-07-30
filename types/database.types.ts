@@ -82,6 +82,7 @@ export interface SupportTicket {
   id: string;
   user_id: string;
   status: 'open' | 'in_progress' | 'resolved';
+  discord_thread_id?: string | null;
   created_at: string;
   updated_at: string;
   user?: Profile;

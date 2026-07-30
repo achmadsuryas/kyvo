@@ -153,9 +153,12 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'open',
+  discord_thread_id TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS discord_thread_id TEXT DEFAULT NULL;
 
 -- Create support_messages table
 CREATE TABLE IF NOT EXISTS public.support_messages (

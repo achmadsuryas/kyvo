@@ -166,9 +166,9 @@ export async function sendSupportMessage(
       .update({ updated_at: new Date().toISOString() })
       .eq('id', targetTicketId);
 
-    // Trigger Discord Webhook Notification for Admin Ticket Channel asynchronously
+    // Trigger Discord Webhook Notification for Admin Ticket Channel
     const senderName = (newMessage as any)?.sender?.display_name || (newMessage as any)?.sender?.username || user.email?.split('@')[0] || 'Kyvo User';
-    await sendDiscordTicketWebhook({
+    const webhookRes = await sendDiscordTicketWebhook({
       ticketId: targetTicketId!,
       username: senderName,
       email: user.email,
@@ -176,7 +176,17 @@ export async function sendSupportMessage(
       message: messageText.trim(),
       status: targetTicket?.status || 'open',
       isReply: !isFirstMessage,
-    }).catch((err) => console.error('Discord Ticket Webhook error:', err));
+      threadId: (targetTicket as any)?.discord_thread_id || null,
+    }).catch((err) => {
+      console.error('Discord Ticket Webhook error:', err);
+      return null;
+    });
+
+    if (webhookRes?.threadId && targetTicketId) {
+      await (supabase.from('support_tickets') as any)
+        .update({ discord_thread_id: webhookRes.threadId })
+        .eq('id', targetTicketId);
+    }
 
     return { success: true, message: newMessage as SupportMessage, ticket: targetTicket };
   } catch (err: unknown) {
