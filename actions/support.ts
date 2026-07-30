@@ -168,7 +168,7 @@ export async function sendSupportMessage(
 
     // Trigger Discord Webhook Notification for Admin Ticket Channel asynchronously
     const senderName = (newMessage as any)?.sender?.display_name || (newMessage as any)?.sender?.username || user.email?.split('@')[0] || 'Kyvo User';
-    sendDiscordTicketWebhook({
+    await sendDiscordTicketWebhook({
       ticketId: targetTicketId!,
       username: senderName,
       email: user.email,

@@ -37,7 +37,7 @@ export async function recordProfileView(profileId: string): Promise<{ success: b
 
     // Check if new view count triggers a milestone notification
     if (MILESTONES.includes(newViews) && profile) {
-      sendDiscordMilestoneWebhook({
+      await sendDiscordMilestoneWebhook({
         username: (profile as any).username || 'creator',
         displayName: (profile as any).display_name,
         viewsCount: newViews,

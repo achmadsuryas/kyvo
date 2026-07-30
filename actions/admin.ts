@@ -195,7 +195,7 @@ export async function warnUserWithReason(profileId: string, reason: string): Pro
     }
 
     const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
-    sendDiscordAuditWebhook({
+    await sendDiscordAuditWebhook({
       actionType: 'WARN',
       targetUsername: targetUser,
       adminUsername,
@@ -221,7 +221,7 @@ export async function clearWarning(profileId: string): Promise<{ success: boolea
     }
 
     const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
-    sendDiscordAuditWebhook({
+    await sendDiscordAuditWebhook({
       actionType: 'REINSTATE',
       targetUsername: targetUser,
       adminUsername,
@@ -248,7 +248,7 @@ export async function banUserWithReason(profileId: string, reason: string): Prom
     }
 
     const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
-    sendDiscordAuditWebhook({
+    await sendDiscordAuditWebhook({
       actionType: 'BAN',
       targetUsername: targetUser,
       adminUsername,
@@ -274,7 +274,7 @@ export async function unbanUser(profileId: string): Promise<{ success: boolean; 
     }
 
     const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
-    sendDiscordAuditWebhook({
+    await sendDiscordAuditWebhook({
       actionType: 'REINSTATE',
       targetUsername: targetUser,
       adminUsername,
@@ -340,7 +340,7 @@ export async function toggleVerifiedBadge(profileId: string, currentIsVerified: 
       if (error && error.code !== '23505') return { success: false, message: error.message };
 
       const { username: targetUser, adminUsername } = await getTargetUsername(profileId);
-      sendDiscordAuditWebhook({
+      await sendDiscordAuditWebhook({
         actionType: 'BADGE_GRANT',
         targetUsername: targetUser,
         adminUsername,

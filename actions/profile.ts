@@ -319,7 +319,7 @@ export async function completeOnboarding(data: {
     }
 
     // Trigger Discord New Signup Webhook Notification asynchronously
-    sendDiscordSignupWebhook({
+    await sendDiscordSignupWebhook({
       username: cleanUsername,
       displayName: data.display_name.trim() || cleanUsername,
       email: user.email,
