@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
     // 1. Verify Discord Ed25519 Signature for Developer Portal Validation & Security
     if (publicKey && signature && timestamp) {
-      const isValid = verifyKey(rawBody, signature, timestamp, publicKey);
+      const isValid = await verifyKey(rawBody, signature, timestamp, publicKey);
       if (!isValid) {
         return new Response('Invalid request signature', { status: 401 });
       }
