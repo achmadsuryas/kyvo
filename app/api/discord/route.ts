@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { verifyKey } from 'discord-interactions';
 import { 
   sendDiscordTicketWebhook, 
   sendDiscordSignupWebhook, 
@@ -14,42 +15,6 @@ function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://csblgetxpymfmubyhijy.supabase.co';
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   return createAdminClient(supabaseUrl, anonKey);
-}
-
-/**
- * Verify Discord HTTP Interaction Ed25519 Signatures
- */
-async function verifyDiscordSignature(
-  rawBody: string,
-  signature: string | null,
-  timestamp: string | null,
-  publicKeyHex: string
-): Promise<boolean> {
-  if (!signature || !timestamp || !publicKeyHex) return false;
-
-  try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(timestamp + rawBody);
-
-    const hexToBytes = (hex: string) =>
-      new Uint8Array(hex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || []);
-
-    const keyBytes = hexToBytes(publicKeyHex);
-    const sigBytes = hexToBytes(signature);
-
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      keyBytes,
-      { name: 'Ed25519', namedCurve: 'Ed25519' },
-      false,
-      ['verify']
-    );
-
-    return await crypto.subtle.verify('Ed25519', cryptoKey, sigBytes, data);
-  } catch (err) {
-    console.error('Discord signature verification error:', err);
-    return false;
-  }
 }
 
 /**
@@ -69,26 +34,20 @@ export async function POST(req: Request) {
       body = {};
     }
 
-    // 1. Handle Discord PING Interaction (Type 1) for Developer Portal Endpoint Validation
-    if (body.type === 1) {
-      if (publicKey && signature && timestamp) {
-        const isValid = await verifyDiscordSignature(rawBody, signature, timestamp, publicKey);
-        if (!isValid) {
-          return new Response('Invalid request signature', { status: 401 });
-        }
-      }
-      return NextResponse.json({ type: 1 });
-    }
-
-    // Verify signature for Slash Commands
+    // 1. Verify Discord Ed25519 Signature for Developer Portal Validation & Security
     if (publicKey && signature && timestamp) {
-      const isValid = await verifyDiscordSignature(rawBody, signature, timestamp, publicKey);
+      const isValid = verifyKey(rawBody, signature, timestamp, publicKey);
       if (!isValid) {
         return new Response('Invalid request signature', { status: 401 });
       }
     }
 
-    // 2. Handle Manual Test Request from Admin / Dev
+    // 2. Handle Discord PING Interaction (Type 1) for Developer Portal Endpoint Validation
+    if (body.type === 1) {
+      return NextResponse.json({ type: 1 });
+    }
+
+    // 3. Handle Manual Test Request from Admin / Dev
     if (body.type === 'test') {
       const channel = body.channel || 'tickets';
       let result;
@@ -135,7 +94,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, channel, result });
     }
 
-    // 3. Handle Discord Slash Commands & Interactive Replies (Type 2)
+    // 4. Handle Discord Slash Commands & Interactive Replies (Type 2)
     if (body.type === 2) {
       const commandName = body.data?.name;
       const options = body.data?.options || [];
